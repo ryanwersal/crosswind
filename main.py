@@ -8,7 +8,7 @@ import logging
 import shutil
 import optparse
 
-from . import refactor
+from lib2to3 import refactor
 
 class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
     """
