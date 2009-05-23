@@ -132,8 +132,8 @@ def main(fixer_pkg, args=None):
                             options.processes)
             except refactor.MultiprocessingUnsupported:
                 assert options.processes > 1
-                print >> sys.stderr, "Sorry, -j isn't " \
-                    "supported on this platform."
+                print ("Sorry, -j isn't supported on this platform.", \
+                       file=sys.stderr)
                 return 1
         rt.summarize()
 
