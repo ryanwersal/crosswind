@@ -1,0 +1,7 @@
+== lib3to2 ==
+
+lib3to2 is a set of fixers that are intended to backport code written for Python
+verson 3.x into Python version 2.x.  The final target 2.x version is the
+latest version of the 2.5 branch.
+
+This project came about as a Google Summer of Code(tm) project in 2009.
