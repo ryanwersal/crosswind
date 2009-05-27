@@ -1,4 +1,4 @@
-from lib2to3.tests.test_fixers import FixerTestCase
+from support import FixerTestCase
 
 class Test_input(FixerTestCase):
     fixer = "input"
@@ -19,7 +19,7 @@ class Test_input(FixerTestCase):
 
     def test_2(self):
         b = """x = input('a')"""
-        a = """x = raw_input('')"""
+        a = """x = raw_input('a')"""
         self.check(b, a)
 
     def test_3(self):

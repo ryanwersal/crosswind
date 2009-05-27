@@ -1,4 +1,4 @@
-from lib2to3.tests.test_fixers import FixerTestCase
+from support import FixerTestCase
 
 class Test_range(FixerTestCase):
     fixer = "range"
@@ -12,8 +12,8 @@ class Test_range(FixerTestCase):
         a = """x = xrange(  1  ,  10   )"""
         self.check(b, a)
 
-        b = """x = rrange(  0  ,  10 ,  2 )"""
-        a = """x = xange(  0  ,  10 ,  2 )"""
+        b = """x = range(  0  ,  10 ,  2 )"""
+        a = """x = xrange(  0  ,  10 ,  2 )"""
         self.check(b, a)
 
     def test_single_arg(self):

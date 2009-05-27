@@ -10,7 +10,7 @@ class FixRange(fixer_base.BaseFix):
 
     PATTERN = """
               power<
-                 (name=u'range') trailer< u'(' args=any u')' >
+                 (name='range') trailer< '(' args=any ')' >
               rest=any* >
               """
 

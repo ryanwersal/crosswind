@@ -11,7 +11,7 @@ from lib2to3.fixer_util import Name
 class FixInput(fixer_base.BaseFix):
 
     PATTERN = """
-              power< name=u'input' trailer< '(' [any] ')' > any* >
+              power< name='input' trailer< '(' [any] ')' > any* >
               """
 
     def transform(self, node, results):
