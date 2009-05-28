@@ -1,4 +1,4 @@
-from support import FixerTestCase
+from lib2to3.tests.test_fixers import FixerTestCase
 
 class Test_range(FixerTestCase):
     fixer = "range"

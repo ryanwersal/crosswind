@@ -16,4 +16,4 @@ class FixInput(fixer_base.BaseFix):
 
     def transform(self, node, results):
         name = results['name']
-        name.replace(Name('raw_input', prefix=name.get_prefix()))
+        name.replace(Name(u'raw_input', prefix=name.get_prefix()))
