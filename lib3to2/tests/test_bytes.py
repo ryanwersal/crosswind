@@ -23,3 +23,7 @@ class Test_bytes(lib3to2FixerTestCase):
         a = """R'''\x13'''"""
         self.check(b, a)
 
+    def test_bytes_concatenation(self):
+        b = """b'bytes' + b'bytes'"""
+        a = """'bytes' + 'bytes'"""
+        self.check(b, a)
