@@ -1,6 +1,6 @@
-from lib2to3.tests.test_fixers import FixerTestCase
+from lib3to2.tests.test_all_fixers import lib3to2FixerTestCase
 
-class Test_range(FixerTestCase):
+class Test_range(lib3to2FixerTestCase):
     fixer = "range"
 
     def test_prefix_preservation(self):
