@@ -5,23 +5,22 @@
 import re
 from lib2to3.pgen2 import token
 from lib2to3 import fixer_base
+from lib2to3.fixer_util import Name
+
+_mapping = {u"chr":u"unichr", u"str":u"unicode"}
+_literal_re = re.compile(ur"[rR]?[\'\"]")
 
 class FixStr(fixer_base.BaseFix):
 
-    PATTERN = "STRING | NAME<'str' | 'chr'>"
+    PATTERN = "STRING | 'str' | 'chr'"
 
     def transform(self, node, results):
-        if node.type == token.NAME:
-            if node.value == u"str":
-                new = node.clone()
-                new.value = u"unicode"
-                return new
-            if node.value == u"chr":
-                new = node.clone()
-                new.value = u"unichr"
-                return new
-        elif node.type == token.STRING:
-            if re.match(ur"[rR]?[\'\"]", node.value):
-                new = node.clone()
+        new = node.clone()
+        if node.type == token.STRING:
+            if _literal_re.match(new.value):
                 new.value = u"u" + new.value
                 return new
+        elif node.type == token.NAME:
+            assert new.value in _mapping
+            new.value = _mapping[new.value]
+            return new
