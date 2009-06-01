@@ -2,9 +2,7 @@
 
 # Local imports
 from lib2to3 import fixer_base
-from lib2to3.fixer_util import Name, Call, consuming_calls
-from lib2to3 import patcomp
-
+from lib2to3.fixer_util import Name
 
 class FixRange(fixer_base.BaseFix):
 
