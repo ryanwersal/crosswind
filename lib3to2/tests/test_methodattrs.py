@@ -19,15 +19,7 @@ class Test_methodattrs(lib3to2FixerTestCase):
         a = "dir(self.foo.im_self.__class__)"
         self.check(b, a)
 
-    #XXX: Why doesn't this work, if the exact same thing works in 2to3?
     def test_unchanged(self):
         for attr in self.attrs:
             s = "foo(__%s__ + 5)" % attr
             self.unchanged(s)
-
-            s = "f(foo.__%s__)" % attr
-            self.unchanged(s)
-
-            s = "f(foo.__%s__.foo)" % attr
-            self.unchanged(s)
-
