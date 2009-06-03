@@ -44,7 +44,7 @@ class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
 
     def print_output(self, lines):
         for line in lines:
-            print(line)
+            print line
 
 
 def main(fixer_pkg, args=None):
@@ -84,19 +84,19 @@ def main(fixer_pkg, args=None):
     if not options.write and options.nobackups:
         parser.error("Can't use -n without -w")
     if options.list_fixes:
-        print("Available transformations for the -f/--fix option:")
+        print "Available transformations for the -f/--fix option:" 
         for fixname in refactor.get_all_fix_names(fixer_pkg):
-            print(fixname)
+            print fixname
         if not args:
             return 0
     if not args:
-        print("At least one file or directory argument required.", file=sys.stderr)
-        print("Use --help to show usage.", file=sys.stderr)
+        print >>sys.stderr, "At least one file or directory argument required."
+        print >>sys.stderr, "Use --help to show usage."
         return 2
     if "-" in args:
         refactor_stdin = True
         if options.write:
-            print("Can't write to stdin.", file=sys.stderr)
+            print >>sys.stderr, "Can't write to stdin."
             return 2
 
     # Set up logging handler
@@ -132,8 +132,8 @@ def main(fixer_pkg, args=None):
                             options.processes)
             except refactor.MultiprocessingUnsupported:
                 assert options.processes > 1
-                print ("Sorry, -j isn't supported on this platform.", \
-                       file=sys.stderr)
+                print >>sys.stderr, \
+                      "Sorry, -j isn't supported on this platform."
                 return 1
         rt.summarize()
 
