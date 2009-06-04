@@ -15,5 +15,5 @@ class FixBool(fixer_base.BaseFix):
 
     def transform(self, node, results):
         name = results["name"]
-        new = Name(u"__nonzero__", prefix=name.get_prefix())
+        new = Name(u"__nonzero__", prefix=name.prefix)
         name.replace(new)

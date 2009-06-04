@@ -19,4 +19,4 @@ class FixMemoryview(fixer_base.BaseFix):
 
     def transform(self, node, results):
         name = results["name"]
-        name.replace(Name(u"buffer", prefix=name.get_prefix()))
+        name.replace(Name(u"buffer", prefix=name.prefix))
