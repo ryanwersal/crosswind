@@ -21,8 +21,8 @@ class Test_print(lib3to2FixerTestCase):
         self.check(b, a)
     def test_4(self):
         b = "print(spam, spam, spam, spam, spam, baked_beans, spam, spam,"\
-            "spam, spam, sep=', spam, ', end=wonderful_spam)"
+            "spam, spam, sep=', spam, ', end=wonderful_spam)\nprint()"
         a = "from __future__ import print_function\n"\
             "print(spam, spam, spam, spam, spam, baked_beans, spam, spam,"\
-            "spam, spam, sep=', spam, ', end=wonderful_spam)"
+            "spam, spam, sep=', spam, ', end=wonderful_spam)\nprint()"
         self.check(b, a)

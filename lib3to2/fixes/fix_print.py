@@ -23,6 +23,9 @@ class FixPrint(fixer_base.BaseFix):
             return
         while _node.parent is not None:
             _node = _node.parent
+        # If we've already added a future_stmt before... don't add another!
+        if '_node' in dir(self.__class__) and _node is self.__class__._node:
+            return
         future_stmt = FromImport(u'__future__',
                                  [pytree.Leaf(token.NAME, u'print_function',
                                  prefix=u' ')])
@@ -32,3 +35,5 @@ class FixPrint(fixer_base.BaseFix):
         children = [future_stmt, Newline()] + children
         newnode = pytree.Node(syms.simple_stmt, children)
         _node.insert_child(0, newnode)
+        #Save our last fix... we don't want to add multiple future_stmts
+        self.__class__._node = _node
