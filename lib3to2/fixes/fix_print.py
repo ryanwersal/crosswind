@@ -11,14 +11,12 @@ from lib2to3.fixer_util import (Name, Comma, FromImport, touch_import, Newline,
 from lib2to3.pgen2 import token
 from lib2to3.pygram import python_symbols as syms
 
-from os import getenv
-
 class FixPrint(fixer_base.BaseFix):
 
     PATTERN = """
-              power < 'print' trailer < '(' any* ')' > any* >
+              power< 'print' trailer < '(' any* ')' > any* >
               """
-
+              
     def transform(self, node, results):
         _node = node
         if not is_probably_builtin(node):

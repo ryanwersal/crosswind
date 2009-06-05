@@ -19,7 +19,8 @@ from lib2to3.tests.test_fixers import FixerTestCase
 
 class lib3to2FixerTestCase(FixerTestCase):
     def setUp(self, fix_list=None, fixer_pkg="lib3to2"):
-        super(lib3to2FixerTestCase, self).setUp(fixer_pkg=fixer_pkg)
+        super(lib3to2FixerTestCase, self).setUp(fixer_pkg=fixer_pkg,
+                                                options={'print_function':True})
 
 if __name__ == "__main__":
     for module in os.listdir(os.path.split(__file__)[0]):
