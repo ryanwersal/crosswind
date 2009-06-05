@@ -69,8 +69,6 @@ def main(fixer_pkg, args=None):
                       help="Prevent a fixer from being run.")
     parser.add_option("-l", "--list-fixes", action="store_true",
                       help="List available transformations (fixes/fix_*.py)")
-    parser.add_option("-p", "--print-function", action="store_true",
-                      help="Modify the grammar so that print() is a function")
     parser.add_option("-v", "--verbose", action="store_true",
                       help="More verbose logging")
     parser.add_option("-w", "--write", action="store_true",
@@ -104,7 +102,7 @@ def main(fixer_pkg, args=None):
     logging.basicConfig(format='%(name)s: %(message)s', level=level)
 
     # Initialize the refactoring tool
-    rt_opts = {"print_function" : options.print_function}
+    rt_opts = {"print_function" : True} # Py3k uses print_function exclusively.
     avail_fixes = set(refactor.get_fixers_from_package(fixer_pkg))
     unwanted_fixes = set(fixer_pkg + ".fix_" + fix for fix in options.nofix)
     explicit = set()

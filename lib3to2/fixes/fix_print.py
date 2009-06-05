@@ -9,7 +9,6 @@ from lib2to3 import fixer_base, pytree
 from lib2to3.fixer_util import (Name, Comma, FromImport, touch_import, Newline,
                                 is_probably_builtin)
 from lib2to3.pgen2 import token
-from lib2to3.pygram import python_symbols as syms
 
 class FixPrint(fixer_base.BaseFix):
 
@@ -21,6 +20,7 @@ class FixPrint(fixer_base.BaseFix):
         _node = node
         if not is_probably_builtin(node):
             return
+        syms = self.syms
         while _node.parent is not None:
             _node = _node.parent
         # If we've already added a future_stmt before... don't add another!

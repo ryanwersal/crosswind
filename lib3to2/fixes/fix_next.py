@@ -1,7 +1,5 @@
 """Fixer for it.__next__() or next(it) -> it.next()"""
 
-from copy import deepcopy
-
 from lib2to3.pgen2 import token
 from lib2to3.pygram import python_symbols as syms
 from lib2to3 import fixer_base
@@ -31,8 +29,8 @@ class FixNext(fixer_base.BaseFix):
         attr = results.get("attr")
         head = results.get("head")
         arg_ = results.get("arg")
-        arg = deepcopy(arg_)
-        if arg:
+        if arg_:
+            arg = arg_.clone()
             head.replace(Attr(Name(unicode(arg),prefix=head.prefix),
                               Name(u"next")))
             arg_.remove()
