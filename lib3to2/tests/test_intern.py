@@ -34,6 +34,19 @@ class Test_intern(lib3to2FixerTestCase):
 
     # These should not be refactored
 
+    def test_multimports(self):
+        b = """from sys import intern, path"""
+        a = """from sys import path"""
+        self.check(b, a)
+        
+        b = """from sys import path, intern"""
+        a = """from sys import path"""
+        self.check(b, a)
+        
+        b = """from sys import argv, intern, path"""
+        a = """from sys import argv, path"""
+        self.check(b, a)
+
     def test_unchanged(self):
         s = """intern(a=1)"""
         self.unchanged(s)
