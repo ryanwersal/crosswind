@@ -19,14 +19,6 @@ class FixIntern(fixer_base.BaseFix):
            after=any*
     >
     |
-    power< name='intern'
-           trailer< lpar='('
-           ( not(arglist | argument<any '=' any>) obj=any
-                      | obj=arglist<(not argument<any '=' any>) any ','> )
-                    rpar=')' >
-           after=any*
-    >
-    |
     import_from< 'from' 'sys' 'import'
                 import_as_names< pre=any* binding='intern' post=any* > any* >
     |
