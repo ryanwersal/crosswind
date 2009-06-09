@@ -1,8 +1,49 @@
 Abstract
 ========
 
-lib3to2 is a set of fixers that are intended to backport code written for Python
-verson 3.x into Python version 2.x.  The final target 2.x version is the
-latest version of the 2.5 branch.
+lib3to2 is a set of fixers that are intended to backport code written for
+Python version 3.x into Python version 2.x.  The final target 2.x version is
+the latest version of the 2.5 branch, though for the Google Summer of Code (TM)
+a later branch will be necessary for some of the more difficult fixers (or some
+of the new features with no syntactical equivalent in Python 2.5) that have
+been backported to the 2.x branches.
 
-This project came about as a Google Summer of Code(tm) project in 2009.
+This project came about as a Google Summer of Code (TM) project in 2009.
+
+Usage (exact same as 2to3)
+==========================
+
+Run "./3to2" to convert stdin ("-"), files or directories given as
+arguments.  By default, the tool outputs a unified diff-formatted patch on
+standard output and a "what was changed" summary on standard error, but the
+"-w" option can be given to write back converted files, creating
+".bak"-named backup files.
+
+3to2 must be run with at least Python 2.5, and will not work without
+modification with a 3.x interpreter, as it uses lib2to3's fixer API.
+
+Relationship with 2to3
+======================
+
+Many of the fixers for lib3to2 are directly copy-pasted from their 2to3
+equivalent, with the element of PATTERN and the corresponding transformation
+switched places.  Most fixers written for this program with a corresponding
+2to3 fixer started from a clone of the 2to3 fixer, then modifying that fixer to
+work in reverse.  I do not claim original authorship of these fixers, but 
+In addition, this program depends on lib2to3 to implement fixers, test cases,
+refactoring, and grammar.  Some portions of 2to3 were modified to be more
+generic to support lib3to2's calls.  If the version of 2to3 included with the
+Python trunk causes errors with this program, the Lib/lib2to3 folder must be
+replaced with the most recent version of 2to2 from
+http://svn.python.org/sandbox/trunk/2to3/ (check out via svn), as a change to
+2to3 will not propagate immediately to the Python trunk.
+
+Administrative Notes
+====================
+
+If there has been a significant period of time without a commit, then I'm
+probably busy reading up on how certain elements of Python work, as I've never
+used many of them before, and I want to be sure I understand how it works
+before I modify code that uses them.  Alternatively, I might be in the process
+of writing a blog post to http://www.startcodon.com/wordpress jotting down some
+part of the process that I have done, am doing, or need to do in the future.
