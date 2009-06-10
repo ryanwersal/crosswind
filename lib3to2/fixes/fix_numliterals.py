@@ -1,13 +1,14 @@
 """
 Fixer that turns:
 1 into 1L
-0x1ed, and 0b111101101 into __builtins__.int(493)
+0x1ed into __builtins__.int("1ed", 16)
+0b111101101 into __builtins__.int("111101101", 2)
 0o755 into 0755
 """
 
 from lib2to3.pgen2 import token
 from lib2to3 import fixer_base
-from lib2to3.fixer_util import Number, Call, Attr
+from lib2to3.fixer_util import Number, Call, Attr, String
 
 baseMAPPING = {'b':2, 'o',8 'x':16}
 
@@ -40,6 +41,6 @@ class FixNumliterals(fixer_base.BaseFix):
                                            "Invalid format for numeric literal"
             base = base(val)
             func_name = Attr(u"__builtins__", u"int")
-            func_args = [val[2:], base]
+            func_args = [String(val[2:]), base]
             new_node = Call(func_name, func_args, node.prefix)
             return new_node
