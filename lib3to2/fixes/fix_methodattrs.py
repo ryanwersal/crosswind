@@ -1,7 +1,7 @@
-"""Fix bound method attributes (method.im_? -> method.__?__).
+"""
+Fixer for method.im_X -> method.__X__.
 """
 
-# Local imports
 from lib2to3 import fixer_base
 from lib2to3.fixer_util import Name
 

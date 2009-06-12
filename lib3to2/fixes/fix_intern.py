@@ -1,8 +1,7 @@
-"""Fixer for sys.intern().
+"""
+Fixer for sys.intern(s) -> intern(s).
+"""
 
-sys.intern(s) -> intern(s)"""
-
-# Local imports
 from lib2to3 import pytree
 from lib2to3 import fixer_base
 from lib2to3.fixer_util import Name, BlankLine, find_binding, find_root

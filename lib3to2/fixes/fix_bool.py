@@ -1,6 +1,7 @@
-"""Fixer for __bool__ -> __nonzero__ methods."""
+"""
+Fixer for __bool__ -> __nonzero__ methods.
+"""
 
-# Local imports
 from lib2to3 import fixer_base
 from lib2to3.fixer_util import Name
 

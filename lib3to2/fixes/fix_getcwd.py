@@ -1,6 +1,6 @@
 """
-Fixer that changes os.getcwd() to os.getcwdu().
-Also warns about "from os import getcwd", suggesting the fixable form.
+Fixer for os.getcwd() -> os.getcwdu().
+Also warns about "from os import getcwd", suggesting the above form.
 """
 
 from lib2to3 import fixer_base
@@ -19,6 +19,7 @@ class FixGetcwd(fixer_base.BaseFix):
             name = results["name"]
             name.replace(Name(u"getcwdu", prefix=name.prefix))
         elif "bad" in results:
+            # Can't convert to getcwdu and then expect to catch every use.
             self.cannot_convert(node, "import os, use os.getcwd() instead.")
             return
         else:

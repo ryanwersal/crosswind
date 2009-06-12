@@ -1,4 +1,5 @@
-"""Fixer that turns 'int' into 'long' everywhere.
+"""
+Fixer for int -> long.
 """
 
 from lib2to3 import fixer_base

@@ -1,8 +1,6 @@
 """
-Fixer for print.
-Currently, this can be seen as a "placeholder":  All it does is add a
-future_stmt to the top that includes the print_function, so the resulting code
-is only compatible with 2.6+.
+Fixer for print: from __future__ import print_function.
+"Placeholder": In the future, this will transform print into a print statement
 """
 
 from lib2to3 import fixer_base, pytree

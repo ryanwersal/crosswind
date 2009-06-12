@@ -1,5 +1,8 @@
-"""Fixer that changes str to unicode, chr to unichr, and "..." into u"...".
-
+"""
+Fixer for:
+str -> unicode
+chr -> unichr
+"spam" -> u"spam"
 """
 
 import re
@@ -17,6 +20,7 @@ class FixStr(fixer_base.BaseFix):
     def transform(self, node, results):
         new = node.clone()
         if node.type == token.STRING:
+            #Simply add u to the beginning of the literal.
             if _literal_re.match(new.value):
                 new.value = u"u" + new.value
                 return new

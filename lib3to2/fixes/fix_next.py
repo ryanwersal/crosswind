@@ -1,4 +1,8 @@
-"""Fixer for it.__next__() or next(it) -> it.next()"""
+"""
+Fixer for:
+it.__next__() -> it.next().
+next(it) -> it.next().
+"""
 
 from lib2to3.pgen2 import token
 from lib2to3.pygram import python_symbols as syms

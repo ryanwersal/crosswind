@@ -1,7 +1,6 @@
 """
-Fixer that changes memoryview(...) into buffer(...)
-Many memoryview(...) methods are invalid on buffer(...) objects,
-so the user must explicitly convert between them.
+Fixer for memoryview(s) -> buffer(s).
+Explicit because some memoryview methods are invalid on buffer objects.
 """
 
 from lib2to3 import fixer_base

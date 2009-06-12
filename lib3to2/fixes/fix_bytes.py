@@ -1,5 +1,5 @@
-"""Fixer that changes bytes to str.
-
+"""
+Fixer for bytes -> str.
 """
 
 import re
@@ -16,7 +16,7 @@ class FixBytes(fixer_base.BaseFix):
     def transform(self, node, results):
         new = node.clone()
         if node.type == token.NAME:
-            assert new.value == u'bytes'
+            assert new.value == u"bytes"
             new.value = u"str"
             return new
         elif node.type == token.STRING:

@@ -1,6 +1,7 @@
-"""Fix function attribute names (f.__x__ -> f.func_x)."""
+"""
+Fixer for f.__x__ -> f.func_x.
+"""
 
-# Local imports
 from lib2to3 import fixer_base
 from lib2to3.fixer_util import Name
 
