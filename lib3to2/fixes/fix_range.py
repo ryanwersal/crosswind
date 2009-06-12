@@ -14,5 +14,5 @@ class FixRange(fixer_base.BaseFix):
               """
 
     def transform(self, node, results):
-        name = results['name']
-        name.replace(Name(u'xrange', prefix=name.prefix))
+        name = results["name"]
+        name.replace(Name(u"xrange", prefix=name.prefix))

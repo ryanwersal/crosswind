@@ -24,9 +24,9 @@ class FixPrint(fixer_base.BaseFix):
         # If we've already added a future_stmt before... don't add another!
         if '_node' in dir(self.__class__) and _node is self.__class__._node:
             return
-        future_stmt = FromImport(u'__future__',
-                                 [pytree.Leaf(token.NAME, u'print_function',
-                                 prefix=u' ')])
+        future_stmt = FromImport(u"__future__",
+                                 [pytree.Leaf(token.NAME, u"print_function",
+                                 prefix=u" ")])
         children = list(_node.children[:])
         for child in children:
             child.remove()
