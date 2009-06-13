@@ -1,6 +1,5 @@
 """
 Fixer for:
-1 -> 1L
 0x1ed -> __builtins__.long("1ed", 16)
 0b111101101 -> __builtins__.long("111101101", 2)
 0o755 -> 0755
@@ -15,7 +14,7 @@ baseMAPPING = {'b':2, 'o':8, 'x':16}
 
 class FixNumliterals(fixer_base.BaseFix):
     # We need to modify all numeric literals except floats, complex.
-
+    
     def base(self, literal):
         """Returns the base of a valid py3k literal."""
         literal = literal.strip()
@@ -25,11 +24,14 @@ class FixNumliterals(fixer_base.BaseFix):
             if literal[1] not in u"box":
                 return 0
             return baseMAPPING[literal[1]]
-
+    
     def unmatch(self, node):
-        """Don't match complex numbers or floats."""
+        """Don't match complex numbers, floats, or base-10 ints"""
+        val = node.value
+        if self.base(val) == 10:
+            return val
         for bad in u"jJ+-.":
-            if bad in node.value: return bad
+            if bad in val: return bad
         
     def match(self, node):
         return ((node.type == token.NUMBER) and not self.unmatch(node))
@@ -38,22 +40,17 @@ class FixNumliterals(fixer_base.BaseFix):
         Call __builtins__.long() with the value and the base of the value.
         This works because 0b10 is int("10", 2), 0o10 is int("10", 8), etc.
         """
-        
         val = node.value
-        base = self.base
-        if val.isdigit() and base(val) == 10:
-            assert not val[-1] in u"lL", "Invalid py3k literal"
-            val += u"L"
-            return Number(val, prefix=node.prefix)
-        elif base(val) == 8:
+
+        if self.base(val) == 8:
             assert val.strip().startswith(u"0o") or \
             val.strip().startswith(u"0O"), "Invalid format for octal literal"
             val = u"".join((u"0",val[2:]))
             return Number(val, prefix=node.prefix)
-        elif base(val) == 16 or base(val) == 2:
+        elif self.base(val) == 16 or self.base(val) == 2:
             assert val.startswith(u"0") and val[1] in u"bxBX", \
                                            "Invalid format for numeric literal"
-            base = Number(base(val), prefix=u" ")
+            base = Number(self.base(val), prefix=u" ")
             # __builtins__.long
             func_name = Node(syms.power, Attr(Name(u"__builtins__"), \
                              Name(u"long")))

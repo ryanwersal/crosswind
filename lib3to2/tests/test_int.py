@@ -40,3 +40,22 @@ class Test_int(lib3to2FixerTestCase):
         a = """x =   long(  x  )"""
         self.check(b, a)
 
+    def test_literal_1(self):
+        b = """5"""
+        a = """5L"""
+        self.check(b, a)
+        
+    def test_literal_2(self):
+        b = """a = 12"""
+        a = """a = 12L"""
+        self.check(b, a)
+
+    def test_complex_1(self):
+        b = """5 + 4j"""
+        a = """5L + 4j"""
+        self.check(b, a)
+
+    def test_complex_2(self):
+        b = """35  +  2j"""
+        a = """35L  +  2j"""
+        self.check(b, a)

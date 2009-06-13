@@ -3,16 +3,6 @@ from lib3to2.tests.test_all_fixers import lib3to2FixerTestCase
 class Test_numliterals(lib3to2FixerTestCase):
     fixer = "numliterals"
 
-    def test_long_1(self):
-        b = """5"""
-        a = """5L"""
-        self.check(b, a)
-        
-    def test_long_2(self):
-        b = """a = 12"""
-        a = """a = 12L"""
-        self.check(b, a)
-    
     def test_octal_1(self):
         b = """0o755"""
         a = """0755"""
@@ -48,16 +38,6 @@ class Test_numliterals(lib3to2FixerTestCase):
         a = """b =   __builtins__.long("12", 16)"""
         self.check(b, a)
 
-    def test_complex_1(self):
-        b = """5 + 4j"""
-        a = """5L + 4j"""
-        self.check(b, a)
-
-    def test_complex_2(self):
-        b = """35  +  2j"""
-        a = """35L  +  2j"""
-        self.check(b, a)
-        
     def test_comments_and_spacing_2(self):
         b = """b = 0o755 # spam"""
         a = """b = 0755 # spam"""
