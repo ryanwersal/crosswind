@@ -10,28 +10,31 @@ from lib2to3.pgen2 import token
 
 class FixPrint(fixer_base.BaseFix):
 
+    def start_tree(self, tree, filename):
+        """This is only run once; we want to remember the first node"""
+        super(FixPrint, self).start_tree(tree, filename)
+        self._tree = tree
+    
     PATTERN = """
               power< 'print' trailer < '(' any* ')' > any* >
               """
-              
+    
+    def match(self, node):
+        """
+        Since the tree needs to be fixed once and only once if and only if it
+        matches, then we can start discarding matches after we make the first.
+        """
+        return not self._tree.was_changed and super(FixPrint,self).match(node)
+
     def transform(self, node, results):
-        _node = node
-        if not is_probably_builtin(node):
-            return
+        tree = self._tree
         syms = self.syms
-        while _node.parent is not None:
-            _node = _node.parent
-        # If we've already added a future_stmt before... don't add another!
-        if '_node' in dir(self.__class__) and _node is self.__class__._node:
-            return
         future_stmt = FromImport(u"__future__",
-                                 [pytree.Leaf(token.NAME, u"print_function",
-                                 prefix=u" ")])
-        children = list(_node.children[:])
+                                [pytree.Leaf(token.NAME, u"print_function",
+                                prefix=u" ")])
+        children = list(tree.children[:])
         for child in children:
             child.remove()
         children = [future_stmt, Newline()] + children
         newnode = pytree.Node(syms.simple_stmt, children)
-        _node.insert_child(0, newnode)
-        #Save our last fix... we don't want to add multiple future_stmts
-        self.__class__._node = _node
+        tree.insert_child(0, newnode)
