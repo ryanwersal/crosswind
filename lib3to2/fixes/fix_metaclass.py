@@ -11,7 +11,7 @@ class FixMetaclass(fixer_base.BaseFix):
     PATTERN = """
     classdef<any*>
     """
-    arg_num = 0
+    
     def transform(self, node, results):
         meta_results = self.has_metaclass(node)
         if not meta_results: return
