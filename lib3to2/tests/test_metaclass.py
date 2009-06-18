@@ -11,20 +11,20 @@ class Test_metaclass(lib3to2FixerTestCase):
         self.unchanged("class X(object1, object2, object3): pass")
 
         s = """
-        class X:
+        class X():
             def __metaclass__(self): pass
         """
         self.unchanged(s)
 
         s = """
-        class X:
+        class X():
             a[23] = 74
         """
         self.unchanged(s)
 
     def test_comments(self):
         a = """
-        class X:
+        class X():
             # hi
             __metaclass__ = AppleMeta
         """
@@ -36,7 +36,7 @@ class Test_metaclass(lib3to2FixerTestCase):
         self.check(b, a)
 
         a = """
-        class X:
+        class X():
             __metaclass__ = Meta
             # Bedtime!
         """
@@ -81,7 +81,7 @@ class Test_metaclass(lib3to2FixerTestCase):
 
     def test_meta_oneparent_simple_body_2(self):
         a = """
-        class X:
+        class X():
             __metaclass__ = Meta; x = 4; g = 23
         """
         b = """
@@ -146,7 +146,7 @@ class Test_metaclass(lib3to2FixerTestCase):
     def test_meta_noparent_simple_body(self):
     
         a = """
-        class X:
+        class X():
             __metaclass__ = Meta
             save.py = 23
         """

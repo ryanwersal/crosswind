@@ -11,32 +11,42 @@ class FixMetaclass(fixer_base.BaseFix):
     PATTERN = """
     classdef<any*>
     """
-    
+    arg_num = 0
     def transform(self, node, results):
-        meta = self.has_metaclass(node)
-        if not meta: return
-        meta.remove()
+        meta_results = self.has_metaclass(node)
+        if not meta_results: return
+        for meta in meta_results:
+            print meta
+            meta.remove()
         target = Leaf(token.NAME, u"__metaclass__")
         equal = Leaf(token.EQUAL, u"=", prefix=u" ")
-        meta.prefix = u" "
-        stmt_node = Node(syms.atom, [target, equal, meta])
+        #meta is the last item in what was returned by has_metaclass(): name
+        name = meta
+        name.prefix = u" "
+        stmt_node = Node(syms.atom, [target, equal, name])
         
     def has_metaclass(self, parent):
-        name = None
+        results = None
         for node in parent.children:
             kids = node.children
             if node.type == syms.argument:
                 if kids[0] == Leaf(token.NAME, u"metaclass") and \
                    kids[1] == Leaf(token.EQUAL, u"=") and \
                    kids[2]:
-                #One argument, it's the (metaclass=X) part...
-                    name = kids[2]
+                    #Hack to avoid "class X(=):" with this case.
+                    results = [node] + kids
+                    break
             elif node.type == syms.arglist:
                 #Argument list... loop through it looking for:
                 #Node(*, [*, Leaf(token.NAME, u"metaclass"), Leaf(token.EQUAL, u"="), Leaf(*, *)]
                 for child in node.children:
-                    if type(child) == Node:
-                        meta = equal = None
+                    if results: break
+                    if type(child) == Leaf:
+                        if child.type == token.COMMA:
+                            #Store the last comma, which precedes the metaclass
+                            comma = child
+                    elif type(child) == Node:
+                        meta = equal = name = None
                         for arg in child.children:
                             if arg == Leaf(token.NAME, u"metaclass"):
                                 #We have the (metaclass) part
@@ -47,6 +57,6 @@ class FixMetaclass(fixer_base.BaseFix):
                             elif meta and equal:
                                 #Here we go, we have (metaclass=X)
                                 name = arg
-                            elif name:
-                                raise SyntaxError("Argument after metaclass=X")
-        return name
+                                results = (comma, meta, equal, name)
+                                break
+        return results
