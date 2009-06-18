@@ -16,7 +16,6 @@ class FixMetaclass(fixer_base.BaseFix):
         meta_results = self.has_metaclass(node)
         if not meta_results: return
         for meta in meta_results:
-            print meta
             meta.remove()
         target = Leaf(token.NAME, u"__metaclass__")
         equal = Leaf(token.EQUAL, u"=", prefix=u" ")
