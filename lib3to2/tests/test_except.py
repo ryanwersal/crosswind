@@ -28,12 +28,3 @@ class Test_except(lib3to2FixerTestCase):
             except Foo as e:
                 pass"""
         self.check(b, a)
-        
-    def test_random_fiddling(self):
-        a = """
-            try:
-                pass
-            except (RuntimeError, FreeBirdError) as NopeError:
-                e = NopeError
-                NopeError = e
-                raise
