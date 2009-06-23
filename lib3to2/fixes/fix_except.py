@@ -11,6 +11,4 @@ class FixExcept(fixer_base.BaseFix):
     PATTERN = """except_clause< 'except' any as='as' any >"""
 
     def transform(self, node, results):
-        as_leaf = results.get("as")
-        i = as_leaf.remove()
-        node.insert_child(i, Comma())
+        results["as"].replace(Comma())
