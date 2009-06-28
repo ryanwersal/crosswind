@@ -35,7 +35,7 @@ In addition, this program depends on lib2to3 to implement fixers, test cases,
 refactoring, and grammar.  Some portions of 2to3 were modified to be more
 generic to support lib3to2's calls.  If the version of 2to3 included with the
 Python trunk causes errors with this program, the Lib/lib2to3 folder must be
-replaced with the most recent version of 2to2 from
+replaced with the most recent version of 2to3 from
 http://svn.python.org/sandbox/trunk/2to3/ (check out via svn), as a change to
 2to3 will not propagate immediately to the Python trunk.
 
