@@ -1,0 +1,50 @@
+
+DEVELOPMENT INSTALLATION
+
+The following steps will merge the latest sandbox version of lib2to3
+with the latest Python 2.x trunk, such that one can build the 3to2
+utility.  You will need both a Subversion and Mercurial client.
+
+The instructions are geared towards Linux, and Mac OS X users note
+that the default Python executable will be named 'Python.exe' instead
+of just 'python'.
+
+1. Check out two subversion repositories:
+
+   $ svn co http://svn.python.org/projects/sandbox/trunk/2to3 2to3
+   $ svn co http://svn.python.org/projects/python/trunk python-trunk
+
+   Then, replace python-trunk/Lib/lib2to3 with the sandbox version:
+
+   $ rm -rf python-trunk/Lib/lib2to3
+   $ cp -r 2to3/lib2to3 python-trunk/Lib/lib2to3
+
+2. Build Python on your system
+
+   $ cd python-trunk && ./configure && make
+
+3. Clone the mercurial repository:
+
+   $ hg clone http://bitbucket.org/amentajo/lib3to2/
+
+   Build using Python from Step 2:
+
+   $ ../python-trunk/python 3to2/setup.py build
+
+FULL INSTALLATION
+
+If you want both the latest build of Python and the 3to2 utility in
+your $PATH, follow the steps from Development Installation, with two
+additional steps:
+
+1. After issuing `make` in python-trunk/, run `make install` as
+   privileged user.  Then, you should be able to use `python2.7`.
+
+2. After the 'setup.py build', run 'setup.py install'.
+
+CREDITS
+
+These instructions are loosely based off of Joe Amenta's blog post,
+"Milestone: print function":
+
+   http://www.startcodon.com/wordpress/?p=41
