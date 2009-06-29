@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.1
+#!/usr/bin/env python2.7
 import sys
 from lib3to2.main import main
 

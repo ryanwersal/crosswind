@@ -40,7 +40,9 @@ additional steps:
 1. After issuing `make` in python-trunk/, run `make install` as
    privileged user.  Then, you should be able to use `python2.7`.
 
-2. After the 'setup.py build', run 'setup.py install'.
+2. Run 'setup.py build', then 'setup.py install' as a privileged user.
+
+** Note that this step is required to run the test suite.
 
 CREDITS
 
