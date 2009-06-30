@@ -27,6 +27,7 @@ class Test_metaclass(lib3to2FixerTestCase):
         class X():
             # hi
             __metaclass__ = AppleMeta
+            pass
         """
         b = """
         class X(metaclass=AppleMeta):
@@ -38,6 +39,7 @@ class Test_metaclass(lib3to2FixerTestCase):
         a = """
         class X():
             __metaclass__ = Meta
+            pass
             # Bedtime!
         """
         b = """
@@ -62,8 +64,12 @@ class Test_metaclass(lib3to2FixerTestCase):
         
     def test_meta_oneparent_no_body(self):
         # one parent class, no body
-        a = """class X(object): __metaclass__ = Q"""
-        b = """class X(object, metaclass=Q): pass"""
+        a = """
+        class X(object):
+            __metaclass__ = Q
+            pass"""
+        b = """
+        class X(object, metaclass=Q): pass"""
         self.check(b, a)
 
     def test_meta_oneparent_simple_body_1(self):
@@ -82,7 +88,8 @@ class Test_metaclass(lib3to2FixerTestCase):
     def test_meta_oneparent_simple_body_2(self):
         a = """
         class X():
-            __metaclass__ = Meta; x = 4; g = 23
+            __metaclass__ = Meta
+            x = 4; g = 23
         """
         b = """
         class X(metaclass=Meta):
@@ -117,14 +124,20 @@ class Test_metaclass(lib3to2FixerTestCase):
 
     def test_meta_multiparent_simple_body_2(self):
         # keywords in the class statement
-        a = """class m(a, arg=23): __metaclass__ = Meta"""
-        b = """class m(a, arg=23, metaclass=Meta): pass"""
+        a = """
+        class m(a, arg=23):
+            __metaclass__ = Meta
+            pass"""
+        b = """
+        class m(a, arg=23, metaclass=Meta):
+            pass"""
         self.check(b, a)
 
     def test_meta_expression_simple_body_1(self):
         a = """
         class X(expression(2 + 4)):
             __metaclass__ = Meta
+            pass
         """
         b = """
         class X(expression(2 + 4), metaclass=Meta):
@@ -136,6 +149,7 @@ class Test_metaclass(lib3to2FixerTestCase):
         a = """
         class X(expression(2 + 4), x**4):
             __metaclass__ = Meta
+            pass
         """
         b = """
         class X(expression(2 + 4), x**4, metaclass=Meta):
@@ -149,9 +163,11 @@ class Test_metaclass(lib3to2FixerTestCase):
         class X():
             __metaclass__ = Meta
             save.py = 23
+            out = 5
         """
         b = """
         class X(metaclass=Meta):
             save.py = 23
+            out = 5
         """
         self.check(b, a)

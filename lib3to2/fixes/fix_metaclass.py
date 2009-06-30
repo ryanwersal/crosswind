@@ -3,7 +3,7 @@ Fixer for (metaclass=X) -> __metaclass__ = X
 Some semantics (see PEP 3115) may be altered in the translation."""
 
 from lib2to3 import fixer_base
-from lib2to3.fixer_util import Name, syms, Node, Leaf
+from lib2to3.fixer_util import Name, syms, Node, Leaf, Newline
 from lib2to3.pygram import token
 
 def suitify(parent):
@@ -11,7 +11,7 @@ def suitify(parent):
     for node in parent.children:
         if node.type == syms.suite:
             # already in the prefered format, do nothing
-            return
+            return False
 
     # One-liners have no suite node, we have to fake one up
     for i, node in enumerate(parent.children):
@@ -21,13 +21,13 @@ def suitify(parent):
         raise ValueError("No class suite and no ':'!")
 
     # Move everything into a suite node
-    suite = Node(syms.suite, [])
+    suite = Node(syms.suite, [Newline(), Leaf(token.INDENT, u'    ')])
     while parent.children[i+1:]:
         move_node = parent.children[i+1]
+        move_node.prefix = u''
         suite.append_child(move_node.clone())
         move_node.remove()
     parent.append_child(suite)
-    node = suite
 
 def has_metaclass(parent):
     results = None
@@ -84,5 +84,13 @@ class FixMetaclass(fixer_base.BaseFix):
         name.prefix = u" "
         stmt_node = Node(syms.atom, [target, equal, name])
         suitify(node)
-        
-
+        for item in node.children:
+            if item.type == syms.suite:
+                for stmt in item.children:
+                    if stmt.type == token.INDENT:
+                        loc = item.children.index(stmt) + 1
+                        ident = Leaf(token.INDENT, stmt.value)
+                        item.insert_child(loc, ident)
+                        item.insert_child(loc, Newline())
+                        item.insert_child(loc, stmt_node)
+                        break
