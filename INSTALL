@@ -42,7 +42,7 @@ additional steps:
 
 2. Run 'setup.py build', then 'setup.py install' as a privileged user.
 
-** Note that this step is required to run the test suite.
+** This step is no longer required to run the test suite.
 
 CREDITS
 
