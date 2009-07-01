@@ -11,7 +11,7 @@ def suitify(parent):
     for node in parent.children:
         if node.type == syms.suite:
             # already in the prefered format, do nothing
-            return False
+            return
 
     # One-liners have no suite node, we have to fake one up
     for i, node in enumerate(parent.children):
@@ -45,10 +45,9 @@ def has_metaclass(parent):
             #Node(*, [*, Leaf(token.NAME, u"metaclass"), Leaf(token.EQUAL, u"="), Leaf(*, *)]
             for child in node.children:
                 if results: break
-                if type(child) == Leaf:
-                    if child.type == token.COMMA:
-                        #Store the last comma, which precedes the metaclass
-                        comma = child
+                if child.type == token.COMMA:
+                    #Store the last comma, which precedes the metaclass
+                    comma = child
                 elif type(child) == Node:
                     meta = equal = name = None
                     for arg in child.children:
@@ -88,7 +87,10 @@ class FixMetaclass(fixer_base.BaseFix):
             if item.type == syms.suite:
                 for stmt in item.children:
                     if stmt.type == token.INDENT:
+                        #Insert, in reverse order, the statement, a newline, 
+                        #and an indent right after the first indented line
                         loc = item.children.index(stmt) + 1
+                        #Keep consistent indentation form
                         ident = Leaf(token.INDENT, stmt.value)
                         item.insert_child(loc, ident)
                         item.insert_child(loc, Newline())
