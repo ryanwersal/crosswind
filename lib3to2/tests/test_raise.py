@@ -14,15 +14,20 @@ class Test_raise(lib3to2FixerTestCase):
         s = """raise E(V)"""
         self.unchanged(s)
 
+        s = """raise E("What?")"""
+        self.unchanged(s)
+        
         s = """raise"""
         self.unchanged(s)
 
-    def test_TODO_make_these_tests_fail(self):
+    def test_what_doesnt_work(self):
         """
         These tests should fail, but don't.  TODO: Uncomment successfully.
         One potential way of making these work is a separate fix_exceptions
         with a lower run order than fix_raise, to communicate to fix_raise how
         to sort out that third argument.
+        
+        These items are currently outside the scope of 3to2.
         """
         
         b = """
@@ -46,7 +51,7 @@ class Test_raise(lib3to2FixerTestCase):
         """
         
         #a = """
-        #E = Exception(V)
+        #E = BaseException(V)
         #raise E, V, T
         
         #self.check(b, a)
