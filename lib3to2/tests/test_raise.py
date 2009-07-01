@@ -65,3 +65,7 @@ class Test_raise(lib3to2FixerTestCase):
         b = """raise E().with_traceback(T)"""
         a = """raise E, None, T"""
         self.check(b, a)
+        
+        b = """raise E("Sorry, you cannot do that.").with_traceback(T)"""
+        a = """raise E, "Sorry, you cannot do that.", T"""
+        self.check(b, a)

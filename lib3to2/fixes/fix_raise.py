@@ -16,7 +16,7 @@ class FixRaise(fixer_base.BaseFix):
         exc, val, trc = (results["exc"], results["val"], results["trc"])
         val = val[0] if val else Leaf(token.NAME, u"None")
         val.prefix = trc.prefix = u" "
-        kids = [Leaf(token.NAME, u"raise"), Leaf(token.NAME, exc), Comma(),
-                Leaf(token.NAME, val), Comma(), Leaf(token.NAME, trc)]
+        kids = [Leaf(token.NAME, u"raise"), exc.clone(), Comma(),
+                val.clone(), Comma(), trc.clone()]
         raise_stmt = Node(syms.raise_stmt, kids)
         return raise_stmt
