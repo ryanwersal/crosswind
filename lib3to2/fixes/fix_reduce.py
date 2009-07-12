@@ -9,13 +9,6 @@ from lib2to3.fixer_util import Call
 from lib2to3.pytree import Node, Leaf
 from lib2to3.pgen2 import token
 
-def orphan_all(parent):
-    for child in parent.children:
-        if type(child) == Node:
-            orphan_all(child)
-        else:
-            child.remove()
-
 class FixReduce(fixer_base.BaseFix):
     
     PATTERN = """
