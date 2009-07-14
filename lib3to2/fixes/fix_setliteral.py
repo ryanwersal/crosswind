@@ -5,16 +5,22 @@ from lib2to3.pytree import Node, Leaf
 from lib2to3.pgen2 import token
 from lib2to3.fixer_util import Name, LParen, RParen
 
-def unmatch_dict(node):
-    """Placeholder for now"""
-    pass
+def found_dict(node):
+    """The pattern will match dicts, too, so we need to change that."""
+    try:
+        return type(eval(str(node))) == dict 
+    except SyntaxError:
+        #All set literals will raise syntax errors when eval()ed in 2.x
+        return False
 
 class FixSetliteral(fixer_base.BaseFix):
     
     PATTERN = """atom< '{' dictsetmaker< args=any* > '}' > |
                  atom< '{' arg=any '}' >"""
     
-    explicit = True # only because it grabs dicts too right now.
+    def match(self, node):
+        return not found_dict(node) and \
+               super(FixSetliteral, self).match(node)
     
     def transform(self, node, results):
         syms = self.syms
