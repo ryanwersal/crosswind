@@ -11,6 +11,8 @@ def found_dict(node):
         return type(eval(str(node))) == dict 
     except SyntaxError:
         #All set literals will raise syntax errors when eval()ed in 2.x
+        from sys import version_info
+        assert version_info[0] == 2, u"fix_setliteral fails to account for dicts when run in Python versions higher than 2.x"
         return False
 
 class FixSetliteral(fixer_base.BaseFix):
