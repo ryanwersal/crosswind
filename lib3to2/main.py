@@ -9,6 +9,7 @@ import shutil
 import optparse
 
 from lib2to3 import refactor
+from lib2to3 import pygram
 
 class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
     """
@@ -18,6 +19,19 @@ class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
     def __init__(self, fixers, options, explicit, nobackups):
         self.nobackups = nobackups
         super(StdoutRefactoringTool, self).__init__(fixers, options, explicit)
+        self.driver.grammar = pygram.python_grammar_no_print_statement
+
+    def refactor_string(self, data, name):
+        """Override to keep print statements out of the grammar"""
+        try:
+            tree = self.driver.parse_string(data)
+        except Exception, err:
+            self.log_error("Can't parse %s: %s: %s",
+                           name, err.__class__.__name__, err)
+            return
+        self.log_debug("Refactoring %s", name)
+        self.refactor_tree(tree, name)
+        return tree
 
     def log_error(self, msg, *args, **kwargs):
         self.errors.append((msg, args, kwargs))
