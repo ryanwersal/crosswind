@@ -4,6 +4,7 @@ Main program for 3to2.
 
 import sys
 import os
+import difflib
 import logging
 import shutil
 import optparse
@@ -11,13 +12,23 @@ import optparse
 from lib2to3 import refactor
 from lib2to3 import pygram
 
+def diff_texts(a, b, filename):
+    """Return a unified diff of two strings."""
+    a = a.splitlines()
+    b = b.splitlines()
+    return difflib.unified_diff(a, b, filename, filename,
+                                "(original)", "(refactored)",
+                                lineterm="")
+
+
 class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
     """
     Prints output to stdout.
     """
 
-    def __init__(self, fixers, options, explicit, nobackups):
+    def __init__(self, fixers, options, explicit, nobackups, show_diffs):
         self.nobackups = nobackups
+        self.show_diffs = show_diffs
         super(StdoutRefactoringTool, self).__init__(fixers, options, explicit)
         self.driver.grammar = pygram.python_grammar_no_print_statement
 
@@ -56,9 +67,18 @@ class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
         if not self.nobackups:
             shutil.copymode(backup, filename)
 
-    def print_output(self, lines):
-        for line in lines:
-            print line
+    def print_output(self, old, new, filename, equal):
+        if equal:
+            self.log_message("No changes to %s", filename)
+        else:
+            self.log_message("Refactored %s", filename)
+            if self.show_diffs:
+                for line in diff_texts(old, new, filename):
+                    print line
+
+
+def warn(msg):
+    print >> sys.stderr, "WARNING: %s" % (msg,)
 
 
 def main(fixer_pkg, args=None):
@@ -89,10 +109,14 @@ def main(fixer_pkg, args=None):
                       help="Write back modified files")
     parser.add_option("-n", "--nobackups", action="store_true", default=False,
                       help="Don't write backups for modified files.")
+    parser.add_option("--no-diffs", action="store_true",
+                      help="Don't show diffs of the refactoring")
 
     # Parse command line arguments
     refactor_stdin = False
     options, args = parser.parse_args(args)
+    if not options.write and options.no_diffs:
+        warn("not writing files and not printing diffs; that's not very useful")
     if not options.write and options.nobackups:
         parser.error("Can't use -n without -w")
     if options.list_fixes:
@@ -131,8 +155,8 @@ def main(fixer_pkg, args=None):
     else:
         requested = avail_fixes.union(explicit)
     fixer_names = requested.difference(unwanted_fixes)
-    rt = StdoutRefactoringTool(sorted(fixer_names), rt_opts, sorted(explicit),
-                               options.nobackups)
+    rt = StdoutRefactoringTool(sorted(fixer_names), None, sorted(explicit),
+                               options.nobackups, not options.no_diffs)
 
     # Refactor all files and directories passed as arguments
     if not rt.errors:
