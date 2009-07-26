@@ -7,6 +7,11 @@ class Test_print(lib3to2FixerTestCase):
         b = """print()"""
         a = """from __future__ import print_function\nprint()"""
         self.check(b,a)
+
+    def test_literal(self):
+        b = """print('spam')"""
+        a = """from __future__ import print_function\nprint('spam')"""
+        self.check(b,a)
         
     def test_not_builtin_unchanged(self):
         s = "this.shouldnt.be.changed.because.it.isnt.builtin.print()"

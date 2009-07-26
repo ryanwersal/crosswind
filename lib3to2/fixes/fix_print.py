@@ -24,11 +24,12 @@ class FixPrint(fixer_base.BaseFix):
         Since the tree needs to be fixed once and only once if and only if it
         matches, then we can start discarding matches after we make the first.
         """
-        return not self._tree.was_changed and super(FixPrint,self).match(node)
+        return not 'print_happened' in dir(self._tree) and super(FixPrint,self).match(node)
 
     def transform(self, node, results):
         tree = self._tree
         syms = self.syms
+        tree.print_happened = True
         future_stmt = FromImport(u"__future__",
                                 [pytree.Leaf(token.NAME, u"print_function",
                                 prefix=u" ")])
