@@ -18,12 +18,11 @@ class FixNumliterals(fixer_base.BaseFix):
     def base(self, literal):
         """Returns the base of a valid py3k literal."""
         literal = literal.strip()
-        if not literal.startswith(u"0"):
+        if int(literal) == 0 or not literal.startswith(u"0"):
             return 10
-        else:
-            if literal[1] not in u"box":
-                return 0
-            return baseMAPPING[literal[1]]
+        elif literal[1] not in u"box":
+            return 0
+        return baseMAPPING[literal[1]]
     
     def unmatch(self, node):
         """Don't match complex numbers, floats, or base-10 ints"""
