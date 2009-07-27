@@ -8,7 +8,7 @@ from lib2to3 import fixer_base
 from lib2to3.fixer_util import Name, is_probably_builtin, Number
 from lib2to3.pgen2 import token
 
-baseMAPPING = {'b':2, 'o':8, 'x':16}
+baseMAPPING = {u'b':2, u'o':8, u'x':16}
 
 class FixInt(fixer_base.BaseFix):
     
@@ -21,12 +21,11 @@ class FixInt(fixer_base.BaseFix):
     def base(self, literal):
         """Returns the base of a valid py3k numeric literal."""
         literal = literal.strip()
-        if not literal.startswith(u"0"):
+        if int(literal) == 0 or not literal.startswith(u"0"):
             return 10
-        else:
-            if literal[1] not in u"box":
-                return 0
-            return baseMAPPING[literal[1]]
+        elif literal[1] not in u"box":
+            return 0
+        return baseMAPPING[literal[1]]
             
     def unmatch(self, node):
         """Don't match complex numbers, floats, or longs"""
