@@ -4,6 +4,8 @@ int -> long
 123 -> 123L
 """
 
+import re
+
 from lib2to3 import fixer_base
 from lib2to3.fixer_util import Name, is_probably_builtin, Number
 from lib2to3.pgen2 import token
@@ -21,7 +23,7 @@ class FixInt(fixer_base.BaseFix):
     def base(self, literal):
         """Returns the base of a valid py3k numeric literal."""
         literal = literal.strip()
-        if int(literal) == 0 or not literal.startswith(u"0"):
+        if not literal.startswith(u"0") or re.match(r"0+$",literal):
             return 10
         elif literal[1] not in u"box":
             return 0

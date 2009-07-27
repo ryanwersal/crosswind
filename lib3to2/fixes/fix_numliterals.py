@@ -5,6 +5,8 @@ Fixer for:
 0o755 -> 0755
 """
 
+import re
+
 from lib2to3.pgen2 import token
 from lib2to3 import fixer_base
 from lib2to3.pygram import python_symbols as syms
@@ -19,20 +21,23 @@ class FixNumliterals(fixer_base.BaseFix):
     def base(self, literal):
         """Returns the base of a valid py3k literal."""
         literal = literal.strip()
-        if int(literal) == 0 or not literal.startswith(u"0"):
+        #All literals that do not start with 0, or are 1 or more zeros.
+        if not literal.startswith(u"0") or re.match(r"0+$",literal):
             return 10
         elif literal[1] not in u"box":
-            return 0
+            raise SyntaxError("Invalid py3k numeric literal")
         return baseMAPPING[literal[1]]
     
     def unmatch(self, node):
         """Don't match complex numbers, floats, or base-10 ints"""
         val = node.value
-        if self.base(val) == 10:
-            return val
         for bad in u"jJ+-.":
             if bad in val: return bad
-        
+            
+        if self.base(val) == 10:
+            return True
+        return False
+
     def match(self, node):
         return ((node.type == token.NUMBER) and not self.unmatch(node))
         
