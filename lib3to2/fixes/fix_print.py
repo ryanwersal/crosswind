@@ -28,7 +28,7 @@ class FixPrint(fixer_base.BaseFix):
 
     def transform(self, node, results):
         tree = self._tree
-        print_happened = True
+        tree.print_happened = True
         syms = self.syms
         future_stmt = FromImport(u"__future__",
                                 [pytree.Leaf(token.NAME, u"print_function",
