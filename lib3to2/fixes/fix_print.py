@@ -28,14 +28,14 @@ class FixPrint(fixer_base.BaseFix):
 
     def transform(self, node, results):
         tree = self._tree
+        print_happened = True
         syms = self.syms
-        tree.print_happened = True
         future_stmt = FromImport(u"__future__",
                                 [pytree.Leaf(token.NAME, u"print_function",
                                 prefix=u" ")])
         children = list(tree.children[:])
+        new_node = pytree.Node(syms.simple_stmt, [future_stmt, Newline()])
         for child in children:
             child.remove()
-        children = [future_stmt, Newline()] + children
-        newnode = pytree.Node(syms.simple_stmt, children)
-        tree.insert_child(0, newnode)
+            new_node.append_child(child)
+        tree.insert_child(0, new_node)
