@@ -42,9 +42,13 @@ http://svn.python.org/sandbox/trunk/2to3/ (check out via svn), as a change to
 Status
 ======
 
-Currently, 3to2 does not work very well with multiple nested fixes.  Check your
-output manually; fixes are coming.  There is also no support for imports that
-were renamed in 2to3.
+3to2 is still in the development stage, so check your output manually.  3to2
+does the bulk of the work, but there may be little tweaks that need to be done.
+
+3to2 will not yet warn if your py3k code uses features that were added in py3k.
+Again, check output manually.
+
+3to2 does not yet fix standard library imports that need to be fixed.
 
 Administrative Notes
 ====================
