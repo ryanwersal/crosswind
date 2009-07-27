@@ -39,6 +39,13 @@ replaced with the most recent version of 2to3 from
 http://svn.python.org/sandbox/trunk/2to3/ (check out via svn), as a change to
 2to3 will not propagate immediately to the Python trunk.
 
+Status
+======
+
+Currently, 3to2 does not work very well with multiple nested fixes.  Check your
+output manually; fixes are coming.  There is also no support for imports that
+were renamed in 2to3.
+
 Administrative Notes
 ====================
 
