@@ -10,6 +10,7 @@ from lib2to3 import fixer_base
 from lib2to3.pygram import python_symbols as syms
 from lib2to3.pytree import Node
 from lib2to3.fixer_util import Number, Call, Attr, String, Name, ArgList, Comma
+
 baseMAPPING = {'b':2, 'o':8, 'x':16}
 
 class FixNumliterals(fixer_base.BaseFix):
@@ -34,6 +35,7 @@ class FixNumliterals(fixer_base.BaseFix):
         
     def match(self, node):
         return ((node.type == token.NUMBER) and not self.unmatch(node))
+        
     def transform(self, node, results):
         """
         Call __builtins__.long() with the value and the base of the value.
@@ -46,6 +48,7 @@ class FixNumliterals(fixer_base.BaseFix):
             val.strip().startswith(u"0O"), "Invalid format for octal literal"
             val = u"".join((u"0",val[2:]))
             return Number(val, prefix=node.prefix)
+            
         elif self.base(val) == 16 or self.base(val) == 2:
             assert val.startswith(u"0") and val[1] in u"bxBX", \
                                            "Invalid format for numeric literal"
