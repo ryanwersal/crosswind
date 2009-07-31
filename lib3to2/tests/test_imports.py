@@ -194,3 +194,15 @@ class Test_imports(lib3to2FixerTestCase):
         import gdbm
         gdbm.open('generic_file')"""
         self.check(b, a)
+        
+        b = """
+        import tkinter.dialog, tkinter.colorchooser
+        tkinter = tkinter.dialog(tkinter.colorchooser("Just messing around"))
+        tkinter.test_should_work = True
+        tkinter.dialog.just_torture_testing_this_algorithm = True"""
+        a = """
+        import Dialog, tkColorChooser
+        tkinter = Dialog(tkColorChooser("Just messing around"))
+        tkinter.test_should_work = True
+        Dialog.just_torture_testing_this_algorithm = True"""
+        self.check(b, a)
