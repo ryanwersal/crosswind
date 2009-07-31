@@ -64,6 +64,10 @@ class FixImports(FixImports_):
                 return child
 
     def find_dotted_name_usage(self, vals):
+        """
+        Find the usage of a dotted name from self.replace
+        Accepts: a list generated from a node.post_order()
+        """
         if not self.replace:
             return False
         names_attrs = [tuple(name.split('.')) for name in self.mapping if '.' in name]
@@ -76,6 +80,7 @@ class FixImports(FixImports_):
         vals = [val for val in vals if type(val) == Leaf]
         vals = iter(vals)
         try:
+            #Do this the long way; we need to manipulate the iterator.
             while True:
                 val = vals.next()
                 if val.value in names:
@@ -92,7 +97,6 @@ class FixImports(FixImports_):
         except StopIteration:
             return matched
 
-    # TODO: Add support for fixing later usage for name_import cases.
     def match_dotted(self, node):
         """Iterate through names matching the dotted ones"""
         results = {"node": node}
@@ -118,6 +122,9 @@ class FixImports(FixImports_):
         return results
 
     def match_named(self, node):
+        """
+        Builds the results dict for self.match() based on what we get in find_dotted_name_usage
+        """
         results = {"node": node}
         name_usage = self.find_dotted_name_usage(node.pre_order())
         if name_usage:
@@ -127,10 +134,16 @@ class FixImports(FixImports_):
         return results
         
     def match(self, node):
+        """
+        An amalgamation of the basic matcher and our own handling of dotted modules
+        """
         return super(FixImports, self).match(node) or self.match_dotted(node) or \
                self.match_named(node)
 
     def transform(self, node, results):
+        """
+        Use the parent's transform unless we have to do our own thing.
+        """
         import_mod = results.get("module_name")
         names = results.get("bare_with_attr")
         if import_mod or (names and (type(names[0]) == Leaf)):
@@ -146,7 +159,7 @@ class FixImports(FixImports_):
                     name[1].remove()
                     name[2].remove()
                 else:
-                    # currently only test.test_support
+                    # test.test_support and everything in fix_imports2
                     new_mod, new_attr = new_name.split('.')
                     bare_name.replace(Name(new_mod, prefix=bare_name.prefix))
                     bare_attr.replace(Name(new_attr, prefix=new_attr.prefix))
