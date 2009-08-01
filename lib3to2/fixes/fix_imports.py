@@ -10,15 +10,6 @@ from lib2to3.fixer_util import Name, Dot, Attr
 from lib2to3.fixes.fix_imports import FixImports as FixImports_
 from lib2to3.fixes.fix_imports import build_pattern
 
-def DottedName(names, prefix=u""):
-    """Accepts a sequence of names; returns a DottedName that combines them"""
-    children = []
-    for arg in names:
-        children.append(Name(arg))
-        children.append(Dot())
-    del children[-1]
-    return Node(syms.dotted_name, children, prefix)
-
 MAPPING = {'winreg': '_winreg',
            'configparser': 'ConfigParser',
            'copyreg': 'copy_reg',
@@ -50,6 +41,15 @@ MAPPING = {'winreg': '_winreg',
            'urllib.robotparser': 'robotparser',
            'xmlrpc.client': 'xmlrpclib',
 }
+
+def DottedName(names, prefix=u""):
+    """Accepts a sequence of names; returns a DottedName that combines them"""
+    children = []
+    for arg in names:
+        children.append(Name(arg))
+        children.append(Dot())
+    del children[-1]
+    return Node(syms.dotted_name, children, prefix)
 
 class FixImports(FixImports_):
 
