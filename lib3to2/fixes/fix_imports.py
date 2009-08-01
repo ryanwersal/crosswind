@@ -140,6 +140,22 @@ class FixImports(FixImports_):
         return super(FixImports, self).match(node) or self.match_dotted(node) or \
                self.match_named(node)
 
+    def transform_dotted_to_single(self, old, new):
+        """
+        Accepts an old tuple of Leafs (Name, Dot, Name) and a string
+        Replaces (Name, Dot, Name) with a single Name, from new.
+        """
+        old[0].replace(Name(new, prefix=old[0].prefix))
+        old[1].remove()
+        old[2].remove()
+
+    def transform_dotted_to_dotted(self, old, new):
+        """
+        Accepts an old tuple of Leafs (Name, Dot, Name) 
+        """
+        old[0].replace(Name(new[0], prefix=old[0].prefix))
+        old[2].replace(Name(new[1], prefix=old[2].prefix))
+
     def transform(self, node, results):
         """
         Use the parent's transform unless we have to do our own thing.
@@ -150,16 +166,12 @@ class FixImports(FixImports_):
             return super(FixImports, self).transform(node, results)
         else:
             for name in names:
+                # TODO: Fix one node at a time.
                 full_name = name[0].value + name[1].value + name[2].value
-                bare_name = name[0]
-                bare_attr = name[2]
                 new_name = self.replace.get(full_name)
                 if u'.' not in new_name:
-                    bare_name.replace(Name(new_name, prefix=bare_name.prefix))
-                    name[1].remove()
-                    name[2].remove()
+                    self.transform_dotted_to_single(name, new_name)
                 else:
                     # test.test_support and everything in fix_imports2
                     new_mod, new_attr = new_name.split('.')
-                    bare_name.replace(Name(new_mod, prefix=bare_name.prefix))
-                    bare_attr.replace(Name(new_attr, prefix=new_attr.prefix))
+                    self.transform_dotted_to_dotted(name, (new_mod, new_attr))
