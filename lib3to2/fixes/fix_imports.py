@@ -49,7 +49,7 @@ def DottedName(names, prefix=u""):
         children.append(Name(arg))
         children.append(Dot())
     del children[-1]
-    return Node(syms.dotted_name, children, prefix)
+    return Node(syms.dotted_name, children, prefix=prefix)
 
 class FixImports(FixImports_):
 

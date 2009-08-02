@@ -1,5 +1,8 @@
-from fix_imports import FixImports
-from lib2to3.fixer_util import Dot, Name
+from fix_imports import FixImports, DottedName
+from lib2to3.pytree import Leaf, Node
+from lib2to3.fixer_util import Dot, Comma, Name, Newline, FromImport, find_root
+from lib2to3.pygram import python_symbols as syms
+from lib2to3.pgen2 import token
 
 PY2MODULES = { 
               'urllib2' : (
@@ -168,6 +171,10 @@ PY2MODULES = {
                   'xmlrpclib'),
                 }
 
+
+# The order of the values of each key is not arbitrary.  If multiple modules provide the same name,
+# then the first module listed here will be used.
+# e.g., urllib and urllib2 both provide urlopen, but since urllib2 is listed first, it will be preferred.
 MAPPING = { 'urllib.request' :
                 ('urllib2', 'urllib'),
             'urllib.error' :
@@ -186,6 +193,14 @@ MAPPING = { 'urllib.request' :
                 ('DocXMLRPCServer', 'SimpleXMLRPCServer'),
             }
 
+def is_from_import(node):
+    """Returns true if the node is a from x import y statement"""
+    return node.type == syms.import_from
+
+def is_name_import(node):
+    """Returns true if the node is a import y statement."""
+    return node.type == syms.import_name
+
 def attr_used(node):
     """
     Returns the attribute of a node if it has one, None if it does not.
@@ -199,7 +214,65 @@ def attr_used(node):
             return None
         next = adj.next_sibling
         return next
-        
+
+def names_imported_from(node):
+   """
+   Accepts an import_from node and returns a list of the name leafs
+   that the node imports
+   """
+   if node.children[3].type == syms.import_as_names:
+       return [child for child in node.children[3].children if child.type == 1]
+   else:
+       return [node.children[3]]
+       
+def full_name(node):
+    """
+    Shortcut for str(name_dot_attr(node))
+    """
+    return node.value + u'.' + attr_used(node).value
+
+def name_dot_attr(node):
+    """
+    Shortcut for (node, node.next_sibling, node.next_sibling.next_sibling)
+    """
+    return (node, node.next_sibling, node.next_sibling.next_sibling)
+
+def scrub_results(results):
+    """
+    Deletes all keys with a val that evals to False
+    """
+    items = results.items()
+    for key, val in items:
+        if not val:
+            del results[key]
+
+def FromDottedImport(package_name, name_leafs):
+    imp = FromImport(package_name, name_leafs)
+    imp.set_child(1, DottedName(package_name.split(u'.'), u" "))
+    return imp
+
+def which_are_imports(relevant_leaves):
+    """
+    Accepts relevant_leaves and returns an object of the same structure
+    that contains just those that are in import statements.
+    """
+    from_import = set()
+    name_import = set()
+    for name in relevant_leaves:
+        for node in relevant_leaves[name]:
+            while node.parent and not (is_name_import(node) or is_from_import(node)):
+                node = node.parent
+            if is_from_import(node): node._mod = name; from_import.add(node)
+            elif is_name_import(node): node._mod = name; name_import.add(node)
+    return (from_import, name_import)
+
+def no_kids(node):
+    for child in node.children:
+        if type(child) == Leaf:
+            del child
+        else:
+            no_kids(child)
+
 def find_relevant_leaves(tree, mapping):
     """
     Searches through the whole tree and returns a mapping of each package in
@@ -213,19 +286,23 @@ def find_relevant_leaves(tree, mapping):
         attr = attr_used(node)
         if attr and (node.value in base_names):
             for name in mapping:
-                if node.value + u'.' + attr.value == name:
+                if full_name(node) == name:
                     results[name].append(node)
-    for name in results:
-        # Only return a True-like object if we have found something
-        if results[name]:
-            return results
-    return False
+    scrub_results(results)
+    return results
 
+def commatize(leafs):
+    new_leafs = []
+    for leaf in leafs:
+        new_leafs.append(leaf)
+        new_leafs.append(Comma())
+    del new_leafs[-1]
+    return new_leafs
 
 class FixImports2(FixImports):
     
     mapping = MAPPING
-    python2_modules = PY2MODULES
+    modules = PY2MODULES
 
     # This should be run pretty late, as it scans the whole code.
     run_order = 7
@@ -238,29 +315,56 @@ class FixImports2(FixImports):
         self.run_once = True
         self.relevant_leaves = find_relevant_leaves(tree, self.mapping)
 
-    def name_replacing(self, module_name):
+    def which_candidate(self, module_name, node):
         """
-        -Accepts the module name to be replaced
-        -Returns a dict mapping modules to replace module_name with the
-        specific usages that replace it
-        -Currently relies on the caller to remove duplicate entries
+        Accepts the old module name and a node that it imports
+        Returns the best module to import that node from
         """
-        relevant_leaves = self.relevant_leaves
-        results = {}
-        for candidate in self.mapping[module_name]:
-            results[candidate] = []
-            for node in relevant_leaves[module_name]:
-                attr = attr_used(node)
-                if attr:
-                    attr = attr_used(attr)
-                    if attr and attr.value in python2_modules[candidate]:
-                        results[candidate].append(attr)
-            return results
+        mapping = self.mapping
+        modules = self.modules
+        candidates = []
+        for candidate in mapping[module_name]:
+            if node.value in modules[candidate]:
+                return candidate
 
     def match(self, node):
         return self.run_once and self.relevant_leaves
 
     def transform(self, node, results):
         self.run_once = False
+        full_nodes = []
         relevant_leaves = self.relevant_leaves
-        # Stub
+        mapping = self.mapping
+        for package in relevant_leaves:
+            for leaf in relevant_leaves[package]:
+                full_nodes.append(name_dot_attr(leaf))
+        from_imports, name_imports = which_are_imports(relevant_leaves)
+        for import_statement in name_imports:
+            self.warning(import_statement, 'Import name not supported yet.  Please use from (name) import (names)')
+        replacers = {}
+        for import_statement in from_imports:
+            if not str(import_statement) in replacers:
+                replacers[str(import_statement)] = {}
+            else:
+                continue
+            curr_replacer = replacers[str(import_statement)]
+            for node_imported in names_imported_from(import_statement):
+                replacing_name = self.which_candidate(import_statement._mod, node_imported)
+                if not replacing_name in curr_replacer: curr_replacer[replacing_name] = []
+                curr_replacer[replacing_name].append(node_imported)
+        for import_statement in from_imports:
+            new_nodes = []
+            for replacing_name in replacers[str(import_statement)]:
+                new_nodes.append(FromImport(replacing_name, commatize([name.clone() for name in replacers[str(import_statement)][replacing_name]])))
+                new_nodes.append(Newline())
+            del new_nodes[-1]
+            new_nodes[-1].prefix = import_statement.prefix
+            no_kids(import_statement)
+            assert import_statement.parent
+            if len(new_nodes) > 1:
+                parent = import_statement.parent
+                pos = import_statement.remove()
+                for node in new_nodes[::]:
+                    parent.insert_child(pos, node)
+            elif len(new_nodes) == 1:
+                import_statement.replace(new_nodes[0])
