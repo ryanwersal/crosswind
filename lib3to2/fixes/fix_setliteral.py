@@ -7,13 +7,8 @@ from lib2to3.fixer_util import Name, LParen, RParen
 
 def found_dict(node):
     """The pattern will match dicts, too, so we need to change that."""
-    try:
-        return type(eval(str(node))) == dict 
-    except SyntaxError:
-        #All set literals will raise syntax errors when eval()ed in 2.x
-        from sys import version_info
-        assert version_info[0] == 2, u"fix_setliteral fails to account for dicts when run in Python versions higher than 2.x"
-        return False
+    # node.children[1] is the dictsetmaker. none of its children may be a colon
+    return any([kid.type == token.COLON for kid in node.children[1].children])
 
 class FixSetliteral(fixer_base.BaseFix):
     
