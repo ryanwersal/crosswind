@@ -21,8 +21,11 @@ class FixSetliteral(fixer_base.BaseFix):
                  atom< '{' arg=any '}' >"""
     
     def match(self, node):
-        return not found_dict(node) and \
-               super(FixSetliteral, self).match(node)
+        results = super(FixSetliteral, self).match(node)
+        if results and not found_dict(node):
+            return results
+        else:
+            return False
     
     def transform(self, node, results):
         syms = self.syms
