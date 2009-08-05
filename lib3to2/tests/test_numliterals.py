@@ -13,16 +13,6 @@ class Test_numliterals(lib3to2FixerTestCase):
         a = """0777"""
         self.check(b, a)
 
-    def test_hex_1(self):
-        b = """0xABC"""
-        a = """__builtins__.long("ABC", 16)"""
-        self.check(b, a)
-        
-    def test_hex_2(self):
-        b = """b = 0x12"""
-        a = """b = __builtins__.long("12", 16)"""
-        self.check(b, a)
-
     def test_bin_1(self):
         b = """0b10010110"""
         a = """__builtins__.long("10010110", 2)"""
@@ -31,11 +21,6 @@ class Test_numliterals(lib3to2FixerTestCase):
     def test_bin_2(self):
         b = """spam(0b1101011010110)"""
         a = """spam(__builtins__.long("1101011010110", 2))"""
-        self.check(b, a)
-        
-    def test_comments_and_spacing_1(self):
-        b = """b =   0x12"""
-        a = """b =   __builtins__.long("12", 16)"""
         self.check(b, a)
 
     def test_comments_and_spacing_2(self):

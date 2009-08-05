@@ -1,6 +1,5 @@
 """
 Fixer for:
-0x1ed -> __builtins__.long("1ed", 16)
 0b111101101 -> __builtins__.long("111101101", 2)
 0o755 -> 0755
 """
@@ -30,11 +29,12 @@ class FixNumliterals(fixer_base.BaseFix):
     
     def unmatch(self, node):
         """Don't match complex numbers, floats, or base-10 ints"""
+        print repr(node.parent)
         val = node.value
         for bad in u"jJ+-.":
             if bad in val: return bad
-            
-        if self.base(val) == 10:
+        base = self.base(val)
+        if base == 10 or base == 16:
             return True
         return False
 
@@ -47,22 +47,21 @@ class FixNumliterals(fixer_base.BaseFix):
         This works because 0b10 is int("10", 2), 0o10 is int("10", 8), etc.
         """
         val = node.value
-
-        if self.base(val) == 8:
+        base = self.base(val)
+        if base == 8:
             assert val.strip().startswith(u"0o") or \
             val.strip().startswith(u"0O"), "Invalid format for octal literal"
             val = u"".join((u"0",val[2:]))
             return Number(val, prefix=node.prefix)
             
-        elif self.base(val) == 16 or self.base(val) == 2:
-            assert val.startswith(u"0") and val[1] in u"bxBX", \
-                                           "Invalid format for numeric literal"
-            base = Number(self.base(val), prefix=u" ")
+        elif base == 2:
+            assert val.startswith(u"0") and val[1] in u"bB", \
+                                           "Invalid format for binary literal"
             # __builtins__.long
             func_name = Node(syms.power, Attr(Name(u"__builtins__"), \
                              Name(u"long")))
-            # ("...", [2 or 16])
+            # ("...", 2)
             func_args = [String(u"".join((u"\"", val.strip()[2:], u"\""))), \
-                         Comma(), base]
+                         Comma(), Number(2, prefix=u" ")]
             new_node = Call(func_name, func_args, node.prefix)
             return new_node
