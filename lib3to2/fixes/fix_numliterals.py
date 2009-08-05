@@ -29,7 +29,6 @@ class FixNumliterals(fixer_base.BaseFix):
     
     def unmatch(self, node):
         """Don't match complex numbers, floats, or base-10 ints"""
-        print repr(node.parent)
         val = node.value
         for bad in u"jJ+-.":
             if bad in val: return bad
