@@ -33,9 +33,7 @@ class FixNumliterals(fixer_base.BaseFix):
         for bad in u"jJ+-.":
             if bad in val: return bad
         base = self.base(val)
-        if base == 10 or base == 16:
-            return True
-        return False
+        return base == 10 or base == 16
 
     def match(self, node):
         return (node.type == token.NUMBER) and not self.unmatch(node)
