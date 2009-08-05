@@ -24,7 +24,7 @@ class FixNumliterals(fixer_base.BaseFix):
         if not literal.startswith(u"0") or re.match(r"0+$",literal):
             return 10
         elif literal[1] not in u"box":
-            raise SyntaxError("Invalid py3k numeric literal")
+            return 0
         return baseMAPPING[literal[1]]
     
     def unmatch(self, node):
@@ -38,7 +38,7 @@ class FixNumliterals(fixer_base.BaseFix):
         return False
 
     def match(self, node):
-        return ((node.type == token.NUMBER) and not self.unmatch(node))
+        return (node.type == token.NUMBER) and not self.unmatch(node)
         
     def transform(self, node, results):
         """
@@ -50,9 +50,8 @@ class FixNumliterals(fixer_base.BaseFix):
         if base == 8:
             assert val.strip().startswith(u"0o") or \
             val.strip().startswith(u"0O"), "Invalid format for octal literal"
-            val = u"".join((u"0",val[2:]))
-            return Number(val, prefix=node.prefix)
-            
+            node.changed()
+            node.value = u"".join((u"0",val[2:]))
         elif base == 2:
             assert val.startswith(u"0") and val[1] in u"bB", \
                                            "Invalid format for binary literal"

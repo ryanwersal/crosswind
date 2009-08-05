@@ -10,7 +10,8 @@ from lib2to3.fixer_util import Name, Dot, Attr
 from lib2to3.fixes.fix_imports import FixImports as FixImports_
 from lib2to3.fixes.fix_imports import build_pattern
 
-MAPPING = {'winreg': '_winreg',
+MAPPING = {'reprlib': 'repr',
+           'winreg': '_winreg',
            'configparser': 'ConfigParser',
            'copyreg': 'copy_reg',
            'queue': 'Queue',
