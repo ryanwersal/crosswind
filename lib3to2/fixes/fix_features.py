@@ -49,7 +49,7 @@ class FixFeatures(fixer_base.BaseFix):
         if results.get('bin'):
             self.alert_feature(node, Feature('bin function', '2.6'))
         if results.get('mem'):
-            self.alert_feature(node, Feature('memoryview function', '2.6'))
+            self.alert_feature(node, Feature('memoryview function', '2.7'))
         io = results.get('io')
         abc = results.get('abc')
         numb = results.get('numb')
