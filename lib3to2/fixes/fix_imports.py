@@ -2,10 +2,11 @@
 
 import re
 
-from lib2to3.pygram import python_symbols as syms
+
 from lib2to3.pgen2 import token
 from lib2to3.pytree import Node, Leaf
-from lib2to3.fixer_util import Name, Dot, Attr
+from lib2to3.pygram import python_symbols as syms
+from lib2to3.fixer_util import Name, Dot, Attr, _is_import_binding
 
 from lib2to3.fixes.fix_imports import FixImports as FixImports_
 from lib2to3.fixes.fix_imports import build_pattern
@@ -27,6 +28,8 @@ MAPPING = {'reprlib': 'repr',
            'http.client': 'httplib',
            'http.cookies': 'Cookie',
            'http.cookiejar': 'cookielib',
+           #TODO: make this work
+           #tkinter': 'Tkinter',
            'tkinter.dialog': 'Dialog',
            'tkinter._fix': 'FixTk',
            'tkinter.scrolledtext': 'ScrolledText',
@@ -43,6 +46,15 @@ MAPPING = {'reprlib': 'repr',
            'xmlrpc.client': 'xmlrpclib',
 }
 
+def pkg_name(node):
+    """
+    Returns a tuple of:
+    (pkg, (names)) if node does "from pkg import names"
+    """
+    if node.type != syms.import_from: return None
+    return (node.children[1], node.children[3])
+        
+
 def DottedName(names, prefix=u""):
     """Accepts a sequence of names; returns a DottedName that combines them"""
     children = []
@@ -51,6 +63,21 @@ def DottedName(names, prefix=u""):
         children.append(Dot())
     del children[-1]
     return Node(syms.dotted_name, children, prefix=prefix)
+
+def dot_attr_used(node):
+    """
+    Accepts a node and returns a dot and the attr if that node uses an attr
+    Otherwise returns None
+    """
+    next_of_kin = node.next_sibling
+    if next_of_kin is None:
+        return (None, None)
+    if next_of_kin.type == syms.trailer:
+        return (next_of_kin.children[:2])
+    if str(next_of_kin) == u'.' and next_of_kin.next_sibling:
+        return (next_of_kin, next_of_kin.next_sibling)
+    else:
+        return (None, None)
 
 class FixImports(FixImports_):
 
@@ -64,6 +91,40 @@ class FixImports(FixImports_):
             if child == ref:
                 return child
 
+    def match_fromimports(self, node):
+        """
+        Find things like from dbm import gnu
+        """
+        dotted_names = [tuple(name.split('.')) for name in self.mapping if '.' in name]
+        if not dotted_names: return False
+        packages = {}
+        for name, attr in dotted_names:
+            if not name in packages:
+                packages[name] = set([attr])
+            else:
+                packages[name].add(attr)
+        matched = {'node': node, 'fromimports': []}
+        for package in packages:
+            for name in packages[package]:
+                if _is_import_binding(node, name, package):
+                    matched['fromimports'].append(node)
+        if matched['fromimports']:
+            return matched
+        else:
+            return False
+
+    def fix_fromimports(self, nodes):
+        for node in nodes:
+            pkg, name = pkg_name(node)
+            mapped = pkg.value + u'.' + name.value
+            repl = unicode(self.mapping[mapped])
+            p = u" "
+            if u'.' not in repl:
+                new_node = Node(syms.import_name, [Leaf(1, u'import'), Node(syms.dotted_as_name, [Leaf(1, repl, prefix=p), Leaf(1, u'as', prefix=p), Leaf(1, name.value, prefix=p)])])
+                node.replace(new_node)
+            else:
+                name.replace(Name(repl.split('.')[1]))
+
     def find_dotted_name_usage(self, vals):
         """
         Find the usage of a dotted name from self.replace
@@ -72,31 +133,28 @@ class FixImports(FixImports_):
         if not self.replace:
             return False
         names_attrs = [tuple(name.split('.')) for name in self.mapping if '.' in name]
-        if names_attrs:
-            names, attrs = zip(*names_attrs)
-        else:
+        if not names_attrs:
             return False
+        packages = {}
+        for name, attr in names_attrs:
+            if not unicode(name) in packages:
+                packages[unicode(name)] = set([attr])
+            else:
+                packages[unicode(name)].add(attr)
         matched = []
         # say this next line ten times fast...
         vals = [val for val in vals if type(val) == Leaf]
-        vals = iter(vals)
-        try:
-            #Do this the long way; we need to manipulate the iterator.
-            while True:
-                val = vals.next()
-                if val.value in names:
-                    dot = vals.next()
-                    if dot.value != u'.':
-                        val = dot
-                        continue
-                    attr = vals.next()
-                    if val.value + u'.' + attr.value in self.replace:
-                        val.named_dotted = True
-                        matched.append((val,dot,attr))
-                else:
-                    val = vals.next()
-        except StopIteration:
-            return matched
+        for val in vals:
+            if val.type == token.NAME and val.value in packages:
+                dot, attr = dot_attr_used(val)
+            else:
+                continue
+            if (dot and attr) and (attr.value in packages[val.value]) and \
+               val.value + u'.' + attr.value in self.replace:
+                matched.append((val,dot,attr))
+            else:
+                continue
+        return matched
 
     def match_dotted(self, node):
         """Iterate through names matching the dotted ones"""
@@ -104,7 +162,6 @@ class FixImports(FixImports_):
         matched = []
         for name in self.mapping:
             if '.' in name:
-                attrs = [Name(attr) for attr in name.split('.')]
                 import_mod = self.find_node_usage(node, DottedName(name.split('.')))
                 if import_mod:
                     import_mod.value = name
@@ -138,8 +195,8 @@ class FixImports(FixImports_):
         """
         An amalgamation of the basic matcher and our own handling of dotted modules
         """
-        return super(FixImports, self).match(node) or self.match_dotted(node) or \
-               self.match_named(node)
+        return super(FixImports, self).match(node) or self.match_named(node) or \
+               self.match_dotted(node) or self.match_fromimports(node)
 
     def transform_dotted_to_single(self, old, new):
         """
@@ -157,22 +214,29 @@ class FixImports(FixImports_):
         old[0].replace(Name(new[0], prefix=old[0].prefix))
         old[2].replace(Name(new[1], prefix=old[2].prefix))
 
+    def fix_names(self, names):
+        for name in names:
+            # TODO: Fix one node at a time.
+            full_name = name[0].value + name[1].value + name[2].value
+            new_name = self.replace.get(full_name)
+            if u'.' not in new_name:
+                self.transform_dotted_to_single(name, new_name)
+            else:
+                # test.test_support and everything in fix_imports2
+                new_mod, new_attr = new_name.split('.')
+                self.transform_dotted_to_dotted(name, (new_mod, new_attr))
+
+
     def transform(self, node, results):
         """
         Use the parent's transform unless we have to do our own thing.
         """
         import_mod = results.get("module_name")
         names = results.get("bare_with_attr")
+        fromimports = results.get("fromimports")
         if import_mod or (names and (type(names[0]) == Leaf)):
             return super(FixImports, self).transform(node, results)
-        else:
-            for name in names:
-                # TODO: Fix one node at a time.
-                full_name = name[0].value + name[1].value + name[2].value
-                new_name = self.replace.get(full_name)
-                if u'.' not in new_name:
-                    self.transform_dotted_to_single(name, new_name)
-                else:
-                    # test.test_support and everything in fix_imports2
-                    new_mod, new_attr = new_name.split('.')
-                    self.transform_dotted_to_dotted(name, (new_mod, new_attr))
+        elif names:
+            self.fix_names(names)
+        elif fromimports:
+            self.fix_fromimports(fromimports)

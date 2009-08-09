@@ -65,8 +65,8 @@ class Test_imports(lib3to2FixerTestCase):
         
     def test_all_dotted_names_solo(self):
 
-        b = "import dbm.bsd"
-        a = "import dbhash"
+        b = "import dbm.bsd as bsd"
+        a = "import dbhash as bsd"
         self.check(b, a)
 
         b = "import dbm.ndbm"
@@ -77,8 +77,8 @@ class Test_imports(lib3to2FixerTestCase):
         a = "import dumbdbm"
         self.check(b, a)
 
-        b = "import dbm.gnu"
-        a = "import gdbm"
+        b = "from dbm import gnu"
+        a = "import gdbm as gnu"
         self.check(b, a)
 
         b = "import html.parser"
@@ -89,8 +89,8 @@ class Test_imports(lib3to2FixerTestCase):
         a = "import htmlentitydefs"
         self.check(b, a)
 
-        b = "import http.client"
-        a = "import httplib"
+        b = "from http import client"
+        a = "import httplib as client"
         self.check(b, a)
 
         b = "import http.cookies"
@@ -128,6 +128,11 @@ class Test_imports(lib3to2FixerTestCase):
         b = "import tkinter.__init__"
         a = "import Tkinter"
         self.check(b, a)
+        
+        #TODO: Make this work (see the fix_imports)
+        #b = "import tkinter"
+        #a = "import Tkinter"
+        #self.check(b, a)
 
         b = "import tkinter.colorchooser"
         a = "import tkColorChooser"

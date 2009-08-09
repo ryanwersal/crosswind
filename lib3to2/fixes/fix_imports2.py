@@ -246,11 +246,6 @@ def scrub_results(results):
         if not val:
             del results[key]
 
-def FromDottedImport(package_name, name_leafs):
-    imp = FromImport(package_name, name_leafs)
-    imp.set_child(1, DottedName(package_name.split(u'.'), u" "))
-    return imp
-
 def which_are_imports(relevant_leaves):
     """
     Accepts relevant_leaves and returns an object of the same structure
