@@ -157,6 +157,14 @@ class Test_imports(lib3to2FixerTestCase):
         b = "import urllib.robotparser"
         a = "import robotparser"
         self.check(b, a)
+        
+        b = "import test.support"
+        a = "import test.test_support"
+        self.check(b, a)
+        
+        b = "from test import support"
+        a = "from test import test_support"
+        self.check(b, a)
 
         b = "import xmlrpc.client"
         a = "import xmlrpclib"

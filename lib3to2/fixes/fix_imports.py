@@ -123,7 +123,7 @@ class FixImports(FixImports_):
                 new_node = Node(syms.import_name, [Leaf(1, u'import'), Node(syms.dotted_as_name, [Leaf(1, repl, prefix=p), Leaf(1, u'as', prefix=p), Leaf(1, name.value, prefix=p)])])
                 node.replace(new_node)
             else:
-                name.replace(Name(repl.split('.')[1]))
+                name.replace(Name(repl.split('.')[1], prefix=p))
 
     def find_dotted_name_usage(self, vals):
         """
