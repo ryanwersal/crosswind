@@ -220,10 +220,23 @@ def names_imported_from(node):
    Accepts an import_from node and returns a list of the name leafs
    that the node imports
    """
-   if node.children[3].type == syms.import_as_names:
-       return [child for child in node.children[3].children if child.type == 1]
-   else:
-       return [node.children[3]]
+   for child in node.children:
+       if child.type == syms.import_as_names:
+           names = [grandchild.clone() for grandchild in child.children if grandchild.type == token.NAME]
+           if child.prev_sibling.type == 7 and\
+              child.next_sibling.type == 8:
+               # with parens, special precautions are to be made.
+               # namely, the parens need to be visible,
+               # and the prefixes of all the actual names are to be set to a single space.
+               for name in names:
+                   name.prefix = u" "
+               names.insert(0, child.prev_sibling)
+               names.insert(len(names), child.next_sibling)
+           return names
+       elif child.type == token.NAME and \
+            child.value == u'import' and \
+            child.next_sibling.type == token.NAME:
+           return [child.next_sibling.clone()]
        
 def full_name(node):
     """
@@ -294,6 +307,7 @@ def commatize(leafs):
     del new_leafs[-1]
     return new_leafs
 
+
 class FixImports2(FixImports):
     
     mapping = MAPPING
@@ -343,7 +357,16 @@ class FixImports2(FixImports):
             else:
                 continue
             curr_replacer = replacers[str(import_statement)]
-            for node_imported in names_imported_from(import_statement):
+            names_imported = names_imported_from(import_statement)
+            if names_imported[0].type == 7 and names_imported[-1].type == 8:
+                # currently, nothing is done with the parentheses, but this opens up the possibility.
+                parens = (names_imported[0].clone(), names_imported[-1].clone())
+                names_imported = names_imported[1:-1]
+                # if the parentheses can somehow survive in the future, take out this line:
+                names_imported[0].prefix = parens[0].prefix
+            else:
+                parens = None
+            for node_imported in names_imported:
                 replacing_name = self.which_candidate(import_statement._mod, node_imported)
                 if not replacing_name in curr_replacer: curr_replacer[replacing_name] = []
                 curr_replacer[replacing_name].append(node_imported)
@@ -356,10 +379,7 @@ class FixImports2(FixImports):
             new_nodes[-1].prefix = import_statement.prefix
             no_kids(import_statement)
             assert import_statement.parent
-            if len(new_nodes) > 1:
-                parent = import_statement.parent
-                pos = import_statement.remove()
-                for node in new_nodes[::]:
-                    parent.insert_child(pos, node)
-            elif len(new_nodes) == 1:
-                import_statement.replace(new_nodes[0])
+            parent = import_statement.parent
+            pos = import_statement.remove()
+            for node in new_nodes[::]:
+                parent.insert_child(pos, node)
