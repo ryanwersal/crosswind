@@ -73,8 +73,9 @@ def dot_attr_used(node):
     if next_of_kin is None:
         return (None, None)
     if next_of_kin.type == syms.trailer:
-        return (next_of_kin.children[:2])
-    if str(next_of_kin) == u'.' and next_of_kin.next_sibling:
+        return tuple(next_of_kin.children[:2]) if \
+                    next_of_kin.children[0].type == token.DOT else (None, None)
+    if next_of_kin.type == token.DOT and next_of_kin.next_sibling:
         return (next_of_kin, next_of_kin.next_sibling)
     else:
         return (None, None)
@@ -106,6 +107,7 @@ class FixImports(FixImports_):
         matched = {'node': node, 'fromimports': []}
         for package in packages:
             for name in packages[package]:
+                #XXX This will fail on things like "from dbm import gnu as g"
                 if _is_import_binding(node, name, package):
                     matched['fromimports'].append(node)
         if matched['fromimports']:
@@ -120,7 +122,9 @@ class FixImports(FixImports_):
             repl = unicode(self.mapping[mapped])
             p = u" "
             if u'.' not in repl:
-                new_node = Node(syms.import_name, [Leaf(1, u'import'), Node(syms.dotted_as_name, [Leaf(1, repl, prefix=p), Leaf(1, u'as', prefix=p), Leaf(1, name.value, prefix=p)])])
+                new_node = Node(syms.import_name, [Leaf(1, u'import'),
+                   Node(syms.dotted_as_name, [Leaf(1, repl, prefix=p),
+                   Leaf(1, u'as', prefix=p), Leaf(1, name.value, prefix=p)])])
                 node.replace(new_node)
             else:
                 name.replace(Name(repl.split('.')[1], prefix=p))
@@ -143,7 +147,7 @@ class FixImports(FixImports_):
                 packages[unicode(name)].add(attr)
         matched = []
         # say this next line ten times fast...
-        vals = [val for val in vals if type(val) == Leaf]
+        vals = [val for val in vals if isinstance(val, Leaf)]
         for val in vals:
             if val.type == token.NAME and val.value in packages:
                 dot, attr = dot_attr_used(val)
@@ -234,7 +238,7 @@ class FixImports(FixImports_):
         import_mod = results.get("module_name")
         names = results.get("bare_with_attr")
         fromimports = results.get("fromimports")
-        if import_mod or (names and (type(names[0]) == Leaf)):
+        if import_mod or (names and (isinstance(names[0], Leaf))):
             return super(FixImports, self).transform(node, results)
         elif names:
             self.fix_names(names)

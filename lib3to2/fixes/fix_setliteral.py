@@ -8,7 +8,7 @@ from lib2to3.fixer_util import Name, LParen, RParen
 def found_dict(node):
     """The pattern will match dicts, too, so we need to change that."""
     # node.children[1] is the dictsetmaker. none of its children may be a colon
-    return any([kid.type == token.COLON for kid in node.children[1].children])
+    return any(kid.type == token.COLON for kid in node.children[1].children)
 
 class FixSetliteral(fixer_base.BaseFix):
     
@@ -28,8 +28,7 @@ class FixSetliteral(fixer_base.BaseFix):
         args = results.get("args")
         arg = results.get("arg")
         if args:
-            for i, arg in enumerate(args):
-                args[i] = arg.clone()
+            args = [arg.clone() for arg in args]
             args = Node(syms.atom, [Leaf(token.LSQB, u"["),
                                     Node(syms.listmaker, args),
                                     Leaf(token.RSQB, u"]")])
