@@ -2,7 +2,7 @@ from test_all_fixers import lib3to2FixerTestCase
 
 class Test_reduce(lib3to2FixerTestCase):
     fixer = "reduce"
-    
+
     def test_functools_import(self):
         b = """
             from functools import reduce
@@ -12,7 +12,7 @@ class Test_reduce(lib3to2FixerTestCase):
             reduce(f, it)
             """
         self.check(b, a)
-    
+
     def test_functools_reduce(self):
         b = """
             import functools
@@ -23,7 +23,7 @@ class Test_reduce(lib3to2FixerTestCase):
             reduce(spam, ['spam', 'spam', 'baked beans', 'spam'])
             """
         self.check(b, a)
-        
+
     def test_prefix(self):
         b = """
             a  =  functools.reduce( self.thing,  self.children , f( 3 ))

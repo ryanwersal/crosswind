@@ -4,7 +4,7 @@ from lib2to3.fixer_util import Dot, Comma, Name, Newline, FromImport, find_root
 from lib2to3.pygram import python_symbols as syms
 from lib2to3.pgen2 import token
 
-PY2MODULES = { 
+PY2MODULES = {
               'urllib2' : (
                   'AbstractBasicAuthHandler', 'AbstractDigestAuthHandler',
                   'AbstractHTTPHandler', 'BaseHandler', 'CacheFTPHandler',
@@ -237,7 +237,7 @@ def names_imported_from(node):
             child.value == u'import' and \
             child.next_sibling.type == token.NAME:
            return [child.next_sibling.clone()]
-       
+
 def full_name(node):
     """
     Shortcut for str(name_dot_attr(node))
@@ -309,7 +309,7 @@ def commatize(leafs):
 
 
 class FixImports2(FixImports):
-    
+
     mapping = MAPPING
     modules = PY2MODULES
 

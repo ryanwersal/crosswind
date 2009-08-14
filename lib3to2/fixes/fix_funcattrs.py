@@ -8,7 +8,7 @@ from lib2to3.fixer_util import Name
 
 class FixFuncattrs(fixer_base.BaseFix):
     PATTERN = """
-    power< any+ trailer< '.' attr=('__closure__' | '__globals__' | 
+    power< any+ trailer< '.' attr=('__closure__' | '__globals__' |
                                    '__defaults__' | '__code__' ) > any* >
     """
 

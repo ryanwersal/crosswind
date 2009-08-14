@@ -4,7 +4,7 @@ class Test_imports(lib3to2FixerTestCase):
     fixer = "imports"
 
     def test_various_unchanged(self):
-        
+
         # Enclosed in a string
         s = "'import queue'"
         self.unchanged(s)
@@ -44,7 +44,7 @@ class Test_imports(lib3to2FixerTestCase):
         self.check(b, a)
 
     def test_nodotted_names_duo(self):
-        
+
         b = "import configparser, copyreg"
         a = "import ConfigParser, copy_reg"
         self.check(b, a)
@@ -54,7 +54,7 @@ class Test_imports(lib3to2FixerTestCase):
         self.check(b, a)
 
     def test_nodotted_names_quad(self):
-        
+
         b = "import configparser, winreg, socketserver, _markupbase"
         a = "import ConfigParser, _winreg, SocketServer, markupbase"
         self.check(b, a)
@@ -62,7 +62,7 @@ class Test_imports(lib3to2FixerTestCase):
         b = "import queue, math, _markupbase, copyreg"
         a = "import Queue, math, markupbase, copy_reg"
         self.check(b, a)
-        
+
     def test_all_dotted_names_solo(self):
 
         b = "import dbm.bsd as bsd"
@@ -84,7 +84,7 @@ class Test_imports(lib3to2FixerTestCase):
         b = "import html.parser"
         a = "import HTMLParser"
         self.check(b, a)
-        
+
         b = "import html.entities"
         a = "import htmlentitydefs"
         self.check(b, a)
@@ -128,7 +128,7 @@ class Test_imports(lib3to2FixerTestCase):
         b = "import tkinter.__init__"
         a = "import Tkinter"
         self.check(b, a)
-        
+
         #TODO: Make this work (see the fix_imports)
         #b = "import tkinter"
         #a = "import Tkinter"
@@ -157,11 +157,11 @@ class Test_imports(lib3to2FixerTestCase):
         b = "import urllib.robotparser"
         a = "import robotparser"
         self.check(b, a)
-        
+
         b = "import test.support"
         a = "import test.test_support"
         self.check(b, a)
-        
+
         b = "from test import support"
         a = "from test import test_support"
         self.check(b, a)
@@ -171,7 +171,7 @@ class Test_imports(lib3to2FixerTestCase):
         self.check(b, a)
 
     def test_dotted_names_duo(self):
-        
+
         b = "import   tkinter.font,  dbm.bsd"
         a = "import   tkFont,  dbhash"
         self.check(b, a)
@@ -181,17 +181,17 @@ class Test_imports(lib3to2FixerTestCase):
         self.check(b, a)
 
     def test_dotted_names_quad(self):
-        
+
         b = "import    html.parser,  math,     tkinter.__init__,   dbm.gnu #comment!"
         a = "import    HTMLParser,  math,     Tkinter,   gdbm #comment!"
         self.check(b, a)
-        
+
         b = "import math, tkinter.dnd, dbm.ndbm, urllib"
         a = "import math, Tkdnd, dbm, urllib"
         self.check(b, a)
 
     def test_usage(self):
-        
+
         b = """
         import queue
         queue.do_stuff()"""
@@ -207,7 +207,7 @@ class Test_imports(lib3to2FixerTestCase):
         import gdbm
         gdbm.open('generic_file')"""
         self.check(b, a)
-        
+
         b = """
         import tkinter.dialog, tkinter.colorchooser
         tkinter = tkinter.dialog(tkinter.colorchooser("Just messing around"))

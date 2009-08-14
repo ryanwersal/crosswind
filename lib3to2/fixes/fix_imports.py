@@ -53,7 +53,7 @@ def pkg_name(node):
     """
     if node.type != syms.import_from: return None
     return (node.children[1], node.children[3])
-        
+
 
 def DottedName(names, prefix=u""):
     """Accepts a sequence of names; returns a DottedName that combines them"""
@@ -194,7 +194,7 @@ class FixImports(FixImports_):
         else:
             return False
         return results
-        
+
     def match(self, node):
         """
         An amalgamation of the basic matcher and our own handling of dotted modules
@@ -213,7 +213,7 @@ class FixImports(FixImports_):
 
     def transform_dotted_to_dotted(self, old, new):
         """
-        Accepts an old tuple of Leafs (Name, Dot, Name) 
+        Accepts an old tuple of Leafs (Name, Dot, Name)
         """
         old[0].replace(Name(new[0], prefix=old[0].prefix))
         old[2].replace(Name(new[1], prefix=old[2].prefix))

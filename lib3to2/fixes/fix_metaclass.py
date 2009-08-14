@@ -70,7 +70,7 @@ class FixMetaclass(fixer_base.BaseFix):
     PATTERN = """
     classdef<any*>
     """
-    
+
     def transform(self, node, results):
         meta_results = has_metaclass(node)
         if not meta_results: return
@@ -87,7 +87,7 @@ class FixMetaclass(fixer_base.BaseFix):
             if item.type == syms.suite:
                 for stmt in item.children:
                     if stmt.type == token.INDENT:
-                        #Insert, in reverse order, the statement, a newline, 
+                        #Insert, in reverse order, the statement, a newline,
                         #and an indent right after the first indented line
                         loc = item.children.index(stmt) + 1
                         #Keep consistent indentation form

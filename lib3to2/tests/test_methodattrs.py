@@ -14,7 +14,7 @@ class Test_methodattrs(lib3to2FixerTestCase):
             b = "self.foo.__%s__.foo_bar" % attr
             a = "self.foo.im_%s.foo_bar" % attr
             self.check(b, a)
-            
+
         b = "dir(self.foo.__self__.__class__)"
         a = "dir(self.foo.im_self.__class__)"
         self.check(b, a)

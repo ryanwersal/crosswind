@@ -31,7 +31,7 @@ class Test_numliterals(lib3to2FixerTestCase):
     def test_unchanged_str(self):
         s = """'0x1400'"""
         self.unchanged(s)
-        
+
         s = """'0b011000'"""
         self.unchanged(s)
 
@@ -41,15 +41,15 @@ class Test_numliterals(lib3to2FixerTestCase):
     def test_unchanged_other(self):
         s = """5.0"""
         self.unchanged(s)
-        
+
         s = """5.0e10"""
         self.unchanged(s)
 
         s = """5.4 + 4.9j"""
         self.unchanged(s)
-        
+
         s = """4j"""
         self.unchanged(s)
-        
+
         s = """4.4j"""
         self.unchanged(s)

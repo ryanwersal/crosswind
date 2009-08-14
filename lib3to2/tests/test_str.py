@@ -7,7 +7,7 @@ class Test_str(lib3to2FixerTestCase):
         b = """str(x, y, z)"""
         a = """unicode(x, y, z)"""
         self.check(b, a)
-    
+
     def test_chr_call(self):
         b = """chr(a, t, m)"""
         a = """unichr(a, t, m)"""

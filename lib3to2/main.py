@@ -120,7 +120,7 @@ def main(fixer_pkg, args=None):
     if not options.write and options.nobackups:
         parser.error("Can't use -n without -w")
     if options.list_fixes:
-        print "Available transformations for the -f/--fix option:" 
+        print "Available transformations for the -f/--fix option:"
         for fixname in refactor.get_all_fix_names(fixer_pkg):
             print fixname
         if not args:

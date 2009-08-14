@@ -16,7 +16,7 @@ baseMAPPING = {'b':2, 'o':8, 'x':16}
 
 class FixNumliterals(fixer_base.BaseFix):
     # We need to modify all numeric literals except floats, complex.
-    
+
     def base(self, literal):
         """Returns the base of a valid py3k literal."""
         literal = literal.strip()
@@ -26,7 +26,7 @@ class FixNumliterals(fixer_base.BaseFix):
         elif literal[1] not in u"box":
             return 0
         return baseMAPPING[literal[1]]
-    
+
     def unmatch(self, node):
         """Don't match complex numbers, floats, or base-10 ints"""
         val = node.value
@@ -37,7 +37,7 @@ class FixNumliterals(fixer_base.BaseFix):
 
     def match(self, node):
         return (node.type == token.NUMBER) and not self.unmatch(node)
-        
+
     def transform(self, node, results):
         """
         Call __builtins__.long() with the value and the base of the value.

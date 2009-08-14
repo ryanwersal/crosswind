@@ -14,11 +14,11 @@ class FixPrint(fixer_base.BaseFix):
         super(FixPrint, self).start_tree(tree, filename)
         self._tree = tree
         self.have_print = False
-    
+
     PATTERN = """
               power< 'print' trailer < '(' any* ')' > any* >
               """
-    
+
     def match(self, node):
         """
         Since the tree needs to be fixed once and only once if and only if it

@@ -7,7 +7,7 @@ from lib2to3 import fixer_base
 from lib2to3.fixer_util import Name
 
 
-class FixMemoryview(fixer_base.BaseFix): 
+class FixMemoryview(fixer_base.BaseFix):
 
     explicit = True # User must specify that they want this.
 

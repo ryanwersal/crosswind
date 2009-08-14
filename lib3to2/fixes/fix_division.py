@@ -23,7 +23,7 @@ class FixDivision(fixer_base.BaseFix):
         super(FixDivision, self).start_tree(tree, filename)
         self._tree = tree
         self.have_div = False
-    
+
     def match(self, node):
         """
         Since the tree needs to be fixed once and only once if and only if it

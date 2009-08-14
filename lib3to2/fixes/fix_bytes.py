@@ -10,7 +10,7 @@ from lib2to3.fixer_util import Name
 _literal_re = re.compile(ur"[bB][rR]?[\'\"]")
 
 class FixBytes(fixer_base.BaseFix):
-    
+
     PATTERN = "STRING | 'bytes'"
 
     def transform(self, node, results):

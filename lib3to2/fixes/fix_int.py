@@ -13,13 +13,13 @@ from lib2to3.pgen2 import token
 baseMAPPING = {u'b':2, u'o':8, u'x':16}
 
 class FixInt(fixer_base.BaseFix):
-    
+
     explicit = True # In most cases, 3.x ints will work just like 2.x ints.
-    
+
     PATTERN = "'int' | NUMBER"
 
     static_long = Name(u"long")
-    
+
     def base(self, literal):
         """Returns the base of a valid py3k numeric literal."""
         literal = literal.strip()
@@ -28,7 +28,7 @@ class FixInt(fixer_base.BaseFix):
         elif literal[1] not in u"box":
             return 0
         return baseMAPPING[literal[1]]
-            
+
     def unmatch(self, node):
         """Don't match complex numbers, floats, or longs"""
         val = node.value
@@ -37,7 +37,7 @@ class FixInt(fixer_base.BaseFix):
             return "L"
         for bad in u"jJ+-.":
             if bad in val: return bad
-            
+
     def match(self, node):
         return super(FixInt, self).match(node) and not self.unmatch(node)
 

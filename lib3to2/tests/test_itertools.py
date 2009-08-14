@@ -11,7 +11,7 @@ class Test_itertoools(lib3to2FixerTestCase):
     def test_unchanged_nobuiltin(self):
         s = """obj.filter(a, b)"""
         self.unchanged(s)
-        
+
         s = """
         def map():
             pass
@@ -32,7 +32,7 @@ class Test_itertoools(lib3to2FixerTestCase):
         b = """from itertools import function, filterfalse, other_function"""
         a = """from itertools import function, ifilterfalse, other_function"""
         self.check( b, a)
-        
+
         b = """filterfalse(a, b)"""
         a = """ifilterfalse(a, b)"""
         self.check(b, a )

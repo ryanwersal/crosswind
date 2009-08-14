@@ -12,13 +12,13 @@ def incompatible_feature(obj, node, feature):
     obj.cannot_convert(node, reason)
 
 class Feature(object):
-    
+
     def __init__(self, name, min_ver):
         self.name = name
         self.min_ver = min_ver
 
 class FixFeatures(fixer_base.BaseFix):
-    
+
     # Run this as late as possible, after optionally fixed features are taken care of.
     run_order = 9
     #TODO: Make the pattern built generically from a mapping.
@@ -26,10 +26,10 @@ class FixFeatures(fixer_base.BaseFix):
                  bin=power< 'bin' trailer< '(' any* ')' > [any*] > |
                  io=import_name< 'import' ('io' | dotted_as_names< any* 'io' any* >) > |
                  io=import_from< 'from' 'io' 'import' any* > |
-                 abc=import_name< 'import' ('abc' | dotted_as_names< any* 'abc' any* >) > |  
+                 abc=import_name< 'import' ('abc' | dotted_as_names< any* 'abc' any* >) > |
                  abc=import_from< 'from' 'abc' 'import' any* > |
                  numb=import_from< 'from' 'numbers' 'import' any* > |
-                 numb=import_name< 'import' ('numbers' | dotted_as_names< any* 'numbers' any* >) > |  
+                 numb=import_name< 'import' ('numbers' | dotted_as_names< any* 'numbers' any* >) > |
                  mem=power< 'memoryview' trailer< '(' any* ')' > [any*] >
               """
     def handle_imports(self, node):

@@ -61,7 +61,7 @@ class Test_metaclass(lib3to2FixerTestCase):
             pass
         """
         self.check(b, a)
-        
+
     def test_meta_oneparent_no_body(self):
         # one parent class, no body
         a = """
@@ -156,9 +156,9 @@ class Test_metaclass(lib3to2FixerTestCase):
             pass
         """
         self.check(b, a)
-    
+
     def test_meta_noparent_simple_body(self):
-    
+
         a = """
         class X():
             __metaclass__ = Meta

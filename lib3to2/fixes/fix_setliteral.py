@@ -11,17 +11,17 @@ def found_dict(node):
     return any(kid.type == token.COLON for kid in node.children[1].children)
 
 class FixSetliteral(fixer_base.BaseFix):
-    
+
     PATTERN = """atom< '{' dictsetmaker< args=any* > '}' > |
                  atom< '{' arg=any '}' >"""
-    
+
     def match(self, node):
         results = super(FixSetliteral, self).match(node)
         if results and not found_dict(node):
             return results
         else:
             return False
-    
+
     def transform(self, node, results):
         syms = self.syms
         prefix = node.prefix
@@ -37,5 +37,5 @@ class FixSetliteral(fixer_base.BaseFix):
             arg = Node(syms.atom, [Leaf(token.LSQB, u"["),
                                    Node(syms.listmaker, [arg]),
                                    Leaf(token.RSQB, u"]")])
-        return Node(syms.power, [Name(u"set"), LParen(), args or arg, RParen()], 
+        return Node(syms.power, [Name(u"set"), LParen(), args or arg, RParen()],
                                                                  prefix=prefix)

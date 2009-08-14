@@ -10,13 +10,13 @@ from lib2to3.pytree import Node, Leaf
 from lib2to3.pgen2 import token
 
 class FixReduce(fixer_base.BaseFix):
-    
+
     PATTERN = """
-    power< 'functools' trailer< '.' 'reduce' > 
+    power< 'functools' trailer< '.' 'reduce' >
                                     args=trailer< '(' arglist< any* > ')' > > |
     imported=import_from< 'from' 'functools' 'import' 'reduce' >
     """
-    
+
     def transform(self, node, results):
         syms = self.syms
         args, imported = (results.get("args"), results.get("imported"))

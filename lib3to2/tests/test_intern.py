@@ -8,7 +8,7 @@ class Test_intern(lib3to2FixerTestCase):
         b = """import sys\nx =   sys.intern(  a  )"""
         a = """import sys\nx =   intern(  a  )"""
         self.check(b, a)
-        
+
         b = """import sys\ny = sys.intern("b" # test
               )"""
         a = """import sys\ny = intern("b" # test
@@ -38,11 +38,11 @@ class Test_intern(lib3to2FixerTestCase):
         b = """from sys import intern, path"""
         a = """from sys import path"""
         self.check(b, a)
-        
+
         b = """from sys import path, intern"""
         a = """from sys import path"""
         self.check(b, a)
-        
+
         b = """from sys import argv, intern, path"""
         a = """from sys import argv, path"""
         self.check(b, a)

@@ -12,7 +12,7 @@ class FixThrow(fixer_base.BaseFix):
         trailer< '(' args=power< exc=any trailer< '(' val=any* ')' >
         trailer< '.' 'with_traceback' > trailer< '(' trc=any ')' > > ')' > >
     """
-    
+
     def transform(self, node, results):
         syms = self.syms
         exc, val, trc = (results["exc"], results["val"], results["trc"])

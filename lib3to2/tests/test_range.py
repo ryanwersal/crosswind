@@ -62,4 +62,4 @@ class Test_range(lib3to2FixerTestCase):
         b = """[i for i in range(10)]"""
         a = """[i for i in xrange(10)]"""
         self.check(b, a)
-        
+
