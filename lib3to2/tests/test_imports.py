@@ -163,7 +163,7 @@ class Test_imports(lib3to2FixerTestCase):
         self.check(b, a)
 
         b = "from test import support"
-        a = "from test import test_support"
+        a = "import test.test_support as support"
         self.check(b, a)
 
         b = "import xmlrpc.client"

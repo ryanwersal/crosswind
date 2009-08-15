@@ -11,39 +11,39 @@ from lib2to3.fixer_util import Name, Dot, Attr, _is_import_binding
 from lib2to3.fixes.fix_imports import FixImports as FixImports_
 from lib2to3.fixes.fix_imports import build_pattern
 
-MAPPING = {'reprlib': 'repr',
-           'winreg': '_winreg',
-           'configparser': 'ConfigParser',
-           'copyreg': 'copy_reg',
-           'queue': 'Queue',
-           'socketserver': 'SocketServer',
-           '_markupbase': 'markupbase',
-           'test.support': 'test.test_support',
-           'dbm.bsd': 'dbhash',
-           'dbm.ndbm': 'dbm',
-           'dbm.dumb': 'dumbdbm',
-           'dbm.gnu': 'gdbm',
-           'html.parser': 'HTMLParser',
-           'html.entities': 'htmlentitydefs',
-           'http.client': 'httplib',
-           'http.cookies': 'Cookie',
-           'http.cookiejar': 'cookielib',
+MAPPING = {"reprlib": "repr",
+           "winreg": "_winreg",
+           "configparser": "ConfigParser",
+           "copyreg": "copy_reg",
+           "queue": "Queue",
+           "socketserver": "SocketServer",
+           "_markupbase": "markupbase",
+           "test.support": "test.test_support",
+           "dbm.bsd": "dbhash",
+           "dbm.ndbm": "dbm",
+           "dbm.dumb": "dumbdbm",
+           "dbm.gnu": "gdbm",
+           "html.parser": "HTMLParser",
+           "html.entities": "htmlentitydefs",
+           "http.client": "httplib",
+           "http.cookies": "Cookie",
+           "http.cookiejar": "cookielib",
            #TODO: make this work
-           #tkinter': 'Tkinter',
-           'tkinter.dialog': 'Dialog',
-           'tkinter._fix': 'FixTk',
-           'tkinter.scrolledtext': 'ScrolledText',
-           'tkinter.tix': 'Tix',
-           'tkinter.constants': 'Tkconstants',
-           'tkinter.dnd': 'Tkdnd',
-           'tkinter.__init__': 'Tkinter',
-           'tkinter.colorchooser': 'tkColorChooser',
-           'tkinter.commondialog': 'tkCommonDialog',
-           'tkinter.font': 'tkFont',
-           'tkinter.messagebox': 'tkMessageBox',
-           'tkinter.turtle': 'turtle',
-           'urllib.robotparser': 'robotparser',
-           'xmlrpc.client': 'xmlrpclib',
+           #tkinter": "Tkinter",
+           "tkinter.dialog": "Dialog",
+           "tkinter._fix": "FixTk",
+           "tkinter.scrolledtext": "ScrolledText",
+           "tkinter.tix": "Tix",
+           "tkinter.constants": "Tkconstants",
+           "tkinter.dnd": "Tkdnd",
+           "tkinter.__init__": "Tkinter",
+           "tkinter.colorchooser": "tkColorChooser",
+           "tkinter.commondialog": "tkCommonDialog",
+           "tkinter.font": "tkFont",
+           "tkinter.messagebox": "tkMessageBox",
+           "tkinter.turtle": "turtle",
+           "urllib.robotparser": "robotparser",
+           "xmlrpc.client": "xmlrpclib",
 }
 
 def pkg_name(node):
@@ -95,7 +95,7 @@ class FixImports(FixImports_):
         """
         Find things like from dbm import gnu
         """
-        dotted_names = [tuple(name.split('.')) for name in self.mapping if '.' in name]
+        dotted_names = [tuple(name.split(".")) for name in self.mapping if "." in name]
         if not dotted_names: return False
         packages = {}
         for name, attr in dotted_names:
@@ -103,13 +103,13 @@ class FixImports(FixImports_):
                 packages[name] = set([attr])
             else:
                 packages[name].add(attr)
-        matched = {'node': node, 'fromimports': []}
+        matched = {"node": node, "fromimports": []}
         for package in packages:
             for name in packages[package]:
                 #XXX This will fail on things like "from dbm import gnu as g"
                 if _is_import_binding(node, name, package):
-                    matched['fromimports'].append(node)
-        if matched['fromimports']:
+                    matched["fromimports"].append(node)
+        if matched["fromimports"]:
             return matched
         else:
             return False
@@ -117,16 +117,13 @@ class FixImports(FixImports_):
     def fix_fromimports(self, nodes):
         for node in nodes:
             pkg, name = pkg_name(node)
-            mapped = pkg.value + u'.' + name.value
+            mapped = pkg.value + u"." + name.value
             repl = unicode(self.mapping[mapped])
             p = u" "
-            if u'.' not in repl:
-                new_node = Node(syms.import_name, [Leaf(1, u'import'),
-                   Node(syms.dotted_as_name, [Leaf(1, repl, prefix=p),
-                   Leaf(1, u'as', prefix=p), Leaf(1, name.value, prefix=p)])])
-                node.replace(new_node)
-            else:
-                name.replace(Name(repl.split('.')[1], prefix=p))
+            new_node = Node(syms.import_name, [Leaf(1, u"import"),
+               Node(syms.dotted_as_name, [Leaf(1, repl, prefix=p),
+               Leaf(1, u"as", prefix=p), Leaf(1, name.value, prefix=p)])])
+            node.replace(new_node)
 
     def find_dotted_name_usage(self, vals):
         """
@@ -135,7 +132,7 @@ class FixImports(FixImports_):
         """
         if not self.replace:
             return False
-        names_attrs = [tuple(name.split('.')) for name in self.mapping if '.' in name]
+        names_attrs = [tuple(name.split(".")) for name in self.mapping if "." in name]
         if not names_attrs:
             return False
         packages = {}
@@ -153,7 +150,7 @@ class FixImports(FixImports_):
             else:
                 continue
             if (dot and attr) and (attr.value in packages[val.value]) and \
-               val.value + u'.' + attr.value in self.replace:
+               val.value + u"." + attr.value in self.replace:
                 matched.append((val,dot,attr))
             else:
                 continue
@@ -164,8 +161,8 @@ class FixImports(FixImports_):
         results = {"node": node}
         matched = []
         for name in self.mapping:
-            if '.' in name:
-                import_mod = self.find_node_usage(node, DottedName(name.split('.')))
+            if "." in name:
+                import_mod = self.find_node_usage(node, DottedName(name.split(".")))
                 if import_mod:
                     import_mod.value = name
                     results["module_name"] = import_mod
@@ -222,11 +219,11 @@ class FixImports(FixImports_):
             # TODO: Fix one node at a time.
             full_name = name[0].value + name[1].value + name[2].value
             new_name = self.replace.get(full_name)
-            if u'.' not in new_name:
+            if u"." not in new_name:
                 self.transform_dotted_to_single(name, new_name)
             else:
                 # test.test_support and everything in fix_imports2
-                new_mod, new_attr = new_name.split('.')
+                new_mod, new_attr = new_name.split(".")
                 self.transform_dotted_to_dotted(name, (new_mod, new_attr))
 
 
