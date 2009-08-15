@@ -207,7 +207,7 @@ def attr_used(node):
     """
     next_node = node.next_sibling
     parent = node.parent
-    next_uncle = parent.next_sibling
+    next_uncle = parent.next_sibling if parent is not None else None
     if next_node is not None:
         if next_node.type == syms.trailer:
             kid = next_node.children[0]
@@ -443,7 +443,10 @@ class FixImports2(FixImports):
                 continue
             replacers[str(import_statement)] = {}
             curr_replacer = replacers[str(import_statement)]
-            for pkg, sub, name in usages:
+            usages_subset = [(pkg, sub, name) for pkg,sub,name in usages \
+              if pkg.parent and \
+              full_name(pkg) == str(import_statement.children[1]).strip()]
+            for pkg, sub, name in usages_subset:
                 must_import = self.which_candidate(import_statement._mod, name)
                 if not must_import in curr_replacer: curr_replacer[must_import] = []
                 curr_replacer[must_import].append(name)
