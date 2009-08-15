@@ -234,6 +234,9 @@ def names_imported_from(node):
     for child in node.children:
         if (isinstance(child, Leaf) and child.value == u"import"):
             child = child.next_sibling
+            while (child is not None and
+                  child.type not in (syms.import_as_names, token.NAME)):
+                child = child.next_sibling
             break
     else:
         return None
@@ -265,10 +268,14 @@ def new_from_imports(replacers, from_imports):
     """
     Build new name import statements based on replacers
     """
+    def pref(node):
+        node.prefix = u" "
+        return node
     for import_statement in from_imports:
         new_nodes = []
         for replacing_name in replacers[str(import_statement)]:
-            new_nodes.append(FromImport(replacing_name, commatize([name.clone() for name in replacers[str(import_statement)][replacing_name]])))
+            imported_nodes = [pref(name.clone()) for name in replacers[str(import_statement)][replacing_name]]
+            new_nodes.append(FromImport(replacing_name, commatize(imported_nodes)))
             new_nodes.append(Newline())
         del new_nodes[-1]
         new_nodes[-1].prefix = import_statement.prefix
