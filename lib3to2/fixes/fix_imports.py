@@ -54,7 +54,6 @@ def pkg_name(node):
     if node.type != syms.import_from: return None
     return (node.children[1], node.children[3])
 
-
 def DottedName(names, prefix=u""):
     """Accepts a sequence of names; returns a DottedName that combines them"""
     children = []

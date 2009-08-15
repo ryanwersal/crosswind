@@ -4,7 +4,7 @@ from lib2to3.fixer_util import Dot, Comma, Name, Newline, FromImport, find_root
 from lib2to3.pygram import python_symbols as syms
 from lib2to3.pgen2 import token
 
-PY2MODULES = {
+PY2MODULES = { 
               'urllib2' : (
                   'AbstractBasicAuthHandler', 'AbstractDigestAuthHandler',
                   'AbstractHTTPHandler', 'BaseHandler', 'CacheFTPHandler',
@@ -171,7 +171,6 @@ PY2MODULES = {
                   'xmlrpclib'),
                 }
 
-
 # The order of the values of each key is not arbitrary.  If multiple modules provide the same name,
 # then the first module listed here will be used.
 # e.g., urllib and urllib2 both provide urlopen, but since urllib2 is listed first, it will be preferred.
@@ -206,43 +205,46 @@ def attr_used(node):
     Returns the attribute of a node if it has one, None if it does not.
     Attribute must look like foo.bar, with any prefix on bar acceptable
     """
-    dot = Dot()
-    adj = node.next_sibling
-    if adj is not None:
-        dot.prefix = adj.prefix
-        if dot != adj:
+    next_node = node.next_sibling
+    parent = node.parent
+    next_uncle = parent.next_sibling
+    if next_node is not None:
+        if next_node.type == syms.trailer:
+            kid = next_node.children[0]
+            if kid.type != token.DOT: return None
+            attr = kid.next_sibling
+        elif next_node.type == token.DOT:
+            attr = next_node.next_sibling
+        else:
             return None
-        next = adj.next_sibling
-        return next
+    # special case to handle chaining with
+    # power < NAME, trailer < '.', NAME >, trailer < '.', NAME >, ... >
+    elif parent.type == syms.trailer and node.prev_sibling.type == token.DOT:
+        assert parent.parent.type == syms.power
+        return attr_used(parent)
+    else:
+        return None
+    return attr if attr.type == token.NAME else None
 
 def names_imported_from(node):
-   """
-   Accepts an import_from node and returns a list of the name leafs
-   that the node imports
-   """
-   for child in node.children:
-       if child.type == syms.import_as_names:
-           names = [grandchild.clone() for grandchild in child.children if grandchild.type == token.NAME]
-           if child.prev_sibling.type == 7 and\
-              child.next_sibling.type == 8:
-               # with parens, special precautions are to be made.
-               # namely, the parens need to be visible,
-               # and the prefixes of all the actual names are to be set to a single space.
-               for name in names:
-                   name.prefix = u" "
-               names.insert(0, child.prev_sibling)
-               names.insert(len(names), child.next_sibling)
-           return names
-       elif child.type == token.NAME and \
-            child.value == u'import' and \
-            child.next_sibling.type == token.NAME:
-           return [child.next_sibling.clone()]
+    """
+    Accepts an import_from node and returns a list of the name leafs
+    that the node imports
+    """
+    for child in node.children:
+        if (isinstance(child, Leaf) and child.value == u"import"):
+            child = child.next_sibling
+            break
+    else:
+        return None
+    return [kid for kid in child.children if kid.type == token.NAME] \
+                             if child.type == syms.import_as_names else [child]
 
 def full_name(node):
     """
     Shortcut for str(name_dot_attr(node))
     """
-    return node.value + u'.' + attr_used(node).value
+    return node.value + u"." + attr_used(node).value
 
 def name_dot_attr(node):
     """
@@ -259,38 +261,93 @@ def scrub_results(results):
         if not val:
             del results[key]
 
+def new_from_imports(replacers, from_imports):
+    """
+    Build new name import statements based on replacers
+    """
+    for import_statement in from_imports:
+        new_nodes = []
+        for replacing_name in replacers[str(import_statement)]:
+            new_nodes.append(FromImport(replacing_name, commatize([name.clone() for name in replacers[str(import_statement)][replacing_name]])))
+            new_nodes.append(Newline())
+        del new_nodes[-1]
+        new_nodes[-1].prefix = import_statement.prefix
+        parent = import_statement.parent
+        pos = import_statement.remove()
+        for node in new_nodes:
+            parent.insert_child(pos, node)
+
+def NameImport(package_name, as_name=None):
+    """
+    Return an import statement in the form:
+    import package [as name]
+    """
+    children = [Name(u"import"), Name(package_name, prefix=u" ")]
+    if as_name:
+        children.append(Name(u"as", prefix=u" "))
+        children.append(Name(as_name, prefux=u" "))
+    return Node(syms.import_name, children)
+
+def new_name_imports(replacers, name_imports):
+    """
+    Build new name import statements based on replacers
+    """
+    for import_statement in name_imports:
+        new_nodes = []
+        for replacing_name in replacers[str(import_statement)]:
+            new_nodes.append(NameImport(replacing_name))
+            new_nodes.append(Newline())
+        del new_nodes[-1]
+        new_nodes[-1].prefix = import_statement.prefix
+        parent = import_statement.parent
+        pos = import_statement.remove()
+        for node in new_nodes:
+            parent.insert_child(pos, node)
+
 def which_are_imports(relevant_leaves):
     """
-    Accepts relevant_leaves and returns an object of the same structure
-    that contains just those that are in import statements.
+    Accepts relevant_leaves and returns a tuple of objects of that structure
+    that contain just those nodes that are import statements.
     """
-    from_import = set()
-    name_import = set()
+    from_import = []
+    name_import = []
     for name in relevant_leaves:
         for node in relevant_leaves[name]:
-            while node.parent and not (is_name_import(node) or is_from_import(node)):
+            while node.parent and not \
+                                (is_name_import(node) or is_from_import(node)):
                 node = node.parent
-            if is_from_import(node): node._mod = name; from_import.add(node)
-            elif is_name_import(node): node._mod = name; name_import.add(node)
+            if is_from_import(node):
+                node._mod = name
+                from_import.append(node)
+            elif is_name_import(node):
+                node._mod = name
+                name_import.append(node)
     return (from_import, name_import)
 
-def no_kids(node):
-    for child in node.children:
-        if type(child) == Leaf:
-            del child
-        else:
-            no_kids(child)
+def names_used(relevant_leaves, mapping):
+    """
+    Returns tuples of (main, sub, name) from name_imported relevant_leaves
+    e.g. urllib.request.urlopen("some url") returns (urllib, request, urlopen)
+    """
+    relevant_usages = []
+    for package in relevant_leaves:
+        for leaf in relevant_leaves[package]:
+            attr_one = attr_used(leaf)
+            attr_two = attr_used(attr_one)
+            if attr_two: relevant_usages.append((leaf, attr_one, attr_two))
+    return relevant_usages
 
 def find_relevant_leaves(tree, mapping):
     """
     Searches through the whole tree and returns a mapping of each package in
     mapping to the nodes that include it
     """
-    base_names = [name.split('.')[0] for name in mapping]
+    base_names = [name.split(".")[0] for name in mapping]
     results = {}
     for name in mapping:
         results[name] = []
     for node in tree.pre_order():
+        if not isinstance(node, Leaf): continue
         attr = attr_used(node)
         if attr and (node.value in base_names):
             for name in mapping:
@@ -300,6 +357,10 @@ def find_relevant_leaves(tree, mapping):
     return results
 
 def commatize(leafs):
+    """
+    Accepts/turns: (Name, Name, ..., Name, Name) 
+    Returns/into: (Name, Comma, Name, Comma, ..., Name, Comma, Name)
+    """
     new_leafs = []
     for leaf in leafs:
         new_leafs.append(leaf)
@@ -307,9 +368,8 @@ def commatize(leafs):
     del new_leafs[-1]
     return new_leafs
 
-
 class FixImports2(FixImports):
-
+    
     mapping = MAPPING
     modules = PY2MODULES
 
@@ -329,10 +389,9 @@ class FixImports2(FixImports):
         Accepts the old module name and a node that it imports
         Returns the best module to import that node from
         """
-        mapping = self.mapping
         modules = self.modules
         candidates = []
-        for candidate in mapping[module_name]:
+        for candidate in self.mapping[module_name]:
             if node.value in modules[candidate]:
                 return candidate
 
@@ -347,39 +406,47 @@ class FixImports2(FixImports):
         for package in relevant_leaves:
             for leaf in relevant_leaves[package]:
                 full_nodes.append(name_dot_attr(leaf))
+        # which_are_imports MUST be run, because it adds a _mod attr to stmts.
         from_imports, name_imports = which_are_imports(relevant_leaves)
-        for import_statement in name_imports:
-            self.warning(import_statement, 'Import name not supported yet.  Please use from (name) import (names)')
+        self.fix_from_imports(from_imports)
+        self.fix_name_imports(name_imports)
+
+    def handle_import_all(self, import_statement, replacer):
+        astrsk = names_imported_from(import_statement)[0]
+        for name in self.mapping[import_statement._mod]:
+            if not name in replacer: replacer[name] = []
+            replacer[name].append(astrsk)
+        self.warning(import_statement, 
+                "Importing * may lead to name conflicts. "
+                "Double-check that you are not re-using names.")
+
+    def fix_from_imports(self, from_imports):
         replacers = {}
         for import_statement in from_imports:
             if not str(import_statement) in replacers:
                 replacers[str(import_statement)] = {}
-            else:
-                continue
             curr_replacer = replacers[str(import_statement)]
-            names_imported = names_imported_from(import_statement)
-            if names_imported[0].type == 7 and names_imported[-1].type == 8:
-                # currently, nothing is done with the parentheses, but this opens up the possibility.
-                parens = (names_imported[0].clone(), names_imported[-1].clone())
-                names_imported = names_imported[1:-1]
-                # if the parentheses can somehow survive in the future, take out this line:
-                names_imported[0].prefix = parens[0].prefix
-            else:
-                parens = None
-            for node_imported in names_imported:
+            for node_imported in names_imported_from(import_statement):
+                if node_imported.value == u"*":
+                    self.handle_import_all(import_statement, curr_replacer)
+                    continue
                 replacing_name = self.which_candidate(import_statement._mod, node_imported)
                 if not replacing_name in curr_replacer: curr_replacer[replacing_name] = []
                 curr_replacer[replacing_name].append(node_imported)
-        for import_statement in from_imports:
-            new_nodes = []
-            for replacing_name in replacers[str(import_statement)]:
-                new_nodes.append(FromImport(replacing_name, commatize([name.clone() for name in replacers[str(import_statement)][replacing_name]])))
-                new_nodes.append(Newline())
-            del new_nodes[-1]
-            new_nodes[-1].prefix = import_statement.prefix
-            no_kids(import_statement)
-            assert import_statement.parent
-            parent = import_statement.parent
-            pos = import_statement.remove()
-            for node in new_nodes[::]:
-                parent.insert_child(pos, node)
+        new_from_imports(replacers, from_imports)
+
+    def fix_name_imports(self, name_imports):
+        replacers = {}
+        usages = names_used(self.relevant_leaves, self.mapping)
+        for import_statement in name_imports:
+            if str(import_statement) in replacers:
+                continue
+            replacers[str(import_statement)] = {}
+            curr_replacer = replacers[str(import_statement)]
+            for pkg, sub, name in usages:
+                must_import = self.which_candidate(import_statement._mod, name)
+                if not must_import in curr_replacer: curr_replacer[must_import] = []
+                curr_replacer[must_import].append(name)
+                sub.parent.remove()
+                pkg.replace(Name(must_import))
+        new_name_imports(replacers, name_imports)
