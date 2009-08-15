@@ -179,7 +179,7 @@ MAPPING = { 'urllib.request' :
             'urllib.error' :
                 ('urllib2', 'urllib'),
             'urllib.parse' :
-                ('urllib2', 'urllib'),
+                ('urllib2', 'urllib', 'urlparse'),
             'dbm.__init__' :
                 ('anydbm', 'whichdb'),
             'http.server' :
@@ -451,5 +451,5 @@ class FixImports2(FixImports):
                 if not must_import in curr_replacer: curr_replacer[must_import] = []
                 curr_replacer[must_import].append(name)
                 sub.parent.remove()
-                pkg.replace(Name(must_import))
+                pkg.replace(Name(must_import, prefix=pkg.prefix))
         new_name_imports(replacers, name_imports)
