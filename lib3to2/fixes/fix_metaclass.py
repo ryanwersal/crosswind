@@ -3,10 +3,10 @@ Fixer for (metaclass=X) -> __metaclass__ = X
 Some semantics (see PEP 3115) may be altered in the translation."""
 
 from lib2to3 import fixer_base
-from lib2to3.fixer_util import Name, syms, Node, Leaf, Newline
+from lib2to3.fixer_util import Name, syms, Node, Leaf, Newline, find_root
 from lib2to3.pygram import token
 
-def suitify(parent):
+def suitify(parent, ident=u'    '):
     """Make sure we have a suite to add our stmt_node"""
     for node in parent.children:
         if node.type == syms.suite:
@@ -19,15 +19,22 @@ def suitify(parent):
             break
     else:
         raise ValueError("No class suite and no ':'!")
-
     # Move everything into a suite node
-    suite = Node(syms.suite, [Newline(), Leaf(token.INDENT, u'    ')])
+    suite = Node(syms.suite, [Newline(), Leaf(token.INDENT, ident)])
     while parent.children[i+1:]:
         move_node = parent.children[i+1]
         move_node.prefix = u''
         suite.append_child(move_node.clone())
         move_node.remove()
     parent.append_child(suite)
+
+def indentation(node):
+    for child in find_root(node).pre_order():
+        if child.type == token.INDENT:
+            break
+    else:
+        return u'    '
+    return child.value
 
 def has_metaclass(parent):
     results = None
@@ -82,7 +89,7 @@ class FixMetaclass(fixer_base.BaseFix):
         name = meta
         name.prefix = u" "
         stmt_node = Node(syms.atom, [target, equal, name])
-        suitify(node)
+        suitify(node, ident=indentation(node))
         for item in node.children:
             if item.type == syms.suite:
                 for stmt in item.children:
