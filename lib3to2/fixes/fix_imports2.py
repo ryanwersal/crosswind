@@ -297,6 +297,7 @@ def new_from_imports(replacers, from_imports):
             new_nodes.append(FromImport(replacing_name, commatize(imported_nodes)))
         parent = import_statement.parent.parent
         simple_stmts = imports_to_stmts(new_nodes, indent=get_indent(parent))
+        simple_stmts[-1].prefix = import_statement.parent.prefix
         pos = import_statement.parent.remove()
         for node in simple_stmts:
             parent.insert_child(pos, node)
@@ -309,10 +310,18 @@ def NameImport(package_name, as_name=None):
     children = [Name(u"import"), Name(package_name, prefix=u" ")]
     if as_name:
         children.append(Name(u"as", prefix=u" "))
-        children.append(Name(as_name, prefux=u" "))
+        children.append(Name(as_name, prefix=u" "))
     return Node(syms.import_name, children)
 
-def new_name_imports(replacers, name_imports):
+def comma_removal(node):
+    """
+    Remove a comma from the previous sibling, if it exists
+    and is indeed a comma
+    """
+    if node.prev_sibling and node.prev_sibling.type == token.COMMA:
+        node.prev_sibling.remove()
+
+def new_name_imports(replacers, name_imports, mapping):
     """
     Build new name import statements based on replacers
     """
@@ -320,13 +329,50 @@ def new_name_imports(replacers, name_imports):
         new_nodes = []
         for replacing_name in replacers[str(import_statement)]:
             new_nodes.append(NameImport(replacing_name))
-            new_nodes.append(Newline())
-        del new_nodes[-1]
-        new_nodes[-1].prefix = import_statement.prefix
+        simple_stmts = imports_to_stmts(new_nodes, indent=get_indent(import_statement.parent.parent))
+        simple_stmts[-1].prefix = import_statement.parent.prefix
+    for import_statement in set(name_imports):
         parent = import_statement.parent
-        pos = import_statement.remove()
-        for node in new_nodes:
-            parent.insert_child(pos, node)
+        gparent = parent.parent
+        for node in relevant_import_nodes(import_statement, mapping):
+            if node.parent.type == syms.dotted_name:
+                comma_removal(node.parent)
+                node.parent.remove()
+            elif node.parent.type == syms.dotted_as_names:
+                comma_removal(node)
+                node.remove()
+            kids = import_statement.children
+            if len(kids) == 1 or not kids[1].children:
+                pos = parent.remove()
+            else:
+                if kids[1].children[0].type == token.COMMA:
+                    kids[1].children[0].remove()
+                for i, n in enumerate(parent.children):
+                    if n is import_statement:
+                        pos = i+1
+                        break
+        for node in simple_stmts:
+            gparent.insert_child(pos, node)
+
+def relevant_import_nodes(import_statement, mapping):
+    assert import_statement.type == syms.import_name, repr(import_statement)
+    names = []
+    imported = import_statement.children[1]
+    if imported.type == syms.dotted_name and \
+       full_name(imported.children[0]) in mapping:
+        return [imported.children[0]]
+    elif imported.type == syms.dotted_as_name and \
+       full_name(imported.children[0].children[0]) in mapping:
+        return [imported.children[0].children[0]]
+    elif imported.type == syms.dotted_as_names:
+        for name in imported.children:
+            if name.type == syms.dotted_name and \
+               full_name(name.children[0]) in mapping:
+                names.append(name.children[0])
+            elif name.type == syms.dotted_as_name and \
+               full_name(name.children[0].children[0]) in mapping:
+                names.append(name.children[0].children[0])
+    return names
 
 def which_are_imports(relevant_leaves):
     """
@@ -338,7 +384,7 @@ def which_are_imports(relevant_leaves):
     for name in relevant_leaves:
         for node in relevant_leaves[name]:
             while node.parent and not \
-                                (is_name_import(node) or is_from_import(node)):
+                                (is_from_import(node) or is_name_import(node)):
                 node = node.parent
             if is_from_import(node):
                 node._mod = name
@@ -471,11 +517,11 @@ class FixImports2(FixImports):
             curr_replacer = replacers[str(import_statement)]
             usages_subset = [(pkg, sub, name) for pkg,sub,name in usages \
               if pkg.parent and \
-              full_name(pkg) == str(import_statement.children[1]).strip()]
+              full_name(pkg) in (full_name(node) for node in relevant_import_nodes(import_statement, self.mapping))]
             for pkg, sub, name in usages_subset:
-                must_import = self.which_candidate(import_statement._mod, name)
+                must_import = self.which_candidate(full_name(pkg), name)
                 if not must_import in curr_replacer: curr_replacer[must_import] = []
                 curr_replacer[must_import].append(name)
                 sub.parent.remove()
                 pkg.replace(Name(must_import, prefix=pkg.prefix))
-        new_name_imports(replacers, name_imports)
+        new_name_imports(replacers, name_imports, self.mapping)
