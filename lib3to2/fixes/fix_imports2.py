@@ -207,6 +207,7 @@ def attr_used(node):
     """
     next_node = node.next_sibling
     parent = node.parent
+    if parent is None: return None
     next_uncle = parent.next_sibling if parent is not None else None
     if next_node is not None:
         if next_node.type == syms.trailer:
@@ -226,6 +227,10 @@ def attr_used(node):
         return None
     return attr if attr.type == token.NAME else None
 
+def pref(node, prefix=u" "):
+    node.prefix = prefix
+    return node
+
 def names_imported_from(node):
     """
     Accepts an import_from node and returns a list of the name leafs
@@ -235,7 +240,7 @@ def names_imported_from(node):
         if (isinstance(child, Leaf) and child.value == u"import"):
             child = child.next_sibling
             while (child is not None and
-                  child.type not in (syms.import_as_names, token.NAME)):
+                  child.type not in (syms.import_as_names, token.NAME, token.STAR)):
                 child = child.next_sibling
             break
     else:
@@ -264,24 +269,36 @@ def scrub_results(results):
         if not val:
             del results[key]
 
+def get_indent(suite):
+    if suite is None: return None
+    if not suite.type == syms.suite: return None
+    for child in suite.children:
+        if child.type == token.INDENT:
+            return child
+    else:
+        return None
+
+def imports_to_stmts(imports, indent=None):
+    typ = syms.simple_stmt
+    new_stmts = [Node(typ, [child, Newline()]) for child in imports]
+    if indent is not None:
+        for stmt in new_stmts[:-1]:
+            stmt.prefix = indent.value
+    return new_stmts
+
 def new_from_imports(replacers, from_imports):
     """
     Build new name import statements based on replacers
     """
-    def pref(node):
-        node.prefix = u" "
-        return node
     for import_statement in from_imports:
         new_nodes = []
         for replacing_name in replacers[str(import_statement)]:
             imported_nodes = [pref(name.clone()) for name in replacers[str(import_statement)][replacing_name]]
             new_nodes.append(FromImport(replacing_name, commatize(imported_nodes)))
-            new_nodes.append(Newline())
-        del new_nodes[-1]
-        new_nodes[-1].prefix = import_statement.prefix
-        parent = import_statement.parent
-        pos = import_statement.remove()
-        for node in new_nodes:
+        parent = import_statement.parent.parent
+        simple_stmts = imports_to_stmts(new_nodes, indent=get_indent(parent))
+        pos = import_statement.parent.remove()
+        for node in simple_stmts:
             parent.insert_child(pos, node)
 
 def NameImport(package_name, as_name=None):
@@ -375,6 +392,7 @@ def commatize(leafs):
     del new_leafs[-1]
     return new_leafs
 
+
 class FixImports2(FixImports):
     
     mapping = MAPPING
@@ -420,6 +438,7 @@ class FixImports2(FixImports):
 
     def handle_import_all(self, import_statement, replacer):
         astrsk = names_imported_from(import_statement)[0]
+        assert astrsk.type == token.STAR, repr(astrsk)
         for name in self.mapping[import_statement._mod]:
             if not name in replacer: replacer[name] = []
             replacer[name].append(astrsk)

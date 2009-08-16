@@ -7,6 +7,7 @@ itertools.filterfalse -> itertools.ifilterfalse
 """
 
 from lib2to3 import fixer_base
+from lib2to3.pytree import Node
 from lib2to3.fixer_util import touch_import, is_probably_builtin
 
 class FixItertools(fixer_base.BaseFix):
@@ -29,8 +30,14 @@ class FixItertools(fixer_base.BaseFix):
             else:
                 children = imports.children
             for child in children[::2]:
-                if child.value == u"filterfalse":
-                    node.changed()
+                if isinstance(child, Node):
+                    for kid in child.children:
+                        if kid.value == u"filterfalse":
+                            kid.changed()
+                            kid.value = u"ifilterfalse"
+                            break
+                elif child.value == u"filterfalse":
+                    child.changed()
                     child.value = u"ifilterfalse"
                     break
         elif names:
@@ -39,5 +46,5 @@ class FixItertools(fixer_base.BaseFix):
                     name.value = u"i" + name.value
                     touch_import(u"itertools", name.value, node)
         elif f:
-            node.changed()
+            f.changed()
             f.value = u"ifilterfalse"
