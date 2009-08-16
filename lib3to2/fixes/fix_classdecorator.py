@@ -36,7 +36,8 @@ class FixClassdecorator(fixer_base.BaseFix):
 
     def transform(self, node, results):
         """
-        This just strips annotations from the funcdef completely.
+        This removes the decorators and replaces them
+        with the syntactical equivalent (source: PEP 3129)        
         """
         dec_node = results["dec_node"]
         cls = results["cls"]
