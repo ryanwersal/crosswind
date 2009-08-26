@@ -19,7 +19,7 @@ standard output and a "what was changed" summary on standard error, but the
 "-w" option can be given to write back converted files, creating
 ".bak"-named backup files.
 
-3to2 must be run with at least Python 2.5, and will not work without
+3to2 must be run with at least Python 2.7, and will not work without
 modification with a 3.x interpreter, as it uses lib2to3's fixer API.
 
 Relationship with 2to3
@@ -42,20 +42,5 @@ http://svn.python.org/sandbox/trunk/2to3/ (check out via svn), as a change to
 Status
 ======
 
-3to2 is still in the development stage, so check your output manually.  3to2
-does the bulk of the work, but there may be little tweaks that need to be done.
-
-3to2 will not yet warn if your py3k code uses features that were added in py3k.
-Again, check output manually.
-
-3to2 does not yet fix standard library imports that need to be fixed.
-
-Administrative Notes
-====================
-
-If there has been a significant period of time without a commit, then I'm
-probably busy reading up on how certain elements of Python work, as I've never
-used many of them before, and I want to be sure I understand how it works
-before I modify code that uses them.  Alternatively, I might be in the process
-of writing a blog post to http://www.startcodon.com/wordpress jotting down some
-part of the process that I have done, am doing, or need to do in the future.
+3to2 is still under development, so check your output manually.  3to2 does the
+bulk of the work, but there may be little tweaks that need to be done.
