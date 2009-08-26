@@ -81,6 +81,8 @@ def dot_attr_used(node):
 
 class FixImports(FixImports_):
 
+    explicit = True # Not stable enough for first alpha.
+
     mapping = MAPPING
 
     def find_node_usage(self, node, ref):

@@ -440,7 +440,9 @@ def commatize(leafs):
 
 
 class FixImports2(FixImports):
-    
+
+    explicit = True # Not stable enough for first alpha
+
     mapping = MAPPING
     modules = PY2MODULES
 
