@@ -1,0 +1,19 @@
++++++++++++++
+3to2 Releases
++++++++++++++
+
+3to2 0.1 alpha 1
+================
+
+General Notes
+-------------
+
+- First release after Google Summer of Code 2009(tm)
+
+Specific Fixers
+---------------
+
+- imports and imports2 fixes are explicit-only due to known crashes.  Run 3to2
+  with the -fimports and/or -fimports2 switch to enable those fixes only.
+
+- features fix might not fix all features.
