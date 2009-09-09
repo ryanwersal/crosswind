@@ -81,7 +81,7 @@ def dot_attr_used(node):
 
 class FixImports(FixImports_):
 
-    explicit = True # Not stable enough for first alpha.
+    explicit = True # Not stable enough
 
     mapping = MAPPING
 

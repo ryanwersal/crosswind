@@ -200,32 +200,41 @@ def is_name_import(node):
     """Returns true if the node is a import y statement."""
     return node.type == syms.import_name
 
-def attr_used(node):
+def dot_used(node):
     """
-    Returns the attribute of a node if it has one, None if it does not.
-    Attribute must look like foo.bar, with any prefix on bar acceptable
+    Returns the dot of a node if it has one, None if it does not.
+    Must look like (foo)(.)(*), doesn't care if anything comes after a dot.
     """
     next_node = node.next_sibling
     parent = node.parent
     if parent is None: return None
-    next_uncle = parent.next_sibling if parent is not None else None
+    next_uncle = parent.next_sibling if parent is None else None
     if next_node is not None:
         if next_node.type == syms.trailer:
             kid = next_node.children[0]
-            if kid.type != token.DOT: return None
-            attr = kid.next_sibling
+            return kid.type == token.DOT
         elif next_node.type == token.DOT:
-            attr = next_node.next_sibling
-        else:
-            return None
-    # special case to handle chaining with
-    # power < NAME, trailer < '.', NAME >, trailer < '.', NAME >, ... >
+            return next_node
     elif parent.type == syms.trailer and node.prev_sibling.type == token.DOT:
         assert parent.parent.type == syms.power
-        return attr_used(parent)
+        return dot_used(parent)
     else:
         return None
-    return attr if attr.type == token.NAME else None
+
+def attr_used(node):
+    """
+    Returns the attribute of a node if it has one, None if it does not.
+    Attribute must look like (foo)(.)(bar), with any prefix on bar acceptable
+    """
+    dot = dot_used(node)
+    if dot is None:
+        return None
+    next = dot.next_sibling
+    assert next is not None, repr(dot.parent)
+    if next.type == token.NAME:
+        return next
+    else:
+        return None
 
 def pref(node, prefix=u" "):
     node.prefix = prefix
@@ -251,14 +260,17 @@ def names_imported_from(node):
 def full_name(node):
     """
     Shortcut for str(name_dot_attr(node))
+    No error checking in this one.  Should only be used with nodes
+    that return not None from name_dot_attr
     """
+    assert name_dot_attr(node), repr(node.parent)
     return node.value + u"." + attr_used(node).value
 
 def name_dot_attr(node):
     """
-    Shortcut for (node, node.next_sibling, node.next_sibling.next_sibling)
+    Shortcut for (node, dot_used(node), attr_used(node))
     """
-    return (node, node.next_sibling, node.next_sibling.next_sibling)
+    return (node, dot_used(node), attr_used(node))
 
 def scrub_results(results):
     """
@@ -270,6 +282,10 @@ def scrub_results(results):
             del results[key]
 
 def get_indent(suite):
+    """
+    Gets the indentation from an indent leaf in Suite
+    Error-checked: Anything other than a suite will return None
+    """
     if suite is None: return None
     if not suite.type == syms.suite: return None
     for child in suite.children:
@@ -279,6 +295,10 @@ def get_indent(suite):
         return None
 
 def imports_to_stmts(imports, indent=None):
+    """
+    Accepts an iterable of import_stmt nodes and an optional indentation
+    Returns a list of simple_stmt nodes with newlines in them.
+    """
     typ = syms.simple_stmt
     new_stmts = [Node(typ, [child, Newline()]) for child in imports]
     if indent is not None:
@@ -313,7 +333,7 @@ def NameImport(package_name, as_name=None):
         children.append(Name(as_name, prefix=u" "))
     return Node(syms.import_name, children)
 
-def comma_removal(node):
+def remove_comma(node):
     """
     Remove a comma from the previous sibling, if it exists
     and is indeed a comma
@@ -336,10 +356,10 @@ def new_name_imports(replacers, name_imports, mapping):
         gparent = parent.parent
         for node in relevant_import_nodes(import_statement, mapping):
             if node.parent.type == syms.dotted_name:
-                comma_removal(node.parent)
+                remove_comma(node.parent)
                 node.parent.remove()
             elif node.parent.type == syms.dotted_as_names:
-                comma_removal(node)
+                remove_comma(node)
                 node.remove()
             kids = import_statement.children
             if len(kids) == 1 or not kids[1].children:
@@ -441,8 +461,7 @@ def commatize(leafs):
 
 class FixImports2(FixImports):
 
-    explicit = True # Not stable enough for first alpha
-
+    explicit = True # Not stable enough
     mapping = MAPPING
     modules = PY2MODULES
 
