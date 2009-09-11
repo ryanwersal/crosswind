@@ -212,7 +212,7 @@ def dot_used(node):
     if next_node is not None:
         if next_node.type == syms.trailer:
             kid = next_node.children[0]
-            return kid.type == token.DOT
+            return kid if kid.type == token.DOT else None
         elif next_node.type == token.DOT:
             return next_node
     elif parent.type == syms.trailer and node.prev_sibling.type == token.DOT:
