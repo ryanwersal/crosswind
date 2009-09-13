@@ -90,7 +90,6 @@ def replace_print(pos, opts, old_node=None):
     Also hacks in the "end" functionality.
     """
     new_node = new_print(*pos, **opts)
-    print repr(new_node)
     end = None if "end" not in opts else opts["end"].clone()
     file = None if "file" not in opts else opts["file"].clone()
     if old_node is None:
