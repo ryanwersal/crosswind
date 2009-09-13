@@ -1,7 +1,7 @@
 from test_all_fixers import lib3to2FixerTestCase
 
-class Test_print(lib3to2FixerTestCase):
-    fixer = "print"
+class Test_printfunction(lib3to2FixerTestCase):
+    fixer = "printfunction"
 
     def test_generic(self):
         b = """print()"""

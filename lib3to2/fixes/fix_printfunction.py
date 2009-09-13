@@ -1,6 +1,5 @@
 """
 Fixer for print: from __future__ import print_function.
-"Placeholder": In the future, this will transform print into a print statement
 """
 
 from lib2to3 import fixer_base
@@ -8,11 +7,13 @@ from lib2to3.pytree import Node
 from lib2to3.pygram import python_symbols as syms
 from lib2to3.fixer_util import Name, FromImport, Newline
 
-class FixPrint(fixer_base.BaseFix):
+class FixPrintfunction(fixer_base.BaseFix):
+
+    explicit = True # Not the preferred way to fix print
 
     def start_tree(self, tree, filename):
         """This is only run once; we want to remember the first node"""
-        super(FixPrint, self).start_tree(tree, filename)
+        super(FixPrintfunction, self).start_tree(tree, filename)
         self._tree = tree
         self.have_print = False
 
@@ -25,7 +26,7 @@ class FixPrint(fixer_base.BaseFix):
         Since the tree needs to be fixed once and only once if and only if it
         matches, then we can start discarding matches after we make the first.
         """
-        return not self.have_print and super(FixPrint,self).match(node)
+        return not self.have_print and super(FixPrintfunction,self).match(node)
 
     def transform(self, node, results):
         tree = self._tree
