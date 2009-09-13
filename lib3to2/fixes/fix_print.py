@@ -5,49 +5,8 @@ Fixer for print: from __future__ import print_function.
 
 from lib2to3 import fixer_base
 from lib2to3.pytree import Node
-from lib2to3.pygram import python_symbols as syms, token
+from lib2to3.pygram import python_symbols as syms
 from lib2to3.fixer_util import Name, FromImport, Newline
-
-def gen_printargs(lst):
-    """
-    Accepts a list of all nodes in the print call's trailer.
-    Returns a normalized list of argument nodes
-    """
-    for node in lst:
-        if node.type == syms.arglist:
-            # arglist < pos=any* kwargs=( argument < "file"|"sep"|"end" "=" any >* ) >
-            kids = node.children
-            it = kids.__iter__()
-            try:
-                while True:
-                    arg = it.next()
-                    if arg.type == syms.argument:
-                        # argument < "file"|"sep"|"end" "=" (any) >
-                        yield arg
-                        # drop a comma, unless it is at the end
-                        comma = it.next()
-                        if comma.next_sibling is None:
-                            yield comma
-                    else:
-                        yield arg
-                        # drop a comma, unless it is at the end
-                        comma = it.next()
-                        if comma.next_sibling is None:
-                            yield comma
-            except StopIteration:
-                continue
-        else:
-            yield node
-
-def map_printargs(args):
-    """
-    Accepts a list of all nodes in the print call's trailer.
-    Returns {'pos':[all,pos,args], 'sep':sep, 'end':end, 'file':file}
-    May include {'trailing_comma':comma_node} in the mapping if there is a trailing comma.
-    """
-    printargs = [arg for arg in gen_printargs(args)]
-#    for arg in printargs:
-#        print repr(arg)
 
 class FixPrint(fixer_base.BaseFix):
 
@@ -58,7 +17,7 @@ class FixPrint(fixer_base.BaseFix):
         self.have_print = False
 
     PATTERN = """
-              power< 'print' trailer < '(' args=any* ')' > any* >
+              power< 'print' trailer < '(' any* ')' > any* >
               """
 
     def match(self, node):
@@ -71,9 +30,6 @@ class FixPrint(fixer_base.BaseFix):
     def transform(self, node, results):
         tree = self._tree
         self.have_print = True
-        args = results.get("args")
-#        if args is not None:
-#            map_printargs(args)
         future_stmt = FromImport(u"__future__",
                                 [Name(u"print_function", prefix=u" ")])
         children = tree.children[:]
