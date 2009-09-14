@@ -1,6 +1,17 @@
 """
-Fixer for print: from __future__ import print_function.
-"Placeholder": In the future, this will transform print into a print statement
+Fixer for print function to print statement
+
+print(spam,ham,eggs,sep=sep,end=end,file=file)
+->
+print >>file, sep.join((str(spam),str(ham),str(eggs))),; file.write(end)
+in the most complicated case.  Simpler cases:
+print() -> print
+print("spam") -> print "spam"
+print(1,2,3) -> print 1,2,3
+print(1,2,3,end=" ") -> print 1,2,3,
+print(1,2,3,end="") -> print 1,2,3,; sys.stdout.write("")
+print(1,2,3,file=file) -> print >>file, 1,2,3
+print(1,2,3,sep=" ",end="\n") -> print 1,2,3
 """
 
 from lib2to3 import fixer_base
@@ -48,7 +59,8 @@ def add_file_part(file, lst):
     lst.append(Comma())
 
 def add_sep_part(sep, pos, lst):
-    if sep is not None:
+    if sep is not None and \
+       not (sep.type == token.STRING and sep.value in (u"' '", u'" "')):
         temp = []
         for arg in pos:
             temp.append(_str(arg.clone()))
@@ -73,6 +85,8 @@ def add_sep_part(sep, pos, lst):
         del lst[-1]
 
 def add_end_part(end, file, parent, loc):
+    if end.type == token.STRING and end.value in (u"' '", u'" "'):
+        return
     if file is None:
         touch_import(None, u"sys", parent)
         file = Node(syms.power, [Name(u"sys"),
@@ -99,8 +113,9 @@ def replace_print(pos, opts, old_node=None):
         parent = old_node.parent
         i = old_node.remove()
     parent.insert_child(i, new_node)
-    # end requires writing to file
-    if end is not None:
+    if end is not None and not (end.type == token.STRING and \
+                               end.value in (u"'\\n'", u'"\\n"')):
+        print repr(end)
         add_end_part(end, file, parent, i+1)
     return new_node
 
@@ -120,9 +135,11 @@ def new_print(*pos, **opts):
     end = None if "end" not in opts else opts["end"]
     add_file_part(file, children)
     add_sep_part(sep, pos, children)
-    if end is not None:
+    if end is not None and not \
+       (end.type==token.STRING and \
+       end.value in u'"\\n"', u"'\\n'"):
         children.append(Comma())
-        # rest handled in replace_print function (maybe this is a bad idea?)
+        # rest handled in replace_print function (maybe there's some other way)
     return Node(syms.print_stmt, children)
 
 def map_printargs(args):
