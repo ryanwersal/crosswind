@@ -19,8 +19,10 @@ standard output and a "what was changed" summary on standard error, but the
 "-w" option can be given to write back converted files, creating
 ".bak"-named backup files.
 
-3to2 must be run with at least Python 2.7, and will not work without
-modification with a 3.x interpreter, as it uses lib2to3's fixer API.
+If you are root, you can also install with "./setup.py build" and
+"./setup.py install" ("make install" does this for you).
+
+This branch of 3to2 must be run with at least Python 2.7.
 
 Relationship with 2to3
 ======================

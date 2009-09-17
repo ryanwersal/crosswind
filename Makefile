@@ -13,3 +13,4 @@ clean:
 	   -or -name '#*#' \
 	   -or -name '*.pyc' \
 	\) -exec rm -fv {} \;
+	rm -rfv build dist

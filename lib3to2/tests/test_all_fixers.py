@@ -1,8 +1,6 @@
 #!/usr/bin/env python2.7
-"""Tests that run all fixer modules over an input stream.
-
-This has been broken out into its own test module because of its
-running time.
+"""
+Runs all tests in the same directory named test_*.py
 """
 
 # Python imports
@@ -20,8 +18,7 @@ from lib2to3.tests.test_fixers import FixerTestCase
 
 class lib3to2FixerTestCase(FixerTestCase):
     def setUp(self, fix_list=None, fixer_pkg="lib3to2"):
-        super(lib3to2FixerTestCase, self).setUp(fixer_pkg=fixer_pkg,
-                                                options={'print_function':True})
+        super(lib3to2FixerTestCase, self).setUp(fixer_pkg=fixer_pkg)
         self.refactor.driver.grammar = pygram.python_grammar_no_print_statement
 
 if __name__ == "__main__":

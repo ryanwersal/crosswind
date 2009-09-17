@@ -2,7 +2,7 @@
 3to2 Releases
 +++++++++++++
 
-3to2 0.1 alpha 1
+3to2 0.1a1
 ================
 
 General Notes
@@ -17,3 +17,22 @@ Specific Fixers
   with the -fimports and/or -fimports2 switch to enable those fixes only.
 
 - features fix might not fix all features.
+
+3to2 0.1a2
+==========
+
+General Notes
+-------------
+
+- Release numbering scheme changed to conform to PEP 386 guidelines.
+
+- Minor documentation improvements.
+
+- Removed an unnecessary line that was causing a DeprecationWarning.
+
+Specific Fixers
+---------------
+
+- print fix renamed to printfunction and made explicit only.
+
+- new print fix refactors print functions into print statements.
