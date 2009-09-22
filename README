@@ -22,6 +22,8 @@ standard output and a "what was changed" summary on standard error, but the
 If you are root, you can also install with "./setup.py build" and
 "./setup.py install" ("make install" does this for you).
 
+Note: You must install 3to2 if you wish to run the test cases.
+
 This branch of 3to2 must be run with at least Python 2.7.
 
 Relationship with 2to3

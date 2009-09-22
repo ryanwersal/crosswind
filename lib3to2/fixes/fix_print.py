@@ -45,11 +45,21 @@ def gen_printargs(lst):
         else:
             yield node
 
+def isNone(arg):
+    """
+    Returns True if arg is a None node
+    """
+    return arg.type == token.NAME and arg.value == u"None"
+
 def _str(arg):
     """
     Calls str() on the arg in the node.
     """
-    return Call(Name("str"), [arg.clone()])
+    prefix = arg.prefix
+    arg = arg.clone()
+    arg.prefix = u""
+    ret = Call(Name(u"str", prefix=prefix), [arg])
+    return ret
 
 def add_file_part(file, lst):
     if file is None:
@@ -59,7 +69,7 @@ def add_file_part(file, lst):
     lst.append(Comma())
 
 def add_sep_part(sep, pos, lst):
-    if sep is not None and \
+    if sep is not None and not isNone(sep) and \
        not (sep.type == token.STRING and sep.value in (u"' '", u'" "')):
         temp = []
         for arg in pos:
@@ -85,6 +95,8 @@ def add_sep_part(sep, pos, lst):
         del lst[-1]
 
 def add_end_part(end, file, parent, loc):
+    if isNone(end):
+        return
     if end.type == token.STRING and end.value in (u"' '", u'" "'):
         return
     if file is None:
@@ -115,7 +127,6 @@ def replace_print(pos, opts, old_node=None):
     parent.insert_child(i, new_node)
     if end is not None and not (end.type == token.STRING and \
                                end.value in (u"'\\n'", u'"\\n"')):
-        print repr(end)
         add_end_part(end, file, parent, i+1)
     return new_node
 
@@ -135,11 +146,10 @@ def new_print(*pos, **opts):
     end = None if "end" not in opts else opts["end"]
     add_file_part(file, children)
     add_sep_part(sep, pos, children)
-    if end is not None and not \
-       (end.type==token.STRING and \
-       end.value in u'"\\n"', u"'\\n'"):
-        children.append(Comma())
-        # rest handled in replace_print function (maybe there's some other way)
+    if end is not None and not isNone(end):
+        if not (end.type==token.STRING):
+            if not end.value in (u'"\\n"', u"'\\n'"):
+                children.append(Comma())
     return Node(syms.print_stmt, children)
 
 def map_printargs(args):
