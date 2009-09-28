@@ -20,7 +20,7 @@ class Test_imports2(lib3to2FixerTestCase):
             "from SimpleDialog import SimpleDialog"
         self.check(b, a)
         
-    def test_nested_imports(self):
+    def test_nested_import_all(self):
         
         b = """
         def try_import(package):
@@ -64,5 +64,31 @@ class Test_imports2(lib3to2FixerTestCase):
             test_all_imports()
         """
         self.check(b, a, ignore_warnings=True)
-        
-        
+
+    def test_nested_import_named(self):
+
+        b = """
+        with open('myFile', 'r') as myFile:
+            from urllib.request import install_opener, urlretrieve
+            fileList = [ln for ln in myFile]"""
+        a = """
+        with open('myFile', 'r') as myFile:
+            from urllib import urlretrieve
+            from urllib2 import install_opener
+            fileList = [ln for ln in myFile]"""
+        self.check(b, a, ignore_warnings=True)
+
+    def test_alt_wording(self):
+
+        b = """
+        if spam.is_good():
+            from urllib import request, parse
+            request.urlopen(spam_site)
+            parse.urlencode(spam_site)"""
+        a = """
+        if spam.is_good():
+            import urllib
+            import urllib2
+            urllib2.urlopen(spam_site)
+            urllib.urlencode(spam_site)"""
+        self.check(b, a)
