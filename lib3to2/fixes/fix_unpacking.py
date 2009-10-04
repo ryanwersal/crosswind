@@ -7,21 +7,21 @@ for (a,)* *b (,c)* [,] in d: ...
 from lib2to3 import fixer_base
 from lib2to3.pytree import Node, Leaf
 from lib2to3.pygram import token, python_symbols as syms
+from lib2to3.fixer_util import Assign, Newline, Name, Number
+from fix_imports2 import commatize
 
 LISTNAME = u"_3to2list"
 ITERNAME = u"_3to2iter"
 
-def assignment_stmt(pre, starg, post):
+def assignment_source(num_pre, num_post):
     """
-    Accepts a list of mandatory argument names before the star_expr,
-    the star_expr name itself,
-    and a list of mandatory argument names after the star_expr
-    Returns a node of the form"
-    pre, starg, post = _3to2iter[:len(pre)] + \
-                      [_3to2iter[len(pre):-len(post)]] + \
-                       _3to2iter[-len(post):]
+    Accepts num_pre and num_post, which are counts of values
+    before and after the starg (not including the starg)
+    Returns a source fit for Assign() from fixer_util
     """
-    pass
+    # Ugly line... TODO: clean it up for readability
+    source = Node(syms.testlist, [Node(syms.power, [Name(LISTNAME), Node(syms.trailer, [Leaf(token.LSQB, u"["), Node(syms.subscript, [Leaf(token.COLON, u":"), Number(num_pre)]), Leaf(token.RSQB, u"]")])]), Leaf(token.COMMA, u","), Node(syms.power, [Name(LISTNAME, prefix=u" "), Node(syms.trailer, [Leaf(token.LSQB, u"["), Node(syms.subscript, [Number(num_pre), Leaf(token.COLON, u":"), Node(syms.factor, [Leaf(token.MINUS, u"-"), Number(num_post)])]), Leaf(token.LSQB, u"]")])]), Leaf(token.COMMA, u","), Node(syms.power, [Name(LISTNAME, prefix=u" "), Node(syms.trailer, [Leaf(token.LSQB, u"["), Node(syms.subscript, [Node(syms.factor, [Leaf(token.MINUS, u"-"), Number(num_post)]), Leaf(token.COLON, u":")]), Leaf(token.RSQB, u"]")])])])
+    return source
 
 class FixUnpacking(fixer_base.BaseFix):
 
@@ -29,15 +29,22 @@ class FixUnpacking(fixer_base.BaseFix):
     expl=expr_stmt< testlist_star_expr<
         pre=(any ',')*
             star_expr< '*' name=NAME >
-        post=(',' any)* [','] > '=' from=any > |
+        post=(',' any)* [','] > '=' source=any > |
     impl=for_stmt< 'for' exprlist<
         pre=(any ',')*
             star_expr< '*' name=NAME >
         post=(',' any)* [','] > 'in' it=any ':' suite=any>"""
 
     def fix_explicit_context(self, node, results):
-        pass
-
+        pre, name, post, source = results.get("pre"), results.get("name"), results.get("post"), results.get("source")
+        assert all(pre, name, post, source), repr(node)
+        target = commatize(pre + [name] + post)
+        setup_line = Assign(Name(LISTNAME), Call(Name(u"list"), source, prefix=u" "))
+        setup_line.append_child(Newline())
+        power_line = Assign(target, assignment_source(len(pre), len(post)))
+        power_line.append_child(Newline())
+        return setup_line, power_line
+        
     def fix_implicit_context(self, node, results):
         pass
 
@@ -56,5 +63,12 @@ class FixUnpacking(fixer_base.BaseFix):
             do_stuff
         """
         expl, impl = results.get("expl"), results.get("impl")
-        return self.fix_implicit_context(node, results) if impl is not None \
-          else self.fix_explicit_context(node, results)
+        if impl is not None:
+            setup_line, power_line = self.fix_implicit_context(node, results)
+            parent = node.parent
+            i = node.remove()
+            parent.insert_child(i, power_line)
+            parent.insert_child(i, setup_line)
+        else:
+            self.fix_explicit_context(node, results) # do something with this
+        
