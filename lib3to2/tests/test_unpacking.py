@@ -49,7 +49,7 @@ class Test_unpacking(lib3to2FixerTestCase):
         a, *b, c = range(100)"""
         a = """
         _3to2list = list(range(100))
-        a, b, c = _3to2list[:1] + [_3to2list[1:-1]] + _3to2list[-1]"""
+        a, b, c = _3to2list[:1] + [_3to2list[1:-1]] + _3to2list[-1:]"""
         self.check(b, a)
 
         b = """

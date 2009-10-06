@@ -7,7 +7,7 @@ for (a,)* *b (,c)* [,] in d: ...
 from lib2to3 import fixer_base
 from lib2to3.pytree import Node, Leaf
 from lib2to3.pygram import token, python_symbols as syms
-from lib2to3.fixer_util import Assign, Newline, Name, Number
+from lib2to3.fixer_util import Assign, Call, Newline, Name, Number
 from fix_imports2 import commatize
 
 LISTNAME = u"_3to2list"
@@ -20,7 +20,7 @@ def assignment_source(num_pre, num_post):
     Returns a source fit for Assign() from fixer_util
     """
     # Ugly line... TODO: clean it up for readability
-    source = Node(syms.testlist, [Node(syms.power, [Name(LISTNAME), Node(syms.trailer, [Leaf(token.LSQB, u"["), Node(syms.subscript, [Leaf(token.COLON, u":"), Number(num_pre)]), Leaf(token.RSQB, u"]")])]), Leaf(token.COMMA, u","), Node(syms.power, [Name(LISTNAME, prefix=u" "), Node(syms.trailer, [Leaf(token.LSQB, u"["), Node(syms.subscript, [Number(num_pre), Leaf(token.COLON, u":"), Node(syms.factor, [Leaf(token.MINUS, u"-"), Number(num_post)])]), Leaf(token.LSQB, u"]")])]), Leaf(token.COMMA, u","), Node(syms.power, [Name(LISTNAME, prefix=u" "), Node(syms.trailer, [Leaf(token.LSQB, u"["), Node(syms.subscript, [Node(syms.factor, [Leaf(token.MINUS, u"-"), Number(num_post)]), Leaf(token.COLON, u":")]), Leaf(token.RSQB, u"]")])])])
+    source = Node(syms.arith_expr, [Node(syms.power, [Name(LISTNAME), Node(syms.trailer, [Leaf(token.LSQB, u"["), Node(syms.subscript, [Leaf(token.COLON, u":"), Number(num_pre)]), Leaf(token.RSQB, u"]")])]), Leaf(token.PLUS, u"+", prefix=u" "), Node(syms.power, [Leaf(token.LSQB, u"[", prefix=u" "), Name(LISTNAME), Node(syms.trailer, [Leaf(token.LSQB, u"["), Node(syms.subscript, [Number(num_pre), Leaf(token.COLON, u":"), Node(syms.factor, [Leaf(token.MINUS, u"-"), Number(num_post)])]), Leaf(token.RSQB, u"]"), Leaf(token.RSQB, u"]")])]), Leaf(token.PLUS, u"+", prefix=u" "), Node(syms.power, [Name(LISTNAME, prefix=u" "), Node(syms.trailer, [Leaf(token.LSQB, u"["), Node(syms.subscript, [Node(syms.factor, [Leaf(token.MINUS, u"-"), Number(num_post)]), Leaf(token.COLON, u":")]), Leaf(token.RSQB, u"]")])])])
     return source
 
 class FixUnpacking(fixer_base.BaseFix):
@@ -37,12 +37,15 @@ class FixUnpacking(fixer_base.BaseFix):
 
     def fix_explicit_context(self, node, results):
         pre, name, post, source = results.get("pre"), results.get("name"), results.get("post"), results.get("source")
-        assert all(pre, name, post, source), repr(node)
-        target = commatize(pre + [name] + post)
-        setup_line = Assign(Name(LISTNAME), Call(Name(u"list"), source, prefix=u" "))
-        setup_line.append_child(Newline())
+        assert all((pre, name, post, source)), repr(node)
+        pre = [n.clone() for n in pre if n.type == token.NAME]
+        name.prefix = u" "
+        post = [n.clone() for n in post if n.type == token.NAME]
+        target = [n.clone() for n in commatize(pre + [name.clone()] + post)]
+        source.prefix = u""
+        setup_line = Assign(Name(LISTNAME), Call(Name(u"list"), [source.clone()]))
+        print repr(post)
         power_line = Assign(target, assignment_source(len(pre), len(post)))
-        power_line.append_child(Newline())
         return setup_line, power_line
         
     def fix_implicit_context(self, node, results):
@@ -63,12 +66,13 @@ class FixUnpacking(fixer_base.BaseFix):
             do_stuff
         """
         expl, impl = results.get("expl"), results.get("impl")
-        if impl is not None:
-            setup_line, power_line = self.fix_implicit_context(node, results)
+        if expl is not None:
+            setup_line, power_line = self.fix_explicit_context(node, results)
+            setup_line.prefix = expl.prefix
             parent = node.parent
             i = node.remove()
             parent.insert_child(i, power_line)
             parent.insert_child(i, setup_line)
         else:
-            self.fix_explicit_context(node, results) # do something with this
+            self.fix_implicit_context(node, results) # do something with this
         
