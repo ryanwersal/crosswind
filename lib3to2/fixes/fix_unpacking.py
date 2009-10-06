@@ -44,7 +44,6 @@ class FixUnpacking(fixer_base.BaseFix):
         target = [n.clone() for n in commatize(pre + [name.clone()] + post)]
         source.prefix = u""
         setup_line = Assign(Name(LISTNAME), Call(Name(u"list"), [source.clone()]))
-        print repr(post)
         power_line = Assign(target, assignment_source(len(pre), len(post)))
         return setup_line, power_line
         
