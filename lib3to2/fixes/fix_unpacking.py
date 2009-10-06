@@ -10,10 +10,7 @@ from lib2to3.pygram import token, python_symbols as syms
 from lib2to3.fixer_util import Assign, Comma, Call, Newline, Name, Number
 from fix_imports2 import commatize
 
-LISTNAME = u"_3to2list"
-ITERNAME = u"_3to2iter"
-
-def assignment_source(num_pre, num_post):
+def assignment_source(num_pre, num_post, LISTNAME, ITERNAME):
     """
     Accepts num_pre and num_post, which are counts of values
     before and after the starg (not including the starg)
@@ -58,8 +55,8 @@ class FixUnpacking(fixer_base.BaseFix):
         # amount of modification, make the left-side into a guaranteed tuple
         target.append(Comma())
         source.prefix = u""
-        setup_line = Assign(Name(LISTNAME), Call(Name(u"list"), [source.clone()]))
-        power_line = Assign(target, assignment_source(len(pre), len(post)))
+        setup_line = Assign(Name(self.LISTNAME), Call(Name(u"list"), [source.clone()]))
+        power_line = Assign(target, assignment_source(len(pre), len(post), self.LISTNAME, self.ITERNAME))
         return setup_line, power_line
         
     def fix_implicit_context(self, node, results):
@@ -79,6 +76,8 @@ class FixUnpacking(fixer_base.BaseFix):
             a,b,c,d,e = _3to2list[:2] + [_3to2list[2:-2]] + _3to2list[-2:]
             do_stuff
         """
+        self.LISTNAME = self.new_name("_3to2list")
+        self.ITERNAME = self.new_name("_3to2iter")
         expl, impl = results.get("expl"), results.get("impl")
         if expl is not None:
             setup_line, power_line = self.fix_explicit_context(node, results)
