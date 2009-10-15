@@ -51,14 +51,14 @@ def isNone(arg):
     """
     return arg.type == token.NAME and arg.value == u"None"
 
-def _str(arg):
+def _unicode(arg):
     """
-    Calls str() on the arg in the node.
+    Calls unicode() on the arg in the node.
     """
     prefix = arg.prefix
     arg = arg.clone()
     arg.prefix = u""
-    ret = Call(Name(u"str", prefix=prefix), [arg])
+    ret = Call(Name(u"unicode", prefix=prefix), [arg])
     return ret
 
 def add_file_part(file, lst):
@@ -73,7 +73,7 @@ def add_sep_part(sep, pos, lst):
        not (sep.type == token.STRING and sep.value in (u"' '", u'" "')):
         temp = []
         for arg in pos:
-            temp.append(_str(arg.clone()))
+            temp.append(_unicode(arg.clone()))
             temp.append(Comma())
         del temp[-1]
         sep = sep.clone()
@@ -166,8 +166,8 @@ def map_printargs(args):
             assert kids[0].type == token.NAME, repr(arg)
             assert len(kids) > 1, repr(arg)
             assert kids[0].value in (u"sep", u"end", u"file")
-            assert str(kids[0].value) not in mapping, mapping
-            mapping[str(kids[0].value)] = kids[2]
+            assert unicode(kids[0].value) not in mapping, mapping
+            mapping[unicode(kids[0].value)] = kids[2]
         else:
             pos.append(arg)
     return pos, mapping
