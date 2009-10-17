@@ -60,7 +60,12 @@ class FixUnpacking(fixer_base.BaseFix):
         return setup_line, power_line
         
     def fix_implicit_context(self, node, results):
-        pass
+        """
+        Only example of the implicit context is
+        a for loop, so only fix that.
+        """
+        self.cannot_convert(node, "Not implemented yet.")
+
 
     def transform(self, node, results):
         """
