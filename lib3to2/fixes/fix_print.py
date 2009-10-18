@@ -62,7 +62,7 @@ def _unicode(arg):
     return ret
 
 def add_file_part(file, lst):
-    if file is None:
+    if file is None or isNone(file):
         return
     lst.append(Leaf(token.RIGHTSHIFT, u">>", prefix=u" "))
     lst.append(file.clone())
@@ -147,9 +147,8 @@ def new_print(*pos, **opts):
     add_file_part(file, children)
     add_sep_part(sep, pos, children)
     if end is not None and not isNone(end):
-        if not (end.type==token.STRING):
-            if not end.value in (u'"\\n"', u"'\\n'"):
-                children.append(Comma())
+        if not end.value in (u'"\\n"', u"'\\n'"):
+            children.append(Comma())
     return Node(syms.print_stmt, children)
 
 def map_printargs(args):

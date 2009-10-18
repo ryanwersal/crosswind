@@ -29,11 +29,11 @@ class Test_print(lib3to2FixerTestCase):
     def test_long_arglist(self):
         b = "print(spam, spam, spam, spam, spam, baked_beans, spam, spam,"\
             " spam, spam, sep=', spam, ', end=wonderful_spam)\nprint()"
-        a = "import sys\nprint ', spam, '.join([str(spam), str(spam), str(spam), str(spam), str(spam), str(baked_beans),"\
-            " str(spam), str(spam), str(spam), str(spam)]),; sys.stdout.write(wonderful_spam)\nprint"
+        a = "import sys\nprint ', spam, '.join([unicode(spam), unicode(spam), unicode(spam), unicode(spam), unicode(spam), unicode(baked_beans),"\
+            " unicode(spam), unicode(spam), unicode(spam), unicode(spam)]),; sys.stdout.write(wonderful_spam)\nprint"
         self.check(b, a)
 
     def test_nones(self):
         b = "print(1,2,3,end=None, sep=None, file=None)"
-        a = "print >>None, 1,2,3"
+        a = "print 1,2,3"
         self.check(b, a)
