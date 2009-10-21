@@ -3,7 +3,7 @@ PYVERSION = python2.7
 install:
 	./setup.py install
 
-test: .localtest
+test:
 	lib3to2/tests/test_all_fixers.py
 
 install-local:
