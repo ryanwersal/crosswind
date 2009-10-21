@@ -92,3 +92,15 @@ class Test_imports2(lib3to2FixerTestCase):
             urllib2.urlopen(spam_site)
             urllib.urlencode(spam_site)"""
         self.check(b, a)
+
+    def test_simplest_usage(self):
+
+        b = """
+        import urllib.request
+        urllib.request.urlopen(spam)"""
+
+        a = """
+        import urllib2
+        urllib2.urlopen(spam)"""
+
+        self.check(b, a)
