@@ -6,15 +6,13 @@ install:
 test: .localtest
 	lib3to2/tests/test_all_fixers.py
 
-test-noroot: .localinstall .localtest .localuninstall
-
-.localinstall:
+install-local:
 	./setup.py install --prefix=$(HOME)/.local
 
-.localtest:
+test-local: install-local
 	$(PYVERSION) $(HOME)/.local/lib/$(PYVERSION)/site-packages/lib3to2/tests/test_all_fixers.py
 
-.localuninstall:
+uninstall-local:
 	rm -rf $(HOME)/.local/lib/$(PYVERSION)/site-packages/lib3to2
 	rm -rf $(HOME)/.local/lib/$(PYVERSION)/site-packages/3to2-*.egg-info
 	rm -rf $(HOME)/.local/bin/3to2
