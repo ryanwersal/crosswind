@@ -31,8 +31,7 @@ class FixDctsetcomp(fixer_base.BaseFix):
             impl_assign = tup((n1, n2))
         else:
             impl_assign = n1
-        our_gencomp = parenthesize(Node(syms.listmaker,
-                                        [(impl_assign),(comp_for)]))
+        our_gencomp = Node(syms.listmaker, [(impl_assign),(comp_for)])
         if is_dict:
             new_node = Node(syms.power, [Name(u"dict"),
                        parenthesize(Node(syms.atom, [our_gencomp]))])
