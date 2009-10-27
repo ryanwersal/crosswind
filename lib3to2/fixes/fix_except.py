@@ -4,7 +4,6 @@ Fixer for except E as T -> except E, T
 
 from lib2to3 import fixer_base
 from lib2to3.fixer_util import Comma
-from lib2to3.pytree import Leaf
 
 class FixExcept(fixer_base.BaseFix):
 
