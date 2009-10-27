@@ -15,12 +15,14 @@ _literal_re = re.compile(ur"[rR]?[\'\"]")
 
 class FixStr(fixer_base.BaseFix):
 
+    run_order = 4 # Run this before bytes objects are converted to str objects
+
     PATTERN = "STRING | 'str' | 'chr'"
 
     def transform(self, node, results):
         new = node.clone()
         if node.type == token.STRING:
-            #Simply add u to the beginning of the literal.
+            # Simply add u to the beginning of the literal.
             if _literal_re.match(new.value):
                 new.value = u"u" + new.value
                 return new
