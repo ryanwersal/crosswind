@@ -1,5 +1,5 @@
 """
-Fixer for method.im_X -> method.__X__.
+Fixer for method.__X__ -> method.im_X
 """
 
 from lib2to3 import fixer_base
