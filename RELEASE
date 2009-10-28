@@ -1,22 +1,30 @@
-+++++++++++++
+=============
 3to2 Releases
-+++++++++++++
+=============
 
-3to2 0.1a1
-================
+3to2 0.1a3
+==========
 
 General Notes
 -------------
 
-- First release after Google Summer of Code 2009(tm)
+- 3to2 now performs an explicit check on the interpreter version
+  when run directly and exits when it is incorrect
+
+- Slightly more robust Makefile adds local targets ('install-local',
+  'test-local', 'uninstall-local') that use site-directories in users'
+  home directories.
+
+- Some documentation fixes
 
 Specific Fixers
 ---------------
 
-- imports and imports2 fixes are explicit-only due to known crashes.  Run 3to2
-  with the -fimports and/or -fimports2 switch to enable those fixes only.
+- Fixer added for dictionary and set comprehensions
 
-- features fix might not fix all features.
+- Fixer added for extended iterable unpacking in explicit assignment context
+  (warns that it cannot convert the implicit assignment context version)
+
 
 3to2 0.1a2
 ==========
@@ -36,3 +44,21 @@ Specific Fixers
 - print fix renamed to printfunction and made explicit only.
 
 - new print fix refactors print functions into print statements.
+
+
+3to2 0.1a1
+================
+
+General Notes
+-------------
+
+- First release after Google Summer of Code 2009(tm)
+
+Specific Fixers
+---------------
+
+- imports and imports2 fixes are explicit-only due to known crashes.  Run 3to2
+  with the -fimports and/or -fimports2 switch to enable those fixes only.
+
+- features fix might not fix all features.
+
