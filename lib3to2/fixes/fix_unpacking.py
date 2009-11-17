@@ -8,6 +8,8 @@ from lib2to3 import fixer_base
 from lib2to3.pytree import Node, Leaf
 from lib2to3.pygram import token, python_symbols as syms
 from lib2to3.fixer_util import Assign, Comma, Call, Newline, Name, Number
+
+from ..fixer_util import is_indented
 from fix_imports2 import commatize
 
 def assignment_source(num_pre, num_post, LISTNAME, ITERNAME):
@@ -76,7 +78,7 @@ class FixUnpacking(fixer_base.BaseFix):
         and
 
         for a,b,*c,d,e in iter_of_iters: do_stuff changes to
-        for _3to2iter in range(100):
+        for _3to2iter in iter_of_iters:
             _3to2list = list(_3to2iter)
             a,b,c,d,e = _3to2list[:2] + [_3to2list[2:-2]] + _3to2list[-2:]
             do_stuff
@@ -87,12 +89,11 @@ class FixUnpacking(fixer_base.BaseFix):
         if expl is not None:
             setup_line, power_line = self.fix_explicit_context(node, results)
             setup_line.prefix = expl.prefix
+            power_line.prefix = indentation(expl.parent)
             setup_line.append_child(Newline())
-            power_line.prefix = u"" # XXX: Incorrect in suites.
             parent = node.parent
             i = node.remove()
             parent.insert_child(i, power_line)
             parent.insert_child(i, setup_line)
-        else:
+        elif impl is not None:
             self.fix_implicit_context(node, results) # do something with this
-        

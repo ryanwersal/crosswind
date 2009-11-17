@@ -79,3 +79,15 @@ class Test_unpacking(lib3to2FixerTestCase):
         _3to2list = list(stuff)
         z, = [_3to2list[:]]"""
         self.check(b, a)
+
+        b = """
+        while True:
+            a, *b, c = stuff
+            other_stuff = make_more_stuff(a, b, c)"""
+
+        a = """
+        while True:
+            _3to2list = list(stuff)
+            a, b, c, = _3to2list[:1] + [_3to2list[1:-1]] + _3to2list[-1:]
+            other_stuff = make_more_stuff(a, b, c)"""
+        self.check(b, a)
