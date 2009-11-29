@@ -1,6 +1,6 @@
 from lib2to3.pygram import token, python_symbols as syms
 from lib2to3.pytree import Leaf, Node
-from lib2to3.fixer_util import Comma
+from lib2to3.fixer_util import Comma, Name
 
 def commatize(leafs):
     """
@@ -25,4 +25,18 @@ def indentation(node):
         return node.value
     else:
         return indentation(prev_sibling) if prev_sibling is not None else ""
+
+def NameImport(package, as_name=None, prefix=None):
+    """
+    Accepts a package (Name node), name to import it as (string), and
+    optional prefix and returns a node:
+    import <package> [as <as_name>]
+    """
+    if prefix is None:
+        prefix = u""
+    children = [Name(u"import", prefix=prefix), package]
+    if as_name is not None:
+        children.extend([Name(u"as", prefix=u" "),
+                         Name(as_name, prefix=u" ")])
+    return Node(syms.import_name, children)
 

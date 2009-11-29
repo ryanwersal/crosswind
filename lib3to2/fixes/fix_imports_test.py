@@ -3,9 +3,12 @@ Fixer for standard library imports renamed in Python 3
 """
 
 from lib2to3 import fixer_base
-from lib2to3.fixer_util import Name, is_probably_builtin
+from lib2to3.fixer_util import Name, is_probably_builtin, Newline
 from lib2to3.pygram import python_symbols as syms
 from lib2to3.pgen2 import token
+from lib2to3.pytree import Node, Leaf
+
+from ..fixer_util import NameImport
 
 # used in simple_mapping_to_pattern()
 MAPPING1 = {"reprlib": "repr",
@@ -243,13 +246,13 @@ dotted_name_match = "dotted_name=dotted_name< name='{name}' '.' attr='{attr}' >"
 # helps match 'queue', as in 'queue.Queue(...)'
 power_onename_match = "power< name='{name}' trailer< '.' using=NAME > any* >"
 # helps match 'urllib.request', as in 'urllib.request.urlopen(...)'
-power_twoname_match = "power< name='{name}' trailer< '.' attr='{attr}'> [trailer< '.' using=NAME >] any* >"
+power_twoname_match = "power< name='{name}' trailer< '.' attr='{attr}' > [trailer< '.' using=NAME >] any* >"
 # helps match 'request.urlopen', if 'request' has been imported from urllib
 power_subname_match = "power< attr='{attr}' trailer< '.' using=NAME > any* >"
 # helps match 'from urllib.request import urlopen'
 from_import_match = "from_import=import_from< 'from' {fmt_name} 'import' imported=any >"
 # helps match 'from urllib import request'
-from_import_submod_match = "from_import_submod=import_from< 'from' '{name}' 'import' imported=any >"
+from_import_submod_match = "from_import_submod=import_from< 'from' name='{name}' 'import' imported=any >"
 # helps match 'import urllib.request'
 name_import_match = "name_import=import_name< 'import' {fmt_name} >"
 
@@ -259,22 +262,21 @@ def all_patterns(name):
     Called by simple_mapping_to_pattern for each name in the mapping it receives.
     """
 
-    # n_ denotes a name-like node
     # i_ denotes an import-like node
     # u_ denotes a node that appears to be a usage of the name
     if '.' in name:
         name, attr = name.split('.', 1)
-        n_dotted_name = dotted_name_match.format(name=name, attr=attr)
-        i_from = from_import_match.format(fmt_name=n_dotted_name)
+        dotted_name = dotted_name_match.format(name=name, attr=attr)
+        i_from = from_import_match.format(fmt_name=dotted_name)
         i_from_submod = from_import_submod_match.format(name=name)
-        i_name = name_import_match.format(fmt_name=n_dotted_name)
+        i_name = name_import_match.format(fmt_name=dotted_name)
         u_name = power_twoname_match.format(name=name, attr=attr)
         u_subname = power_subname_match.format(attr=attr)
         return ' | \n'.join((i_name, i_from, i_from_submod, u_name, u_subname))
     else:
-        n_simple_name = simple_name_match.format(name=name)
-        i_name = name_import_match.format(fmt_name = n_simple_name)
-        i_from = from_import_match.format(fmt_name = n_simple_name)
+        simple_name = simple_name_match.format(name=name)
+        i_name = name_import_match.format(fmt_name=simple_name)
+        i_from = from_import_match.format(fmt_name=simple_name)
         u_name = power_onename_match.format(name=name)
         return ' | \n'.join((i_name, i_from, u_name))
 
@@ -285,10 +287,58 @@ def simple_mapping_to_pattern(mapping):
     for name in mapping:
         yield all_patterns(name)
 
-for pattern in simple_mapping_to_pattern(MAPPING1):
-    print pattern
+
+
 
 class FixImportsTest(fixer_base.BaseFix):
 
+    simple_pattern = ' | \n'.join(simple_mapping_to_pattern(MAPPING1))
+    PATTERN = simple_pattern
+
+    def fix_submod_import(self, imported, name, node):
+        """
+        Accepts a list of NAME leafs, a name string, and a node
+        node is given as an argument to BaseFix.transform()
+        NAME leafs come from an import_as_names node (the children)
+        name string is the base name found in node.
+        """
+        submods = []
+        missed = []
+        for attr in imported:
+            dotted = u'.'.join((name, attr.value))
+            if dotted in MAPPING1:
+                # get the replacement module
+                to_repl = MAPPING1[dotted]
+                if '.' not in to_repl:
+                    # it's a simple name, so use a simple replacement.
+                    import_ = NameImport(Name(to_repl, prefix=u" "), attr.value)
+                    submods.append(import_)
+            elif attr.type == token.NAME:
+                missed.append(attr.clone())
+        if not submods:
+            return
+
+        parent = node.parent
+        node.replace(submods[0])
+        if len(submods) > 1:
+            start = submods.pop(0)
+            prev = start
+            for submod in submods:
+                parent.append_child(submod)
+        if missed:
+            self.warning(node, "Imported names not known to 3to2 to be part of the package {0}.  Leaving those alone... high probability that this code will be incorrect.".format(name))
+            children = [Name("from"), Name(name, prefix=u" "), Name("import", prefix=u" "), Node(syms.import_as_names, missed)]
+            orig_stripped = Node(syms.import_from, children)
+            parent.append_child(Newline())
+            parent.append_child(orig_stripped)
+
+    
     def transform(self, node, results):        
-        pass
+        from_import = results.get("from_import")
+        from_import_submod = results.get("from_import_submod")
+        name_import = results.get("name_import")
+        name = results.get("name")
+        attr = results.get("attr")
+        imported = results.get("imported")
+        if imported and imported.type == syms.import_as_names:
+            self.fix_submod_import(imported=imported.children, node=node, name=name.value)
