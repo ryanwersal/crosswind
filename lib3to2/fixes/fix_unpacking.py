@@ -9,7 +9,7 @@ from lib2to3.pytree import Node, Leaf
 from lib2to3.pygram import token, python_symbols as syms
 from lib2to3.fixer_util import Assign, Comma, Call, Newline, Name, Number
 
-from ..fixer_util import is_indented
+from ..fixer_util import indentation
 from fix_imports2 import commatize
 
 def assignment_source(num_pre, num_post, LISTNAME, ITERNAME):
