@@ -252,9 +252,11 @@ power_subname_match = "power< {fmt_attr} trailer< '.' using=NAME > any* >"
 # helps match 'from urllib.request import urlopen'
 from_import_match = "from_import=import_from< 'from' {fmt_name} 'import' imported=any >"
 # helps match 'from urllib import request'
-from_import_submod_match = "from_import_submod=import_from< 'from' {fmt_name} 'import' imported=any >"
+from_import_submod_match = "from_import_submod=import_from< 'from' {fmt_name} 'import' {fmt_attr} > | from_import_submod=import_from< 'from' {fmt_name} 'import' dotted_as_names< any* dotted_as_name< {fmt_attr} 'as' renamed=any > any* > >"
 # helps match 'import urllib.request'
-name_import_match = "name_import=import_name< 'import' {fmt_name} >"
+name_import_match = "name_import=import_name< 'import' {fmt_name} > | name_import=import_name< 'import' dotted_as_name< {fmt_name} 'as' renamed=any > >"
+# helps match 'import urllib.request, winreg'
+multiple_name_import_match = "name_import=import_name< 'import' dotted_as_names< any* {fmt_name} any* > > | name_import=import_name< 'import' dotted_as_names< any* dotted_as_name< {fmt_name} 'as' renamed=any > any* > >"
 
 def all_patterns(name):
     """
@@ -270,17 +272,19 @@ def all_patterns(name):
         simple_attr = subname_match.format(attr=attr)
         dotted_name = dotted_name_match.format(fmt_name=simple_name, fmt_attr=simple_attr)
         i_from = from_import_match.format(fmt_name=dotted_name)
-        i_from_submod = from_import_submod_match.format(fmt_name=simple_name)
+        i_from_submod = from_import_submod_match.format(fmt_name=simple_name, fmt_attr=simple_attr)
         i_name = name_import_match.format(fmt_name=dotted_name)
+        i_name_mult = multiple_name_import_match.format(fmt_name=dotted_name)
         u_name = power_twoname_match.format(fmt_name=simple_name, fmt_attr=simple_attr)
         u_subname = power_subname_match.format(fmt_attr=simple_attr)
-        return ' | \n'.join((i_name, i_from, i_from_submod, u_name, u_subname))
+        return ' | \n'.join((i_name, i_from, i_from_submod, i_name_mult, u_name, u_subname))
     else:
         simple_name = simple_name_match.format(name=name)
         i_name = name_import_match.format(fmt_name=simple_name)
+        i_name_mult = multiple_name_import_match.format(fmt_name=simple_name)
         i_from = from_import_match.format(fmt_name=simple_name)
         u_name = power_onename_match.format(fmt_name=simple_name)
-        return ' | \n'.join((i_name, i_from, u_name))
+        return ' | \n'.join((i_name, i_name_mult, i_from, u_name))
 
 
 class FixImportsTest(fixer_base.BaseFix):
@@ -294,7 +298,20 @@ class FixImportsTest(fixer_base.BaseFix):
         If mapping is given, use it; otherwise use our MAPPING1
         Returns a node that can be in-place replaced by the node given
         """
-        pass
+        if node.type == syms.dotted_name:
+            _name = node.children[0]
+            _attr = node.children[2]
+            name = _name.value
+            attr = _attr.value
+            full_name = name + u'.' + attr
+            to_repl = mapping.get(full_name)
+            assert to_repl
+            if u'.' in to_repl:
+                repl_name, repl_attr = to_repl.split(u'.')
+                _name.replace(Name(repl_name, prefix=_name.prefix))
+                _attr.replace(Name(repl_attr, prefix=_attr.prefix))
+            else:
+                node.replace(Name(to_repl, prefix=node.prefix))
 
     def fix_simple_name(self, node, mapping=MAPPING1):
         """
@@ -302,7 +319,9 @@ class FixImportsTest(fixer_base.BaseFix):
         If mapping is given, use it; otherwise use our MAPPING1
         Returns a node that can be in-place replaced by the node given
         """
-        pass
+        assert node.type == token.NAME, repr(node)
+        replacement = mapping[node.value]
+        node.replace(Leaf(token.NAME, unicode(replacement), prefix=node.prefix))
 
     def fix_submod_import(self, imported, name, node):
         """
@@ -341,19 +360,46 @@ class FixImportsTest(fixer_base.BaseFix):
             parent.append_child(Newline())
             parent.append_child(orig_stripped)
 
+
+    def get_dotted_replacement(self, name_node, attr_node, mapping=MAPPING1):
+        full_name = name_node.value + u'.' + attr_node.value
+        replacement = mapping[full_name]
+        if u'.' in replacement:
+            new_name, new_attr = replacement.split(u'.')
+            return Name(new_name, prefix=name_node.prefix), Node(syms.dotted_as_name, [Name(new_attr, prefix=attr_node.prefix), Name(u'as', prefix=u" "), attr_node.clone()])
+        else:
+            return Node(syms.dotted_as_name, [Name(replacement, prefix=name_node.prefix), Name(u'as', prefix=u' '), Name(attr_node.value, prefix=attr_node.prefix)]), None
     
-    def transform(self, node, results):        
-        from_import = results.get("from_import")
-        from_import_submod = results.get("from_import_submod")
-        name_import = results.get("name_import")
-        name = results.get("name")
-        attr = results.get("attr")
-        imported = results.get("imported")
-        if imported and imported.type == syms.import_as_names:
-            self.fix_submod_import(imported=imported.children, node=node, name=name.value)
-        elif name_import:
-            assert name, u"Code fail: got {0}".format(unicode(name_import))
-            if attr:
-                self.fix_dotted_name(node)
+    def transform(self, node, results):
+        a = 0
+        while a < 10:
+            from_import = results.get("from_import")
+            from_import_submod = results.get("from_import_submod")
+            name_import = results.get("name_import")
+            dotted_name = results.get("dotted_name")
+            name = results.get("name")
+            attr = results.get("attr")
+            imported = results.get("imported")
+            if from_import_submod:
+                new_name, new_attr = self.get_dotted_replacement(name, attr)
+                if new_attr is not None:
+                    name.replace(new_name)
+                    attr.replace(new_attr)
+                else:
+                    children = [Name("import"), new_name]
+                    node.replace(Node(syms.import_name, children, prefix=node.prefix))
+                    break
+            elif dotted_name:
+                self.fix_dotted_name(dotted_name)
+            elif node.type == syms.power:
+                pass
+            elif name:
+                self.fix_simple_name(name)
+            elif imported and imported.type == syms.import_as_names:
+                self.fix_submod_import(imported=imported.children, node=node, name=name.value)
+
+            results = self.match(node)
+            if not results:
+                break
             else:
-                self.fix_simple_name(node)
+                a += 1
