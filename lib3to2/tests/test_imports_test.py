@@ -13,10 +13,6 @@ class Test_imports_test(lib3to2FixerTestCase):
         s = "print(queue)"
         self.unchanged(s)
 
-        # Never was imported
-        s = "gdbm = dbm.gnu"
-        self.unchanged(s)
-
     def test_all_nodotted_names_solo(self):
 
         b = "import configparser"
@@ -49,8 +45,8 @@ class Test_imports_test(lib3to2FixerTestCase):
         a = "import ConfigParser, copy_reg"
         self.check(b, a)
 
-        b = "import _markupbase, queue"
-        a = "import markupbase, Queue"
+        b = "import _markupbase, queue as bob"
+        a = "import markupbase, Queue as bob"
         self.check(b, a)
 
     def test_nodotted_names_quad(self):
@@ -182,15 +178,23 @@ class Test_imports_test(lib3to2FixerTestCase):
 
     def test_dotted_names_quad(self):
 
-        b = "import    html.parser,  math,     tkinter.__init__,   dbm.gnu #comment!"
-        a = "import    HTMLParser,  math,     Tkinter,   gdbm #comment!"
+        b = "import    html.parser as spam,  math,     tkinter.__init__,   dbm.gnu #comment!"
+        a = "import    HTMLParser as spam,  math,     Tkinter,   gdbm #comment!"
         self.check(b, a)
 
-        b = "import math, tkinter.dnd, dbm.ndbm, urllib"
-        a = "import math, Tkdnd, dbm, urllib"
+        b = "import math, tkinter.dnd, dbm.ndbm as one, dbm.ndbm as two, urllib"
+        a = "import math, Tkdnd, dbm as one, dbm as two, urllib"
         self.check(b, a)
 
     def test_usage(self):
+
+        b = """
+        import queue as james
+        james.do_stuff()"""
+        a = """
+        import Queue as james
+        james.do_stuff()"""
+        self.check(b, a)
 
         b = """
         import queue
@@ -212,10 +216,10 @@ class Test_imports_test(lib3to2FixerTestCase):
         import tkinter.dialog, tkinter.colorchooser
         tkinter = tkinter.dialog(tkinter.colorchooser("Just messing around"))
         tkinter.test_should_work = True
-        tkinter.dialog.just_torture_testing_this_algorithm = True"""
+        tkinter.dialog.dont.code.like.this = True"""
         a = """
         import Dialog, tkColorChooser
         tkinter = Dialog(tkColorChooser("Just messing around"))
         tkinter.test_should_work = True
-        Dialog.just_torture_testing_this_algorithm = True"""
+        Dialog.dont.code.like.this = True"""
         self.check(b, a)
