@@ -1,16 +1,16 @@
-"""Fix renamed imports and module references."""
+"""
+Fixer for standard library imports renamed in Python 3
+"""
 
-import re
-
-
+from lib2to3 import fixer_base
+from lib2to3.fixer_util import Name, is_probably_builtin, Newline, does_tree_import
+from lib2to3.pygram import python_symbols as syms
 from lib2to3.pgen2 import token
 from lib2to3.pytree import Node, Leaf
-from lib2to3.pygram import python_symbols as syms
-from lib2to3.fixer_util import Name, Dot, Attr, _is_import_binding
 
-from lib2to3.fixes.fix_imports import FixImports as FixImports_
-from lib2to3.fixes.fix_imports import build_pattern
+from ..fixer_util import NameImport
 
+# used in simple_mapping_to_pattern()
 MAPPING = {"reprlib": "repr",
            "winreg": "_winreg",
            "configparser": "ConfigParser",
@@ -28,8 +28,7 @@ MAPPING = {"reprlib": "repr",
            "http.client": "httplib",
            "http.cookies": "Cookie",
            "http.cookiejar": "cookielib",
-           #TODO: make this work
-           #tkinter": "Tkinter",
+#          "tkinter": "Tkinter",
            "tkinter.dialog": "Dialog",
            "tkinter._fix": "FixTk",
            "tkinter.scrolledtext": "ScrolledText",
@@ -46,199 +45,196 @@ MAPPING = {"reprlib": "repr",
            "xmlrpc.client": "xmlrpclib",
 }
 
-def pkg_name(node):
-    """
-    Returns a tuple of:
-    (pkg, (names)) if node does "from pkg import names"
-    """
-    if node.type != syms.import_from: return None
-    return (node.children[1], node.children[3])
+# generic strings to help build patterns
+# these variables mean (with http.client.HTTPConnection as an example):
+# name = http
+# attr = client
+# used = HTTPConnection
+# fmt_name is a formatted subpattern (simple_name_match or dotted_name_match)
 
-def DottedName(names, prefix=u""):
-    """Accepts a sequence of names; returns a DottedName that combines them"""
-    children = []
-    for arg in names:
-        children.append(Name(arg))
-        children.append(Dot())
-    del children[-1]
-    return Node(syms.dotted_name, children, prefix=prefix)
+# helps match 'queue', as in 'from queue import ...'
+simple_name_match = "name='{name}'"
+# helps match 'client', to be used if client has been imported from http
+subname_match = "attr='{attr}'"
+# helps match 'http.client', as in 'import urllib.request'
+dotted_name_match = "dotted_name=dotted_name< {fmt_name} '.' {fmt_attr} >"
+# helps match 'queue', as in 'queue.Queue(...)'
+power_onename_match = "power< {fmt_name} trailer< '.' using=NAME > any* >"
+# helps match 'http.client', as in 'http.client.HTTPConnection(...)'
+power_twoname_match = "power< {fmt_name} trailer< '.' {fmt_attr} > [trailer< '.' using=NAME >] any* >"
+# helps match 'client.HTTPConnection', if 'client' has been imported from http
+power_subname_match = "power< {fmt_attr} trailer< '.' using=NAME > any* >"
+# helps match 'from http.client import HTTPConnection'
+from_import_match = "from_import=import_from< 'from' {fmt_name} 'import' imported=any >"
+# helps match 'from http import client'
+from_import_submod_match = "from_import_submod=import_from< 'from' {fmt_name} 'import' {fmt_attr} >"
+# helps match 'import urllib.request'
+name_import_match = "name_import=import_name< 'import' {fmt_name} > | name_import=import_name< 'import' dotted_as_name< {fmt_name} 'as' renamed=any > >"
+# helps match 'import http.client, winreg'
+multiple_name_import_match = "name_import=import_name< 'import' dotted_as_names< names=any* > >"
 
-def dot_attr_used(node):
+def all_patterns(name):
     """
-    Accepts a node and returns a dot and the attr if that node uses an attr
-    Otherwise returns None
+    Accepts a string and returns a pattern of possible patterns involving that name
+    Called by simple_mapping_to_pattern for each name in the mapping it receives.
     """
-    next_of_kin = node.next_sibling
-    if next_of_kin is None:
-        return (None, None)
-    if next_of_kin.type == syms.trailer:
-        return tuple(next_of_kin.children[:2]) if \
-                    next_of_kin.children[0].type == token.DOT else (None, None)
-    if next_of_kin.type == token.DOT and next_of_kin.next_sibling:
-        return (next_of_kin, next_of_kin.next_sibling)
+
+    # i_ denotes an import-like node
+    # u_ denotes a node that appears to be a usage of the name
+    if '.' in name:
+        name, attr = name.split('.', 1)
+        simple_name = simple_name_match.format(name=name)
+        simple_attr = subname_match.format(attr=attr)
+        dotted_name = dotted_name_match.format(fmt_name=simple_name, fmt_attr=simple_attr)
+        i_from = from_import_match.format(fmt_name=dotted_name)
+        i_from_submod = from_import_submod_match.format(fmt_name=simple_name, fmt_attr=simple_attr)
+        i_name = name_import_match.format(fmt_name=dotted_name)
+        u_name = power_twoname_match.format(fmt_name=simple_name, fmt_attr=simple_attr)
+        u_subname = power_subname_match.format(fmt_attr=simple_attr)
+        return ' | \n'.join((i_name, i_from, i_from_submod, u_name, u_subname))
     else:
-        return (None, None)
+        simple_name = simple_name_match.format(name=name)
+        i_name = name_import_match.format(fmt_name=simple_name)
+        i_from = from_import_match.format(fmt_name=simple_name)
+        u_name = power_onename_match.format(fmt_name=simple_name)
+        return ' | \n'.join((i_name, i_from, u_name))
 
-class FixImports(FixImports_):
 
-    explicit = True # Not stable enough
+class FixImportsTest(fixer_base.BaseFix):
 
-    mapping = MAPPING
+    PATTERN = ' | \n'.join(all_patterns(name) for name in MAPPING)
+    PATTERN = ' | \n'.join((PATTERN, multiple_name_import_match))
 
-    def find_node_usage(self, node, ref):
-        """Returns an object in node's children that is equivalent to ref"""
-        for child in node.pre_order():
-            # Discard differences in prefixes
-            ref.prefix = child.prefix
-            if child == ref:
-                return child
-
-    def match_fromimports(self, node):
+    def fix_dotted_name(self, node, mapping=MAPPING):
         """
-        Find things like from dbm import gnu
+        Accepts either a DottedName node or a power node with a trailer.
+        If mapping is given, use it; otherwise use our MAPPING
+        Returns a node that can be in-place replaced by the node given
         """
-        dotted_names = [tuple(name.split(".")) for name in self.mapping if "." in name]
-        if not dotted_names: return False
-        packages = {}
-        for name, attr in dotted_names:
-            if not name in packages:
-                packages[name] = set([attr])
-            else:
-                packages[name].add(attr)
-        matched = {"node": node, "fromimports": []}
-        for package in packages:
-            for name in packages[package]:
-                #XXX This will fail on things like "from dbm import gnu as g"
-                if _is_import_binding(node, name, package):
-                    matched["fromimports"].append(node)
-        if matched["fromimports"]:
-            return matched
+        if node.type == syms.dotted_name:
+            _name = node.children[0]
+            _attr = node.children[2]
+        elif node.type == syms.power:
+            _name = node.children[0]
+            _attr = node.children[1].children[1]
+        name = _name.value
+        attr = _attr.value
+        full_name = name + u'.' + attr
+        if not full_name in mapping:
+            return
+        to_repl = mapping[full_name]
+        if u'.' in to_repl:
+            repl_name, repl_attr = to_repl.split(u'.')
+            _name.replace(Name(repl_name, prefix=_name.prefix))
+            _attr.replace(Name(repl_attr, prefix=_attr.prefix))
+        elif node.type == syms.dotted_name:
+            node.replace(Name(to_repl, prefix=node.prefix))
+        elif node.type == syms.power:
+            _name.replace(Name(to_repl, prefix=_name.prefix))
+            parent = _attr.parent
+            _attr.remove()
+            parent.remove()
+
+    def fix_simple_name(self, node, mapping=MAPPING):
+        """
+        Accepts a Name leaf.
+        If mapping is given, use it; otherwise use our MAPPING
+        Returns a node that can be in-place replaced by the node given
+        """
+        assert node.type == token.NAME, repr(node)
+        if not node.value in mapping:
+            return
+        replacement = mapping[node.value]
+        node.replace(Leaf(token.NAME, unicode(replacement), prefix=node.prefix))
+
+    def fix_submod_import(self, imported, name, node):
+        """
+        Accepts a list of NAME leafs, a name string, and a node
+        node is given as an argument to BaseFix.transform()
+        NAME leafs come from an import_as_names node (the children)
+        name string is the base name found in node.
+        """
+        submods = []
+        missed = []
+        for attr in imported:
+            dotted = u'.'.join((name, attr.value))
+            if dotted in MAPPING:
+                # get the replacement module
+                to_repl = MAPPING[dotted]
+                if '.' not in to_repl:
+                    # it's a simple name, so use a simple replacement.
+                    _import = NameImport(Name(to_repl, prefix=u" "), attr.value)
+                    submods.append(_import)
+            elif attr.type == token.NAME:
+                missed.append(attr.clone())
+        if not submods:
+            return
+
+        parent = node.parent
+        node.replace(submods[0])
+        if len(submods) > 1:
+            start = submods.pop(0)
+            prev = start
+            for submod in submods:
+                parent.append_child(submod)
+        if missed:
+            self.warning(node, "Imported names not known to 3to2 to be part of the package {0}.  Leaving those alone... high probability that this code will be incorrect.".format(name))
+            children = [Name("from"), Name(name, prefix=u" "), Name("import", prefix=u" "), Node(syms.import_as_names, missed)]
+            orig_stripped = Node(syms.import_from, children)
+            parent.append_child(Newline())
+            parent.append_child(orig_stripped)
+
+
+    def get_dotted_import_replacement(self, name_node, attr_node, mapping=MAPPING):
+        """
+        For (http, client) given and httplib being the correct replacement,
+        returns (httplib as client, None)
+        For (test, support) given and test.test_support being the replacement,
+        returns (test, test_support as support)
+        """
+        full_name = name_node.value + u'.' + attr_node.value
+        replacement = mapping[full_name]
+        if u'.' in replacement:
+            new_name, new_attr = replacement.split(u'.')
+            return Name(new_name, prefix=name_node.prefix), Node(syms.dotted_as_name, [Name(new_attr, prefix=attr_node.prefix), Name(u'as', prefix=u" "), attr_node.clone()])
         else:
-            return False
-
-    def fix_fromimports(self, nodes):
-        for node in nodes:
-            pkg, name = pkg_name(node)
-            mapped = pkg.value + u"." + name.value
-            repl = unicode(self.mapping[mapped])
-            p = u" "
-            new_node = Node(syms.import_name, [Leaf(1, u"import"),
-               Node(syms.dotted_as_name, [Leaf(1, repl, prefix=p),
-               Leaf(1, u"as", prefix=p), Leaf(1, name.value, prefix=p)])])
-            node.replace(new_node)
-
-    def find_dotted_name_usage(self, vals):
-        """
-        Find the usage of a dotted name from self.replace
-        Accepts: a list generated from a node.post_order()
-        """
-        if not self.replace:
-            return False
-        names_attrs = [tuple(name.split(".")) for name in self.mapping if "." in name]
-        if not names_attrs:
-            return False
-        packages = {}
-        for name, attr in names_attrs:
-            if not unicode(name) in packages:
-                packages[unicode(name)] = set([attr])
-            else:
-                packages[unicode(name)].add(attr)
-        matched = []
-        # say this next line ten times fast...
-        vals = [val for val in vals if isinstance(val, Leaf)]
-        for val in vals:
-            if val.type == token.NAME and val.value in packages:
-                dot, attr = dot_attr_used(val)
-            else:
-                continue
-            if (dot and attr) and (attr.value in packages[val.value]) and \
-               val.value + u"." + attr.value in self.replace:
-                matched.append((val,dot,attr))
-            else:
-                continue
-        return matched
-
-    def match_dotted(self, node):
-        """Iterate through names matching the dotted ones"""
-        results = {"node": node}
-        matched = []
-        for name in self.mapping:
-            if "." in name:
-                import_mod = self.find_node_usage(node, DottedName(name.split(".")))
-                if import_mod:
-                    import_mod.value = name
-                    results["module_name"] = import_mod
-                    self.replace[import_mod.value] = self.mapping[import_mod.value]
-                    matched.append(import_mod)
-        # This switch flags self.transform to perform certain actions
-        if len(matched) == 0:
-            return False
-        if len(matched) == 1:
-            if not re.match("from %s import +" % name, str(node)) or \
-               not re.match("import * %s * as +" % name, str(node)):
-                results["name_import"] = True
-        else:
-            results["multiple_imports"] = True
-        return results
-
-    def match_named(self, node):
-        """
-        Builds the results dict for self.match() based on what we get in find_dotted_name_usage
-        """
-        results = {"node": node}
-        name_usage = self.find_dotted_name_usage(node.pre_order())
-        if name_usage:
-            results["bare_with_attr"] = name_usage
-        else:
-            return False
-        return results
-
-    def match(self, node):
-        """
-        An amalgamation of the basic matcher and our own handling of dotted modules
-        """
-        return super(FixImports, self).match(node) or self.match_named(node) or \
-               self.match_dotted(node) or self.match_fromimports(node)
-
-    def transform_dotted_to_single(self, old, new):
-        """
-        Accepts an old tuple of Leafs (Name, Dot, Name) and a string
-        Replaces (Name, Dot, Name) with a single Name, from new.
-        """
-        old[0].replace(Name(new, prefix=old[0].prefix))
-        old[1].remove()
-        old[2].remove()
-
-    def transform_dotted_to_dotted(self, old, new):
-        """
-        Accepts an old tuple of Leafs (Name, Dot, Name)
-        """
-        old[0].replace(Name(new[0], prefix=old[0].prefix))
-        old[2].replace(Name(new[1], prefix=old[2].prefix))
-
-    def fix_names(self, names):
-        for name in names:
-            # TODO: Fix one node at a time.
-            full_name = name[0].value + name[1].value + name[2].value
-            new_name = self.replace.get(full_name)
-            if u"." not in new_name:
-                self.transform_dotted_to_single(name, new_name)
-            else:
-                # test.test_support and everything in fix_imports2
-                new_mod, new_attr = new_name.split(".")
-                self.transform_dotted_to_dotted(name, (new_mod, new_attr))
-
-
+            return Node(syms.dotted_as_name, [Name(replacement, prefix=name_node.prefix), Name(u'as', prefix=u' '), Name(attr_node.value, prefix=attr_node.prefix)]), None
+    
     def transform(self, node, results):
-        """
-        Use the parent's transform unless we have to do our own thing.
-        """
-        import_mod = results.get("module_name")
-        names = results.get("bare_with_attr")
-        fromimports = results.get("fromimports")
-        if import_mod or (names and (isinstance(names[0], Leaf))):
-            return super(FixImports, self).transform(node, results)
-        elif names:
-            self.fix_names(names)
-        elif fromimports:
-            self.fix_fromimports(fromimports)
+        from_import = results.get("from_import")
+        from_import_submod = results.get("from_import_submod")
+        name_import = results.get("name_import")
+        dotted_name = results.get("dotted_name")
+        name = results.get("name")
+        names = results.get("names")
+        attr = results.get("attr")
+        imported = results.get("imported")
+        if names:
+            for name in names:
+                if name.type == token.NAME:
+                    self.fix_simple_name(name)
+                elif name.type == syms.dotted_as_name:
+                    self.fix_simple_name(name.children[0]) if name.children[0].type == token.NAME else \
+                    self.fix_dotted_name(name.children[0])
+                elif name.type == syms.dotted_name:
+                    self.fix_dotted_name(name)
+        elif from_import_submod:
+            new_name, new_attr = self.get_dotted_import_replacement(name, attr)
+            if new_attr is not None:
+                name.replace(new_name)
+                attr.replace(new_attr)
+            else:
+                children = [Name("import"), new_name]
+                node.replace(Node(syms.import_name, children, prefix=node.prefix))
+        elif dotted_name:
+            self.fix_dotted_name(dotted_name)
+        elif name_import or from_import:
+            self.fix_simple_name(name)
+        elif name and not attr:
+            if does_tree_import(None, MAPPING[name.value], node):
+                self.fix_simple_name(name)
+        elif name and attr:
+            # Note that this will fix a dotted name that was never imported.  This will probably not matter.
+            self.fix_dotted_name(node)
+        elif imported and imported.type == syms.import_as_names:
+            self.fix_submod_import(imported=imported.children, node=node, name=name.value)
