@@ -1,4 +1,4 @@
-from fix_imports import FixImports, DottedName
+from fix_imports import FixImports
 from lib2to3.pytree import Leaf, Node
 from lib2to3.fixer_util import Dot, Comma, Name, Newline, FromImport, find_root
 from lib2to3.pygram import python_symbols as syms

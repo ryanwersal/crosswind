@@ -1,7 +1,7 @@
 from test_all_fixers import lib3to2FixerTestCase
 
-class Test_imports_test(lib3to2FixerTestCase):
-    fixer = "imports_test"
+class Test_imports(lib3to2FixerTestCase):
+    fixer = "imports"
 
     def test_various_unchanged(self):
 

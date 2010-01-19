@@ -100,7 +100,7 @@ def all_patterns(name):
         return ' | \n'.join((i_name, i_from, u_name))
 
 
-class FixImportsTest(fixer_base.BaseFix):
+class FixImports(fixer_base.BaseFix):
 
     PATTERN = ' | \n'.join(all_patterns(name) for name in MAPPING)
     PATTERN = ' | \n'.join((PATTERN, multiple_name_import_match))

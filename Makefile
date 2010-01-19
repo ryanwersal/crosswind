@@ -9,7 +9,7 @@ test:
 install-local:
 	./setup.py install --prefix=$(HOME)/.local
 
-test-local: install-local
+test-local: uninstall-local install-local
 	$(PYVERSION) $(HOME)/.local/lib/$(PYVERSION)/site-packages/lib3to2/tests/test_all_fixers.py
 
 uninstall-local:
