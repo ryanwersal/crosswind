@@ -1,3 +1,8 @@
+"""
+Warn about features that are not present in Python 2.5, giving a message that
+points to the earliest version of Python 2.x (or 3.x, if none) that supports it
+"""
+
 from feature_base import Feature, Features
 from lib2to3 import fixer_base
 
@@ -9,10 +14,6 @@ FEATURES = [
     ("memoryview",
         "power < 'memoryview' trailer < '(' any* ')' > any* >",
      "2.7",
-    ),
-    ("python",
-        "power < 'python' trailer < '(' ')' > >",
-     "3.8",
     ),
     ("numbers",
         """import_from< 'from' 'numbers' 'import' any* > |
@@ -36,22 +37,28 @@ FEATURES = [
     ("formatting",
         "power< any trailer< '.' 'format' > trailer< '(' any* ')' > >",
      "2.6",
-    ),
+    ),    
 ]
 
 class FixFeaturesTest(fixer_base.BaseFix):
 
+    # To avoid spamming, we only want to warn for each feature once.
     features_warned = set()
 
-    features = Features(Feature(name, pattern, version) for name, pattern, version in FEATURES)
+    # Build features from the list above
+    features = Features(Feature(name, pattern, version) for \
+                                name, pattern, version in FEATURES)
 
     PATTERN = features.PATTERN
 
     def match(self, node):
         to_ret = super(FixFeaturesTest, self).match(node)
+        # We want the mapping only to tell us the node's specific information.
         try:
             del to_ret['node']
         except Exception:
+            # We want it to delete the 'node' from the results
+            # if it's there, so we don't care if it fails for normal reasons.
             pass
         return to_ret
     
@@ -60,5 +67,6 @@ class FixFeaturesTest(fixer_base.BaseFix):
             if feature_name in self.features_warned:
                 continue
             else:
-                self.warning(node, reason=self.features[feature_name].warning_text())
+                curr_feature = self.features[feature_name]
+                self.warning(node, reason=curr_feature.warning_text())
                 self.features_warned.add(feature_name)
