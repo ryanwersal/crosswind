@@ -38,9 +38,9 @@ class FixAnnotations(fixer_base.BaseFix):
         if params is None: return
         if params.type == syms.typedargslist:
             # more than one param in a typedargslist
-            self.warn_once(node, reason=warning_text)
             for param in params.children:
                 if param.type == syms.tname:
+                    self.warn_once(node, reason=warning_text)
                     param.replace(param_without_annotations(param))
         elif params.type == syms.tname:
             # one param
