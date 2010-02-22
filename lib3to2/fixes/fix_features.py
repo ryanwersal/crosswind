@@ -1,62 +1,80 @@
 """
-Fixer to alert the user about features in 3.x that do not exist in 2.5
-Any matches here will necessarily constrain the input code to work after refactoring
-only in later versions of Python than 2.5.
+Warn about features that are not present in Python 2.5, giving a message that
+points to the earliest version of Python 2.x (or 3.x, if none) that supports it
 """
 
+from feature_base import Feature, Features
 from lib2to3 import fixer_base
-from lib2to3.fixer_util import does_tree_import, is_import
 
-def incompatible_feature(obj, node, feature):
-    reason = "The following is not backwards compatible with Python 2.5 and will only run in version %s and up: %s" %(feature.min_ver, feature.name)
-    obj.cannot_convert(node, reason)
-
-class Feature(object):
-
-    def __init__(self, name, min_ver):
-        self.name = name
-        self.min_ver = min_ver
+FEATURES = [
+   #(FeatureName,
+   #    FeaturePattern,
+   # FeatureMinVersion,
+   #),
+    ("memoryview",
+        "power < 'memoryview' trailer < '(' any* ')' > any* >",
+     "2.7",
+    ),
+    ("numbers",
+        """import_from< 'from' 'numbers' 'import' any* > |
+           import_name< 'import' ('numbers' dotted_as_names< any* 'numbers' any* >) >""",
+     "2.6",
+    ),
+    ("abc",
+        """import_name< 'import' ('abc' dotted_as_names< any* 'abc' any* >) > |
+           import_from< 'from' 'abc' 'import' any* >""",
+     "2.6",
+    ),
+    ("io",
+        """import_name< 'import' ('io' dotted_as_names< any* 'io' any* >) > |
+           import_from< 'from' 'io' 'import' any* >""",
+     "2.6",
+    ),
+    ("bin",
+        "power< 'bin' trailer< '(' any* ')' > any* >",
+     "2.6",
+    ),
+    ("formatting",
+        "power< any trailer< '.' 'format' > trailer< '(' any* ')' > >",
+     "2.6",
+    ),
+    ("nonlocal",
+        "global_stmt< 'nonlocal' any* >",
+     "3.0",
+    ),
+]
 
 class FixFeatures(fixer_base.BaseFix):
 
-    # Run this as late as possible, after optionally fixed features are taken care of.
-    run_order = 9
-    #TODO: Make the pattern built generically from a mapping.
-    PATTERN = """format=power< STRING trailer< '.' 'format' > trailer< '(' any* ')' > > |
-                 bin=power< 'bin' trailer< '(' any* ')' > [any*] > |
-                 io=import_name< 'import' ('io' | dotted_as_names< any* 'io' any* >) > |
-                 io=import_from< 'from' 'io' 'import' any* > |
-                 abc=import_name< 'import' ('abc' | dotted_as_names< any* 'abc' any* >) > |
-                 abc=import_from< 'from' 'abc' 'import' any* > |
-                 numb=import_from< 'from' 'numbers' 'import' any* > |
-                 numb=import_name< 'import' ('numbers' | dotted_as_names< any* 'numbers' any* >) > |
-                 mem=power< 'memoryview' trailer< '(' any* ')' > [any*] >
-              """
-    def handle_imports(self, node):
-        #TODO: Make the handler generic.
-        found = []
-        if does_tree_import(None, 'io', node) or \
-           (is_import(node) and ' io ' in str(node)):
-            found.append(Feature('io package', '2.6'))
-        if does_tree_import(None, 'abc', node) or \
-           (is_import(node) and ' abc ' in str(node)):
-            found.append(Feature('abc package', '2.6'))
-        if does_tree_import(None, 'numbers', node) or \
-           (is_import(node) and ' numbers ' in str(node)):
-            found.append(Feature('numbers package', '2.6'))
-        return found
+    # To avoid spamming, we only want to warn for each feature once.
+    features_warned = set()
 
+    # Build features from the list above
+    features = Features(Feature(name, pattern, version) for \
+                                name, pattern, version in FEATURES)
+
+    PATTERN = features.PATTERN
+
+    def match(self, node):
+        to_ret = super(FixFeatures, self).match(node)
+        # We want the mapping only to tell us the node's specific information.
+        try:
+            del to_ret['node']
+        except Exception:
+            # We want it to delete the 'node' from the results
+            # if it's there, so we don't care if it fails for normal reasons.
+            pass
+        return to_ret
+    
     def transform(self, node, results):
-        #TODO: Make the transformation generic.
-        def alert_feature(feature):
-            return incompatible_feature(self, node, feature)
-        if results.get('bin'):
-            alert_feature(Feature('bin function', '2.6'))
-        if results.get('mem'):
-            alert_feature(Feature('memoryview function', '2.7'))
-        io = results.get('io')
-        abc = results.get('abc')
-        numb = results.get('numb')
-        if io or numb or abc:
-            for found in self.handle_imports(node):
-                alert_feature(found)
+        for feature_name in results:
+            if feature_name in self.features_warned:
+                continue
+            else:
+                curr_feature = self.features[feature_name]
+                if curr_feature.version >= "3":
+                    fail = self.cannot_convert
+                else:
+                    fail = self.warning
+                fail(node, reason=curr_feature.message_text())
+                self.features_warned.add(feature_name)

@@ -8,11 +8,8 @@ PATTERN = features.PATTERN
 """
 
 pattern_unformatted = "{0}={1}" # name=pattern, for dict lookups
-warning_unformatted = """
-feature {0} is not supported in Python 2.5.  A minimum version of Python {1} is
-required to use this feature.  If your program will only be using that version
-of the interpreter or higher, then you may ignore this warning.  Otherwise, you
-will need to refactor your code not to use that feature."""
+message_unformatted = """
+feature {0} is only supported in Python {1} and above."""
 
 class Feature(object):
     """
@@ -25,11 +22,11 @@ class Feature(object):
         self._pattern = PATTERN
         self.version = version
 
-    def warning_text(self):
+    def message_text(self):
         """
         Format the above text with the name and minimum version required.
         """
-        return warning_unformatted.format(self.name, self.version)
+        return message_unformatted.format(self.name, self.version)
 
 class Features(set):
     """
