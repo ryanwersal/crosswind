@@ -166,9 +166,9 @@ def map_printargs(args):
             kids = arg.children
             assert kids[0].type == token.NAME, repr(arg)
             assert len(kids) > 1, repr(arg)
-            assert kids[0].value in (u"sep", u"end", u"file")
-            assert unicode(kids[0].value) not in mapping, mapping
-            mapping[unicode(kids[0].value)] = kids[2]
+            assert str(kids[0].value) in ("sep", "end", "file")
+            assert str(kids[0].value) not in mapping, mapping
+            mapping[str(kids[0].value)] = kids[2]
         else:
             pos.append(arg)
     return pos, mapping
