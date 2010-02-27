@@ -99,7 +99,9 @@ def add_sep_part(sep, pos, lst):
 def add_end_part(end, file, parent, loc):
     if isNone(end):
         return
-    if end.type == token.STRING and end.value in (u"' '", u'" "'):
+    if end.type == token.STRING and end.value in (u"' '", u'" "',
+                                                  u"u' '", u'u" "',
+                                                  u"b' '", u'b" "'):
         return
     if file is None:
         touch_import(None, u"sys", parent)
