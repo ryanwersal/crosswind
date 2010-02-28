@@ -22,5 +22,6 @@ clean:
 	\( -name '*~' \
 	   -or -name '#*#' \
 	   -or -name '*.pyc' \
+	   -or -name '*.orig' \
 	\) -exec rm -fv {} \;
 	rm -rfv build dist
