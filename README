@@ -27,6 +27,9 @@ the Python 3 executable installed as "python3".  If this does not exist, then
 you should either symlink "python3" to your preferred Python 3 executable, or
 modify the lines that start with "#!" in scripts.
 
+To install locally (used for running tests as a non-privileged user), the
+scripts assume you are using python3.1.  Modify accordingly if you are not.
+
 Relationship with 2to3
 ======================
 

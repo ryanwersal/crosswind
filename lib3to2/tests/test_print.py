@@ -1,4 +1,4 @@
-from .test_all_fixers import lib3to2FixerTestCase
+from lib3to2.tests.test_all_fixers import lib3to2FixerTestCase
 
 class Test_print(lib3to2FixerTestCase):
     fixer = "print"
@@ -31,7 +31,7 @@ class Test_print(lib3to2FixerTestCase):
             " spam, spam, sep=', spam, ', end=wonderful_spam)\nprint()"
         a = "import sys\nprint ', spam, '.join([unicode(spam), unicode(spam), unicode(spam), unicode(spam), unicode(spam), unicode(baked_beans),"\
             " unicode(spam), unicode(spam), unicode(spam), unicode(spam)]),; sys.stdout.write(wonderful_spam)\nprint"
-        self.check(b, a)
+        self.check(b, a, ignore_warnings=True)
 
     def test_nones(self):
         b = "print(1,2,3,end=None, sep=None, file=None)"

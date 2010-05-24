@@ -1,4 +1,4 @@
-from .test_all_fixers import lib3to2FixerTestCase
+from lib3to2.tests.test_all_fixers import lib3to2FixerTestCase
 
 class Test_bytes(lib3to2FixerTestCase):
     fixer = "bytes"

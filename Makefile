@@ -1,4 +1,4 @@
-PYVERSION = python2.7
+PYVERSION = python3.1
 
 install:
 	./setup.py install

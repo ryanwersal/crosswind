@@ -1,23 +1,17 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 """
 Runs all tests in the same directory named test_*.py
 """
 
-# Python imports
-import unittest
 import os.path
 import os
-from itertools import chain
 
-# Local imports
-from lib2to3 import pytree
 from lib2to3 import pygram
-from lib2to3 import refactor
 from lib2to3.tests import support
 from lib2to3.tests.test_fixers import FixerTestCase
 
 class lib3to2FixerTestCase(FixerTestCase):
-    def setUp(self, fix_list=None, fixer_pkg="lib3to2"):
+    def setUp(self, fix_list=None, fixer_pkg=".."):
         super(lib3to2FixerTestCase, self).setUp(fixer_pkg=fixer_pkg)
         self.refactor.driver.grammar = pygram.python_grammar_no_print_statement
 
