@@ -9,8 +9,7 @@ from lib2to3.pytree import Node, Leaf
 from lib2to3.pygram import token, python_symbols as syms
 from lib2to3.fixer_util import Assign, Comma, Call, Newline, Name, Number
 
-from ..fixer_util import indentation
-from fix_imports2 import commatize
+from ..fixer_util import indentation, commatize
 
 def assignment_source(num_pre, num_post, LISTNAME, ITERNAME):
     """
@@ -21,16 +20,17 @@ def assignment_source(num_pre, num_post, LISTNAME, ITERNAME):
     children = []
     pre = str(num_pre)
     post = str(num_post)
-    # a little prettier... still some cleanup TODO
+    # This code builds the assignment source from lib2to3 tree primitives.
+    # It's not very readable, but it seems like the most correct way to do it.
     if num_pre > 0:
-        pre_part = Node(syms.power, [Name(LISTNAME), Node(syms.trailer, [Leaf(token.LSQB, u"["), Node(syms.subscript, [Leaf(token.COLON, u":"), Number(pre)]), Leaf(token.RSQB, u"]")])])
+        pre_part = Node(syms.power, [Name(LISTNAME), Node(syms.trailer, [Leaf(token.LSQB, "["), Node(syms.subscript, [Leaf(token.COLON, ":"), Number(pre)]), Leaf(token.RSQB, "]")])])
         children.append(pre_part)
-        children.append(Leaf(token.PLUS, u"+", prefix=u" "))
-    main_part = Node(syms.power, [Leaf(token.LSQB, u"[", prefix=u" "), Name(LISTNAME), Node(syms.trailer, [Leaf(token.LSQB, u"["), Node(syms.subscript, [Number(pre) if num_pre > 0 else Leaf(1, u""), Leaf(token.COLON, u":"), Node(syms.factor, [Leaf(token.MINUS, u"-"), Number(post)]) if num_post > 0 else Leaf(1, u"")]), Leaf(token.RSQB, u"]"), Leaf(token.RSQB, u"]")])])
+        children.append(Leaf(token.PLUS, "+", prefix=" "))
+    main_part = Node(syms.power, [Leaf(token.LSQB, "[", prefix=" "), Name(LISTNAME), Node(syms.trailer, [Leaf(token.LSQB, "["), Node(syms.subscript, [Number(pre) if num_pre > 0 else Leaf(1, ""), Leaf(token.COLON, ":"), Node(syms.factor, [Leaf(token.MINUS, "-"), Number(post)]) if num_post > 0 else Leaf(1, "")]), Leaf(token.RSQB, "]"), Leaf(token.RSQB, "]")])])
     children.append(main_part)
     if num_post > 0:
-        children.append(Leaf(token.PLUS, u"+", prefix=u" "))
-        post_part = Node(syms.power, [Name(LISTNAME, prefix=u" "), Node(syms.trailer, [Leaf(token.LSQB, u"["), Node(syms.subscript, [Node(syms.factor, [Leaf(token.MINUS, u"-"), Number(post)]), Leaf(token.COLON, u":")]), Leaf(token.RSQB, u"]")])])
+        children.append(Leaf(token.PLUS, "+", prefix=" "))
+        post_part = Node(syms.power, [Name(LISTNAME, prefix=" "), Node(syms.trailer, [Leaf(token.LSQB, "["), Node(syms.subscript, [Node(syms.factor, [Leaf(token.MINUS, "-"), Number(post)]), Leaf(token.COLON, ":")]), Leaf(token.RSQB, "]")])])
         children.append(post_part)
     source = Node(syms.arith_expr, children)
     return source
@@ -50,14 +50,14 @@ class FixUnpacking(fixer_base.BaseFix):
     def fix_explicit_context(self, node, results):
         pre, name, post, source = results.get("pre"), results.get("name"), results.get("post"), results.get("source")
         pre = [n.clone() for n in pre if n.type == token.NAME]
-        name.prefix = u" "
+        name.prefix = " "
         post = [n.clone() for n in post if n.type == token.NAME]
         target = [n.clone() for n in commatize(pre + [name.clone()] + post)]
         # to make the special-case fix for "*z, = ..." correct with the least
         # amount of modification, make the left-side into a guaranteed tuple
         target.append(Comma())
-        source.prefix = u""
-        setup_line = Assign(Name(self.LISTNAME), Call(Name(u"list"), [source.clone()]))
+        source.prefix = ""
+        setup_line = Assign(Name(self.LISTNAME), Call(Name("list"), [source.clone()]))
         power_line = Assign(target, assignment_source(len(pre), len(post), self.LISTNAME, self.ITERNAME))
         return setup_line, power_line
         
@@ -73,7 +73,7 @@ class FixUnpacking(fixer_base.BaseFix):
         """
         a,b,c,d,e,f,*g,h,i = range(100) changes to
         _3to2list = list(range(100))
-        a,b,c,d,e,f,g,h,i = _3to2iter[:6] + [_3to2iter[6:-2]] + _3to2iter[-2:]
+        a,b,c,d,e,f,g,h,i = _3to2list[:6] + [_3to2list[6:-2]] + _3to2list[-2:]
 
         and
 
@@ -96,4 +96,4 @@ class FixUnpacking(fixer_base.BaseFix):
             parent.insert_child(i, power_line)
             parent.insert_child(i, setup_line)
         elif impl is not None:
-            self.fix_implicit_context(node, results) # do something with this
+            self.fix_implicit_context(node, results) # TODO: something with this

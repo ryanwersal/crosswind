@@ -14,6 +14,8 @@ print(1,2,3,file=file) -> print >>file, 1,2,3
 print(1,2,3,sep=" ",end="\n") -> print 1,2,3
 """
 
+from __future__ import with_statement # Aiming for 2.5-compatible code
+
 from lib2to3 import fixer_base
 from lib2to3.pytree import Node, Leaf
 from lib2to3.pygram import python_symbols as syms, token
@@ -33,14 +35,14 @@ def gen_printargs(lst):
             it = kids.__iter__()
             try:
                 while True:
-                    arg = it.next()
+                    arg = next(it)
                     if arg.type == syms.argument:
                         # argument < "file"|"sep"|"end" "=" (any) >
                         yield arg
-                        it.next()
+                        next(it)
                     else:
                         yield arg
-                        it.next()
+                        next(it)
             except StopIteration:
                 continue
         else:
@@ -50,7 +52,7 @@ def isNone(arg):
     """
     Returns True if arg is a None node
     """
-    return arg.type == token.NAME and arg.value == u"None"
+    return arg.type == token.NAME and arg.value == "None"
 
 def _unicode(arg):
     """
@@ -58,20 +60,20 @@ def _unicode(arg):
     """
     prefix = arg.prefix
     arg = arg.clone()
-    arg.prefix = u""
-    ret = Call(Name(u"unicode", prefix=prefix), [arg])
+    arg.prefix = ""
+    ret = Call(Name("unicode", prefix=prefix), [arg])
     return ret
 
 def add_file_part(file, lst):
     if file is None or isNone(file):
         return
-    lst.append(Leaf(token.RIGHTSHIFT, u">>", prefix=u" "))
+    lst.append(Leaf(token.RIGHTSHIFT, ">>", prefix=" "))
     lst.append(file.clone())
     lst.append(Comma())
 
 def add_sep_part(sep, pos, lst):
     if sep is not None and not isNone(sep) and \
-       not (sep.type == token.STRING and sep.value in (u"' '", u'" "')):
+       not (sep.type == token.STRING and sep.value in ("' '", '" "')):
         temp = []
         for arg in pos:
             temp.append(_unicode(arg.clone()))
@@ -79,18 +81,18 @@ def add_sep_part(sep, pos, lst):
             temp.append(Comma())
         del temp[-1]
         sep = sep.clone()
-        sep.prefix = u" "
+        sep.prefix = " "
         args = Node(syms.listmaker, temp)
-        new_list = Node(syms.atom, [Leaf(token.LSQB, u"["), args,
-                                    Leaf(token.RSQB, u"]")])
+        new_list = Node(syms.atom, [Leaf(token.LSQB, "["), args,
+                                    Leaf(token.RSQB, "]")])
         join_arg = Node(syms.trailer, [LParen(), new_list, RParen()])
         sep_join = Node(syms.power, [sep, Node(syms.trailer,
-                                                      [Dot(), Name(u"join")])])
+                                                      [Dot(), Name("join")])])
         lst.append(sep_join)
         lst.append(join_arg)
     else:
         if pos:
-            pos[0].prefix = u" "
+            pos[0].prefix = " "
         for arg in pos:
             lst.append(arg.clone())
             lst.append(Comma())
@@ -99,19 +101,19 @@ def add_sep_part(sep, pos, lst):
 def add_end_part(end, file, parent, loc):
     if isNone(end):
         return
-    if end.type == token.STRING and end.value in (u"' '", u'" "',
-                                                  u"u' '", u'u" "',
-                                                  u"b' '", u'b" "'):
+    if end.type == token.STRING and end.value in ("' '", '" "',
+                                                  "u' '", 'u" "',
+                                                  "b' '", 'b" "'):
         return
     if file is None:
-        touch_import(None, u"sys", parent)
-        file = Node(syms.power, [Name(u"sys"),
-                                 Node(syms.trailer, [Dot(), Name(u"stdout")])])
+        touch_import(None, "sys", parent)
+        file = Node(syms.power, [Name("sys"),
+                                 Node(syms.trailer, [Dot(), Name("stdout")])])
     end_part = Node(syms.power, [file,
-                                Node(syms.trailer, [Dot(), Name(u"write")]),
+                                Node(syms.trailer, [Dot(), Name("write")]),
                                 Node(syms.trailer, [LParen(), end, RParen()])])
-    end_part.prefix = u" "
-    parent.insert_child(loc, Leaf(token.SEMI, u";"))
+    end_part.prefix = " "
+    parent.insert_child(loc, Leaf(token.SEMI, ";"))
     parent.insert_child(loc+1, end_part)
 
 def replace_print(pos, opts, old_node=None):
@@ -123,14 +125,14 @@ def replace_print(pos, opts, old_node=None):
     end = None if "end" not in opts else opts["end"].clone()
     file = None if "file" not in opts else opts["file"].clone()
     if old_node is None:
-        parent = Node(syms.simple_stmt, [Leaf(token.NEWLINE, u"\n")])
+        parent = Node(syms.simple_stmt, [Leaf(token.NEWLINE, "\n")])
         i = 0
     else:
         parent = old_node.parent
         i = old_node.remove()
     parent.insert_child(i, new_node)
     if end is not None and not (end.type == token.STRING and \
-                               end.value in (u"'\\n'", u'"\\n"')):
+                               end.value in ("'\\n'", '"\\n"')):
         add_end_part(end, file, parent, i+1)
     return new_node
 
@@ -144,14 +146,14 @@ def new_print(*pos, **opts):
     'file': some file-like object that supports the write() method
     'end': some string
     """
-    children = [Name(u"print")]
+    children = [Name("print")]
     sep = None if "sep" not in opts else opts["sep"]
     file = None if "file" not in opts else opts["file"]
     end = None if "end" not in opts else opts["end"]
     add_file_part(file, children)
     add_sep_part(sep, pos, children)
     if end is not None and not isNone(end):
-        if not end.value in (u'"\\n"', u"'\\n'"):
+        if not end.value in ('"\\n"', "'\\n'"):
             children.append(Comma())
     return Node(syms.print_stmt, children)
 

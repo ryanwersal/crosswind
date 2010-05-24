@@ -102,7 +102,7 @@ def all_patterns(name):
 
 class FixImports(fixer_base.BaseFix):
 
-    PATTERN = ' | \n'.join(all_patterns(name) for name in MAPPING)
+    PATTERN = ' | \n'.join([all_patterns(name) for name in MAPPING])
     PATTERN = ' | \n'.join((PATTERN, multiple_name_import_match))
 
     def fix_dotted_name(self, node, mapping=MAPPING):
@@ -119,12 +119,12 @@ class FixImports(fixer_base.BaseFix):
             _attr = node.children[1].children[1]
         name = _name.value
         attr = _attr.value
-        full_name = name + u'.' + attr
+        full_name = name + '.' + attr
         if not full_name in mapping:
             return
         to_repl = mapping[full_name]
-        if u'.' in to_repl:
-            repl_name, repl_attr = to_repl.split(u'.')
+        if '.' in to_repl:
+            repl_name, repl_attr = to_repl.split('.')
             _name.replace(Name(repl_name, prefix=_name.prefix))
             _attr.replace(Name(repl_attr, prefix=_attr.prefix))
         elif node.type == syms.dotted_name:
@@ -145,7 +145,7 @@ class FixImports(fixer_base.BaseFix):
         if not node.value in mapping:
             return
         replacement = mapping[node.value]
-        node.replace(Leaf(token.NAME, unicode(replacement), prefix=node.prefix))
+        node.replace(Leaf(token.NAME, str(replacement), prefix=node.prefix))
 
     def fix_submod_import(self, imported, name, node):
         """
@@ -157,13 +157,13 @@ class FixImports(fixer_base.BaseFix):
         submods = []
         missed = []
         for attr in imported:
-            dotted = u'.'.join((name, attr.value))
+            dotted = '.'.join((name, attr.value))
             if dotted in MAPPING:
                 # get the replacement module
                 to_repl = MAPPING[dotted]
                 if '.' not in to_repl:
                     # it's a simple name, so use a simple replacement.
-                    _import = NameImport(Name(to_repl, prefix=u" "), attr.value)
+                    _import = NameImport(Name(to_repl, prefix=" "), attr.value)
                     submods.append(_import)
             elif attr.type == token.NAME:
                 missed.append(attr.clone())
@@ -179,7 +179,7 @@ class FixImports(fixer_base.BaseFix):
                 parent.append_child(submod)
         if missed:
             self.warning(node, "Imported names not known to 3to2 to be part of the package {0}.  Leaving those alone... high probability that this code will be incorrect.".format(name))
-            children = [Name("from"), Name(name, prefix=u" "), Name("import", prefix=u" "), Node(syms.import_as_names, missed)]
+            children = [Name("from"), Name(name, prefix=" "), Name("import", prefix=" "), Node(syms.import_as_names, missed)]
             orig_stripped = Node(syms.import_from, children)
             parent.append_child(Newline())
             parent.append_child(orig_stripped)
@@ -192,13 +192,13 @@ class FixImports(fixer_base.BaseFix):
         For (test, support) given and test.test_support being the replacement,
         returns (test, test_support as support)
         """
-        full_name = name_node.value + u'.' + attr_node.value
+        full_name = name_node.value + '.' + attr_node.value
         replacement = mapping[full_name]
-        if u'.' in replacement:
-            new_name, new_attr = replacement.split(u'.')
-            return Name(new_name, prefix=name_node.prefix), Node(syms.dotted_as_name, [Name(new_attr, prefix=attr_node.prefix), Name(u'as', prefix=u" "), attr_node.clone()])
+        if '.' in replacement:
+            new_name, new_attr = replacement.split('.')
+            return Name(new_name, prefix=name_node.prefix), Node(syms.dotted_as_name, [Name(new_attr, prefix=attr_node.prefix), Name('as', prefix=" "), attr_node.clone()])
         else:
-            return Node(syms.dotted_as_name, [Name(replacement, prefix=name_node.prefix), Name(u'as', prefix=u' '), Name(attr_node.value, prefix=attr_node.prefix)]), None
+            return Node(syms.dotted_as_name, [Name(replacement, prefix=name_node.prefix), Name('as', prefix=' '), Name(attr_node.value, prefix=attr_node.prefix)]), None
     
     def transform(self, node, results):
         from_import = results.get("from_import")

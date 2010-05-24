@@ -18,5 +18,5 @@ class FixMethodattrs(fixer_base.BaseFix):
 
     def transform(self, node, results):
         attr = results["attr"][0]
-        new = unicode(MAP[attr.value])
+        new = str(MAP[attr.value])
         attr.replace(Name(new, prefix=attr.prefix))

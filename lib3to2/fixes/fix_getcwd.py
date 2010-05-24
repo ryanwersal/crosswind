@@ -17,7 +17,7 @@ class FixGetcwd(fixer_base.BaseFix):
     def transform(self, node, results):
         if "name" in results:
             name = results["name"]
-            name.replace(Name(u"getcwdu", prefix=name.prefix))
+            name.replace(Name("getcwdu", prefix=name.prefix))
         elif "bad" in results:
             # Can't convert to getcwdu and then expect to catch every use.
             self.cannot_convert(node, "import os, use os.getcwd() instead.")

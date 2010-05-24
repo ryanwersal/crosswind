@@ -16,8 +16,8 @@ class FixThrow(fixer_base.BaseFix):
     def transform(self, node, results):
         syms = self.syms
         exc, val, trc = (results["exc"], results["val"], results["trc"])
-        val = val[0] if val else Leaf(token.NAME, u"None")
-        val.prefix = trc.prefix = u" "
+        val = val[0] if val else Leaf(token.NAME, "None")
+        val.prefix = trc.prefix = " "
         kids = [exc.clone(), Comma(), val.clone(), Comma(), trc.clone()]
         args = results["args"]
         args.children = kids

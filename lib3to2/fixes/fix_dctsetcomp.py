@@ -9,7 +9,7 @@ from lib2to3.pygram import python_symbols as syms
 from lib2to3.pgen2 import token
 from lib2to3.fixer_util import parenthesize, Name, Call, LParen, RParen
 
-from lib3to2.fixer_util import commatize
+from ..fixer_util import commatize
 
 def tup(args):
     return parenthesize(Node(syms.testlist_gexp, commatize(args)))
@@ -27,16 +27,16 @@ class FixDctsetcomp(fixer_base.BaseFix):
         n1 = results.get("n1").clone()
         if is_dict:
             n2 = results.get("n2").clone()
-            n2.prefix = u" "
+            n2.prefix = " "
             impl_assign = tup((n1, n2))
         else:
             impl_assign = n1
         our_gencomp = Node(syms.listmaker, [(impl_assign),(comp_for)])
         if is_dict:
-            new_node = Node(syms.power, [Name(u"dict"),
+            new_node = Node(syms.power, [Name("dict"),
                        parenthesize(Node(syms.atom, [our_gencomp]))])
         else:
-            new_node = Node(syms.power, [Name(u"set"),
+            new_node = Node(syms.power, [Name("set"),
                        parenthesize(Node(syms.atom, [our_gencomp]))])
         new_node.prefix = node.prefix
         return new_node

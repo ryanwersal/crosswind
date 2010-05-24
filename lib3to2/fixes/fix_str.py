@@ -10,8 +10,8 @@ from lib2to3.pgen2 import token
 from lib2to3 import fixer_base
 from lib2to3.fixer_util import Name
 
-_mapping = {u"chr":u"unichr", u"str":u"unicode"}
-_literal_re = re.compile(ur"[rR]?[\'\"]")
+_mapping = {"chr": "unichr", "str": "unicode"}
+_literal_re = re.compile(r"[rR]?[\'\"]")
 
 class FixStr(fixer_base.BaseFix):
 
@@ -24,7 +24,7 @@ class FixStr(fixer_base.BaseFix):
         if node.type == token.STRING:
             # Simply add u to the beginning of the literal.
             if _literal_re.match(new.value):
-                new.value = u"u" + new.value
+                new.value = "u" + new.value
                 return new
         elif node.type == token.NAME:
             assert new.value in _mapping

@@ -39,7 +39,7 @@ class Features(set):
         """
         Called every time we care about the mapping of names to features.
         """
-        self.mapping = dict((f.name, f) for f in iter(self))
+        self.mapping = dict([(f.name, f) for f in iter(self)])
     
     @property
     def PATTERN(self):
@@ -48,11 +48,10 @@ class Features(set):
         for using the lib2to3 patcomp.
         """
         self.update_mapping()
-        return " |\n".join(pattern_unformatted.format(f.name, f._pattern) for f in iter(self))
+        return " |\n".join([pattern_unformatted.format(f.name, f._pattern) for f in iter(self)])
 
     def __getitem__(self, key):
         """
         Implement a simple mapping to get patterns from names.
         """
         return self.mapping[key]
-        

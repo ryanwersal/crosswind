@@ -33,10 +33,10 @@ def NameImport(package, as_name=None, prefix=None):
     import <package> [as <as_name>]
     """
     if prefix is None:
-        prefix = u""
-    children = [Name(u"import", prefix=prefix), package]
+        prefix = ""
+    children = [Name("import", prefix=prefix), package]
     if as_name is not None:
-        children.extend([Name(u"as", prefix=u" "),
-                         Name(as_name, prefix=u" ")])
+        children.extend([Name("as", prefix=" "),
+                         Name(as_name, prefix=" ")])
     return Node(syms.import_name, children)
 

@@ -42,7 +42,7 @@ class FixClassdecorator(fixer_base.BaseFix):
         dec_node = results["dec_node"]
         cls = results["cls"]
         name = results["name"].clone()
-        name.prefix = u""
+        name.prefix = ""
         # If there's just one decorator, put it in a list
         # Otherwise, get all the decorators into one list
         decs = [results.get("dec")] if "dec" in results else \

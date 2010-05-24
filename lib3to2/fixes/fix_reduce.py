@@ -30,7 +30,7 @@ class FixReduce(fixer_base.BaseFix):
         elif args:
             args = args.clone()
             prefix = node.prefix
-            return Node(syms.power, [Leaf(token.NAME, u"reduce"), args],
+            return Node(syms.power, [Leaf(token.NAME, "reduce"), args],
                                                                  prefix=prefix)
         elif in_list:
             next = in_list.next_sibling

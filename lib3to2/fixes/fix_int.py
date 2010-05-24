@@ -10,7 +10,7 @@ from lib2to3 import fixer_base
 from lib2to3.fixer_util import Name, is_probably_builtin, Number
 from lib2to3.pgen2 import token
 
-baseMAPPING = {u'b':2, u'o':8, u'x':16}
+baseMAPPING = {'b':2, 'o':8, 'x':16}
 
 class FixInt(fixer_base.BaseFix):
 
@@ -18,14 +18,14 @@ class FixInt(fixer_base.BaseFix):
 
     PATTERN = "'int' | NUMBER"
 
-    static_long = Name(u"long")
+    static_long = Name("long")
 
     def base(self, literal):
         """Returns the base of a valid py3k numeric literal."""
         literal = literal.strip()
-        if not literal.startswith(u"0") or re.match(r"0+$",literal):
+        if not literal.startswith("0") or re.match(r"0+$",literal):
             return 10
-        elif literal[1] not in u"box":
+        elif literal[1] not in "box":
             return 0
         return baseMAPPING[literal[1]]
 
@@ -35,7 +35,7 @@ class FixInt(fixer_base.BaseFix):
         #For whatever reason, some ints are being matched after we fix them.
         if val.endswith("L"):
             return "L"
-        for bad in u"jJ+-.":
+        for bad in "jJ+-.":
             if bad in val: return bad
 
     def match(self, node):
@@ -44,8 +44,8 @@ class FixInt(fixer_base.BaseFix):
     def transform(self, node, results):
         val = node.value
         if node.type == token.NUMBER and self.base(val) == 10:
-            assert not val[-1] in u"lL", "Invalid py3k literal: " + str(val)
-            val += u"L"
+            assert not val[-1] in "lL", "Invalid py3k literal: " + str(val)
+            val += "L"
             return Number(val, prefix=node.prefix)
         elif is_probably_builtin(node):
             assert node.type == token.NAME, "Sanity check failed: " + str(val)

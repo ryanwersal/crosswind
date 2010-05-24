@@ -1,4 +1,4 @@
-from fix_imports import FixImports
+from .fix_imports import FixImports
 from lib2to3.pytree import Leaf, Node
 from lib2to3.fixer_util import Dot, Comma, Name, Newline, FromImport, find_root
 from lib2to3.pygram import python_symbols as syms
@@ -236,7 +236,7 @@ def attr_used(node):
     else:
         return None
 
-def pref(node, prefix=u" "):
+def pref(node, prefix=" "):
     node.prefix = prefix
     return node
 
@@ -246,7 +246,7 @@ def names_imported_from(node):
     that the node imports
     """
     for child in node.children:
-        if (isinstance(child, Leaf) and child.value == u"import"):
+        if (isinstance(child, Leaf) and child.value == "import"):
             child = child.next_sibling
             while (child is not None and
                   child.type not in (syms.import_as_names, token.NAME, token.STAR)):
@@ -264,7 +264,7 @@ def full_name(node):
     that return not None from name_dot_attr
     """
     assert name_dot_attr(node), repr(node.parent)
-    return node.value + u"." + attr_used(node).value
+    return node.value + "." + attr_used(node).value
 
 def name_dot_attr(node):
     """
@@ -276,7 +276,7 @@ def scrub_results(results):
     """
     Deletes all keys with a val that evals to False
     """
-    items = results.items()
+    items = list(results.items())
     for key, val in items:
         if not val:
             del results[key]
@@ -327,10 +327,10 @@ def NameImport(package_name, as_name=None):
     Return an import statement in the form:
     import package [as name]
     """
-    children = [Name(u"import"), Name(package_name, prefix=u" ")]
+    children = [Name("import"), Name(package_name, prefix=" ")]
     if as_name:
-        children.append(Name(u"as", prefix=u" "))
-        children.append(Name(as_name, prefix=u" "))
+        children.append(Name("as", prefix=" "))
+        children.append(Name(as_name, prefix=" "))
     return Node(syms.import_name, children)
 
 def remove_comma(node):
@@ -520,7 +520,7 @@ class FixImports2(FixImports):
                 replacers[str(import_statement)] = {}
             curr_replacer = replacers[str(import_statement)]
             for node_imported in names_imported_from(import_statement):
-                if node_imported.value == u"*":
+                if node_imported.value == "*":
                     self.handle_import_all(import_statement, curr_replacer)
                     continue
                 replacing_name = self.which_candidate(import_statement._mod, node_imported)

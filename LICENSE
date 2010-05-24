@@ -2,7 +2,7 @@
 "lib2to3", which is a part of the Python project, licensed under the Python
 Software Foundation License Version 2.  
 
-lib3to2 is Copyright 2009 Joseph Amenta and
+lib3to2 is Copyright 2009-2010 Joseph Amenta and
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use lib3to2 except in compliance with the License.
@@ -16,7 +16,7 @@ lib3to2 is Copyright 2009 Joseph Amenta and
    See the License for the specific language governing permissions and
    limitations under the License.
 
---------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
                                  Apache License
                            Version 2.0, January 2004

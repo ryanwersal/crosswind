@@ -15,8 +15,7 @@ class FixIntern(fixer_base.BaseFix):
                     ( not(arglist | argument<any '=' any>) obj=any
                       | obj=arglist<(not argument<any '=' any>) any ','> )
                     rpar=')' >
-           after=any*
-    >
+           after=any* >
     |
     import_from< 'from' 'sys' 'import'
                 import_as_names< pre=any* binding='intern' post=any* > any* >
@@ -31,31 +30,31 @@ class FixIntern(fixer_base.BaseFix):
         post = results.get("post")
         simple = results.get("simple")
         if simple:
-            binding = find_binding(u"intern", find_root(node), u"sys")
+            binding = find_binding("intern", find_root(node), "sys")
             binding.remove()
             return
         if binding:
             if not pre and not post:
-                new_binding = find_binding(u"intern", find_root(node), u"sys")
+                new_binding = find_binding("intern", find_root(node), "sys")
                 new_binding.remove()
                 return
             elif not pre and post:
                 for ch in node.children:
                     if type(ch) == pytree.Node:
-                        assert ch.children[0].prefix + u"intern" \
+                        assert ch.children[0].prefix + "intern" \
                                                        == str(ch.children[0])
                         ch.children[0].remove() # intern
-                        assert ch.children[0].prefix + u"," \
+                        assert ch.children[0].prefix + "," \
                                                        == str(ch.children[0])
                         ch.children[0].remove() # ,
                 return
             elif not post and pre:
                 for ch in node.children:
                     if type(ch) == pytree.Node:
-                        assert ch.children[-1].prefix + u"intern" \
+                        assert ch.children[-1].prefix + "intern" \
                                                        == str(ch.children[-1])
                         ch.children[-1].remove() # intern
-                        assert ch.children[-1].prefix + u"," \
+                        assert ch.children[-1].prefix + "," \
                                                        == str(ch.children[-1])
                         ch.children[-1].remove() # ,
                 return
@@ -63,10 +62,10 @@ class FixIntern(fixer_base.BaseFix):
                 for ch in node.children:
                     if type(ch) == pytree.Node:
                         for ch_ in ch.children:
-                            if ch_ and ch_.prefix + u"intern" == str(ch_):
+                            if ch_ and ch_.prefix + "intern" == str(ch_):
                                 last_ch_ = ch_.prev_sibling
                                 ch_.remove() # intern
-                                assert last_ch_.prefix + u"," \
+                                assert last_ch_.prefix + "," \
                                                        == str(last_ch_)
                                 last_ch_.remove() # ,
                 return
@@ -81,7 +80,7 @@ class FixIntern(fixer_base.BaseFix):
             after = [n.clone() for n in after]
 
         new = pytree.Node(syms.power,
-                          [Name(u"intern")] +
+                          [Name("intern")] +
                           [pytree.Node(syms.trailer,
                                        [results["lpar"].clone(),
                                         newarglist,

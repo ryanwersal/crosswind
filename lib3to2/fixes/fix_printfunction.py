@@ -26,13 +26,13 @@ class FixPrintfunction(fixer_base.BaseFix):
         Since the tree needs to be fixed once and only once if and only if it
         matches, then we can start discarding matches after we make the first.
         """
-        return not self.have_print and super(FixPrintfunction,self).match(node)
+        return not self.have_print and super(FixPrintfunction, self).match(node)
 
     def transform(self, node, results):
         tree = self._tree
         self.have_print = True
-        future_stmt = FromImport(u"__future__",
-                                [Name(u"print_function", prefix=u" ")])
+        future_stmt = FromImport("__future__",
+                                [Name("print_function", prefix=" ")])
         children = tree.children[:]
         new_node = Node(syms.simple_stmt, [future_stmt, Newline()])
         for child in children:

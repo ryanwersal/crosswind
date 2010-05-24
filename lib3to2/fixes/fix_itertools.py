@@ -32,19 +32,19 @@ class FixItertools(fixer_base.BaseFix):
             for child in children[::2]:
                 if isinstance(child, Node):
                     for kid in child.children:
-                        if kid.value == u"filterfalse":
+                        if kid.value == "filterfalse":
                             kid.changed()
-                            kid.value = u"ifilterfalse"
+                            kid.value = "ifilterfalse"
                             break
-                elif child.value == u"filterfalse":
+                elif child.value == "filterfalse":
                     child.changed()
-                    child.value = u"ifilterfalse"
+                    child.value = "ifilterfalse"
                     break
         elif names:
             for name in names:
                 if is_probably_builtin(name):
-                    name.value = u"i" + name.value
-                    touch_import(u"itertools", name.value, node)
+                    name.value = "i" + name.value
+                    touch_import("itertools", name.value, node)
         elif f:
             f.changed()
-            f.value = u"ifilterfalse"
+            f.value = "ifilterfalse"

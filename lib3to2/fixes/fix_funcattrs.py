@@ -7,6 +7,7 @@ from lib2to3.fixer_util import Name
 
 
 class FixFuncattrs(fixer_base.BaseFix):
+
     PATTERN = """
     power< any+ trailer< '.' attr=('__closure__' | '__globals__' |
                                    '__defaults__' | '__code__' ) > any* >
@@ -14,5 +15,5 @@ class FixFuncattrs(fixer_base.BaseFix):
 
     def transform(self, node, results):
         attr = results["attr"][0]
-        attr.replace(Name((u"func_%s" % attr.value.strip(u"_")),
+        attr.replace(Name(("func_%s" % attr.value.strip("_")),
                           prefix=attr.prefix))

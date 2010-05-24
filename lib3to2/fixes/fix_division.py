@@ -35,8 +35,8 @@ class FixDivision(fixer_base.BaseFix):
         tree = self._tree
         self.have_print = True
         syms = self.syms
-        future_stmt = FromImport(u"__future__",
-                                [Name(u"division", prefix=u" ")])
+        future_stmt = FromImport("__future__",
+                                [Name("division", prefix=" ")])
         children = tree.children[:]
         new_node = Node(syms.simple_stmt, [future_stmt, Newline()])
         for child in children:

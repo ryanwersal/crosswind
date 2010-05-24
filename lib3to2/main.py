@@ -36,7 +36,7 @@ class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
         """Override to keep print statements out of the grammar"""
         try:
             tree = self.driver.parse_string(data)
-        except Exception, err:
+        except Exception as err:
             self.log_error("Can't parse %s: %s: %s",
                            name, err.__class__.__name__, err)
             return
@@ -74,11 +74,11 @@ class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
             self.log_message("Refactored %s", filename)
             if self.show_diffs:
                 for line in diff_texts(old, new, filename):
-                    print line
+                    print(line)
 
 
 def warn(msg):
-    print >> sys.stderr, "WARNING: %s" % (msg,)
+    print("WARNING: %s" % (msg,), file=sys.stderr)
 
 
 def main(fixer_pkg, args=None):
@@ -120,19 +120,19 @@ def main(fixer_pkg, args=None):
     if not options.write and options.nobackups:
         parser.error("Can't use -n without -w")
     if options.list_fixes:
-        print "Available transformations for the -f/--fix option:"
+        print("Available transformations for the -f/--fix option:")
         for fixname in refactor.get_all_fix_names(fixer_pkg):
-            print fixname
+            print(fixname)
         if not args:
             return 0
     if not args:
-        print >>sys.stderr, "At least one file or directory argument required."
-        print >>sys.stderr, "Use --help to show usage."
+        print("At least one file or directory argument required.", file=sys.stderr)
+        print("Use --help to show usage.", file=sys.stderr)
         return 2
     if "-" in args:
         refactor_stdin = True
         if options.write:
-            print >>sys.stderr, "Can't write to stdin."
+            print("Can't write to stdin.", file=sys.stderr)
             return 2
 
     # Set up logging handler
@@ -167,8 +167,7 @@ def main(fixer_pkg, args=None):
                             options.processes)
             except refactor.MultiprocessingUnsupported:
                 assert options.processes > 1
-                print >>sys.stderr, \
-                      "Sorry, -j isn't supported on this platform."
+                print("Sorry, -j isn't supported on this platform.", file=sys.stderr)
                 return 1
         rt.summarize()
 

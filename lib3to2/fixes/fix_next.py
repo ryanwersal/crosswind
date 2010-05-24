@@ -13,6 +13,7 @@ bind_warning = "Calls to builtin next() possibly shadowed by global binding"
 
 
 class FixNext(fixer_base.BaseFix):
+
     PATTERN = """
     power< base=any+ trailer< '.' attr='__next__' > any* >
     |
@@ -35,8 +36,8 @@ class FixNext(fixer_base.BaseFix):
         arg_ = results.get("arg")
         if arg_:
             arg = arg_.clone()
-            head.replace(Attr(Name(unicode(arg),prefix=head.prefix),
-                              Name(u"next")))
+            head.replace(Attr(Name(str(arg),prefix=head.prefix),
+                              Name("next")))
             arg_.remove()
         elif base:
-            attr.replace(Name(u"next", prefix=attr.prefix))
+            attr.replace(Name("next", prefix=attr.prefix))

@@ -19,7 +19,7 @@ def list_called(node):
         prev = parent.prev_sibling
         if prev is not None and \
            prev.type == token.NAME and \
-           prev.value == u"list" and \
+           prev.value == "list" and \
            is_probably_builtin(prev):
             return prev.parent
     return False
@@ -44,4 +44,4 @@ class FixRange(fixer_base.BaseFix):
                 new_node.append_child(after)
             parent.insert_child(i, new_node)
         else:
-            name.replace(Name(u"xrange", prefix=name.prefix))
+            name.replace(Name("xrange", prefix=name.prefix))

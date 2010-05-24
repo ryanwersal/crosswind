@@ -3,15 +3,15 @@ Abstract
 
 lib3to2 is a set of fixers that are intended to backport code written for
 Python version 3.x into Python version 2.x.  The final target 2.x version is
-the latest version of the 2.5 branch, though for the Google Summer of Code (TM)
-a later branch will be necessary for some of the more difficult fixers (or some
-of the new features with no syntactical equivalent in Python 2.5) that have
-been backported to the 2.x branches.
+the latest version of the 2.5 branch, though for now, a later branch will be
+necessary for some of the more difficult fixers (or some of the new features
+with no syntactical equivalent in Python 2.5) that have been backported to the
+2.x branches.
 
 This project came about as a Google Summer of Code (TM) project in 2009.
 
-Usage (exact same as 2to3)
-==========================
+Usage
+=====
 
 Run "./3to2" to convert stdin ("-"), files or directories given as
 arguments.  By default, the tool outputs a unified diff-formatted patch on
@@ -22,9 +22,10 @@ standard output and a "what was changed" summary on standard error, but the
 If you are root, you can also install with "./setup.py build" and
 "./setup.py install" ("make install" does this for you).
 
-Note: You must install 3to2 if you wish to run the test cases.
-
-This branch of 3to2 must be run with at least Python 2.7.
+This branch of 3to2 must be run with Python 3.  Scripts assume that you have
+the Python 3 executable installed as "python3".  If this does not exist, then
+you should either symlink "python3" to your preferred Python 3 executable, or
+modify the lines that start with "#!" in scripts.
 
 Relationship with 2to3
 ======================
@@ -37,11 +38,11 @@ work in reverse.  I do not claim original authorship of these fixers, but I do
 claim that they will work for 3to2, independent of how they work for 2to3.
 In addition, this program depends on lib2to3 to implement fixers, test cases,
 refactoring, and grammar.  Some portions of 2to3 were modified to be more
-generic to support lib3to2's calls.  If the version of 2to3 included with the
-Python trunk causes errors with this program, the Lib/lib2to3 folder must be
-replaced with the most recent version of 2to3 from
-http://svn.python.org/sandbox/trunk/2to3/ (check out via svn), as a change to
-2to3 will not propagate immediately to the Python trunk.
+generic to support lib3to2's calls.  If the version of 2to3 included with your
+Python version causes problems with this program, the Lib/lib2to3 folder must
+be replaced.  The most recent version of 2to3 can be found at
+http://svn.python.org/sandbox/trunk/2to3/ (check out via svn).  Changes to
+2to3 may not necessarily propagate immediately to the Python trunk.
 
 Status
 ======
