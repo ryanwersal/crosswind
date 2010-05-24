@@ -7,9 +7,9 @@ features.add(Feature("py3k_feature", "power< 'py3k' any* >", "2.7"))
 PATTERN = features.PATTERN
 """
 
-pattern_unformatted = "{0}={1}" # name=pattern, for dict lookups
+pattern_unformatted = "%s=%s" # name=pattern, for dict lookups
 message_unformatted = """
-feature {0} is only supported in Python {1} and above."""
+feature %s is only supported in Python %s and above."""
 
 class Feature(object):
     """
@@ -26,7 +26,7 @@ class Feature(object):
         """
         Format the above text with the name and minimum version required.
         """
-        return message_unformatted.format(self.name, self.version)
+        return message_unformatted % (self.name, self.version)
 
 class Features(set):
     """
@@ -48,7 +48,7 @@ class Features(set):
         for using the lib2to3 patcomp.
         """
         self.update_mapping()
-        return " |\n".join([pattern_unformatted.format(f.name, f._pattern) for f in iter(self)])
+        return " |\n".join([pattern_unformatted % (f.name, f._pattern) for f in iter(self)])
 
     def __getitem__(self, key):
         """
