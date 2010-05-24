@@ -1,27 +1,36 @@
 PYVERSION = python3.1
+SETUP = ./setup.py
+FIND = find
 
-install:
-	./setup.py install
+.PHONY: dist install test install-local test-local uninstall-local clean dangerously-clean
 
-test:
-	lib3to2/tests/test_all_fixers.py
+dist:
+	$(SETUP) build sdist
 
 install-local:
-	./setup.py install --prefix=$(HOME)/.local
-
-test-local: uninstall-local install-local
-	$(PYVERSION) $(HOME)/.local/lib/$(PYVERSION)/site-packages/lib3to2/tests/test_all_fixers.py
+	$(SETUP) install --prefix=$(HOME)/.local
 
 uninstall-local:
 	rm -rf $(HOME)/.local/lib/$(PYVERSION)/site-packages/lib3to2
 	rm -rf $(HOME)/.local/lib/$(PYVERSION)/site-packages/3to2-*.egg-info
 	rm -rf $(HOME)/.local/bin/3to2
 
+test-local: uninstall-local install-local
+	$(PYVERSION) $(HOME)/.local/lib/$(PYVERSION)/site-packages/lib3to2/tests/test_all_fixers.py
+
+install:
+	$(SETUP) install
+
+test:
+	lib3to2/tests/test_all_fixers.py
+
 clean:
-	find . \
+	rm -rf build dist MANIFEST
+
+dangerously-clean: clean
+	$(FIND) . \
 	\( -name '*~' \
 	   -or -name '#*#' \
 	   -or -name '*.pyc' \
 	   -or -name '*.orig' \
 	\) -exec rm -fv {} \;
-	rm -rfv build dist
