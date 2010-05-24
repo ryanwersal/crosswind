@@ -24,9 +24,22 @@ class FixReduce(fixer_base.BaseFix):
         in_list = results.get("in_list")
         if imported:
             next = imported.next_sibling
-            if next.type == token.NEWLINE:
+            prev = imported.prev_sibling
+            parent = imported.parent
+            if next and next.type == token.SEMI:
                 next.remove()
+                next = imported.next_sibling
             imported.remove()
+
+            if next is not None and next.type == token.NEWLINE:
+                # nothing after from_import on the line
+                if prev is not None:
+                    if prev.type == token.SEMI:
+                        prev.remove()
+                elif parent.next_sibling is not None:
+                    # nothing before from_import either
+                    parent.next_sibling.prefix = imported.prefix
+                    parent.remove()
         elif args:
             args = args.clone()
             prefix = node.prefix
