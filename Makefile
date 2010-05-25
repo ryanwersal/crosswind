@@ -34,3 +34,10 @@ dangerously-clean: clean
 	   -or -name '*.pyc' \
 	   -or -name '*.orig' \
 	\) -exec rm -fv {} \;
+
+python2: clean
+	patch -p0 < python2.patch
+	3to2 --no-diffs -n -j 10 -w lib3to2
+	mv lib3to2/fixes/imports_fix_alt_formatting.py __TEMPFILE__
+	mv lib3to2/fixes/fix_imports.py lib3to2/fixes/imports_fix_alt_formatting.py
+	mv __TEMPFILE__ lib3to2/fixes/fix_imports.py
