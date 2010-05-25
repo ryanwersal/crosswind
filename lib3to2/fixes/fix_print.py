@@ -22,6 +22,7 @@ from lib2to3.pygram import python_symbols as syms, token
 from lib2to3.fixer_util import (Name, FromImport, Newline, Call, Comma, Dot,
                                 LParen, RParen, touch_import)
 import warnings
+import sys
 
 def gen_printargs(lst):
     """
@@ -77,7 +78,8 @@ def add_sep_part(sep, pos, lst):
         temp = []
         for arg in pos:
             temp.append(_unicode(arg.clone()))
-            warnings.warn("Calling unicode() on what may be a bytes object")
+            if sys.version_info >= (2, 6):
+                warnings.warn("Calling unicode() on what may be a bytes object")
             temp.append(Comma())
         del temp[-1]
         sep = sep.clone()
@@ -203,8 +205,13 @@ class FixPrint(fixer_base.BaseFix):
             self.warning(opts["file"], "file is not a variable name; "\
                    "print fixer suggests to bind the file to a variable "\
                    "name first before passing it to print function")
-        with warnings.catch_warnings(record=True) as w:
-            new_node = replace_print(pos, opts, old_node=node)
-            if len(w) > 0:
-                self.warning(node, "coercing to unicode even though this may be a bytes object")
+        try:
+            with warnings.catch_warnings(record=True) as w:
+                new_node = replace_print(pos, opts, old_node=node)
+                if len(w) > 0:
+                    self.warning(node, "coercing to unicode even though this may be a bytes object")
+        except AttributeError:
+            # Python 2.5 doesn't have warnings.catch_warnings, so we're in Python 2.5 code here...
+            new_node = replace_print(pos, dict([(bytes(k), opts[k]) for k in opts]), old_node=node)
+
         new_node.prefix = node.prefix
