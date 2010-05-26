@@ -15,9 +15,8 @@ class Test_imports2(lib3to2FixerTestCase):
             "from urllib import urlencode"
         self.check(b, a)
 
-        b = "from tkinter.simpledialog import Grid, SimpleDialog"
-        a = "from tkSimpleDialog import Grid\n"\
-            "from SimpleDialog import SimpleDialog"
+        b = "from tkinter.simpledialog import SimpleDialog"
+        a = "from SimpleDialog import SimpleDialog"
         self.check(b, a)
         
     def test_nested_import_all(self):
