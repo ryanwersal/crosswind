@@ -120,7 +120,7 @@ PY2MODULES = {
                   'askopenfilenames', 'askopenfiles', 'asksaveasfile',
                   'asksaveasfilename'),
               # tkSimpleDialog works in every case but this one class
-              'SimpleDialog' : ('SimpleDialog'),
+              'SimpleDialog' : ('SimpleDialog',),
               'tkSimpleDialog' : (
                   'ACTIVE', 'ALL', 'ANCHOR', 'ARC', 'At', 'AtEnd', 'AtInsert',
                   'AtSelFirst', 'AtSelLast', 'BASELINE', 'BEVEL', 'BOTH',
@@ -209,33 +209,51 @@ MAPPING = { 'urllib.request' :
 simple_name_match = "name='{name}'"
 # helps match 'client', to be used if client has been imported from http
 subname_match = "attr='{attr}'"
+# helps match 'HTTPConnection', as in 'http.client.HTTPConnection'
+using_match = "using='{using}'"
 # helps match 'http.client', as in 'import urllib.request'
 dotted_name_match = "dotted_name=dotted_name< {fmt_name} '.' {fmt_attr} >"
-# helps match 'queue', as in 'queue.Queue(...)'
-power_onename_match = "power< {fmt_name} trailer< '.' using=NAME > any* >"
 # helps match 'http.client', as in 'http.client.HTTPConnection(...)'
-power_twoname_match = "power< {fmt_name} trailer< '.' {fmt_attr} > [trailer< '.' using=NAME >] any* >"
+power_twoname_match = "power< {fmt_name} trailer< '.' {fmt_attr} > [trailer< '.' {fmt_using} >] any* >"
 # helps match 'client.HTTPConnection', if 'client' has been imported from http
-power_subname_match = "power< {fmt_attr} trailer< '.' using=NAME > any* >"
+power_subname_match = "power< {fmt_attr} trailer< '.' {fmt_using} > any* >"
 # helps match 'from http.client import HTTPConnection'
-from_import_match = "from_import=import_from< 'from' {fmt_name} 'import' imported=any >"
+from_import_match = "from_import=import_from< 'from' {fmt_name} 'import' {fmt_using} > | from_import=import_from< 'from' {fmt_name} 'import' import_as_name< {fmt_using} 'as' renamed=any > > | from_import=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< any* {fmt_using} any* > > | from_import=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< any* import_as_name< {fmt_using} 'as' renamed=any > any* > > | from_import=import_from< 'from' {fmt_name} 'import' all='*' >"
 # helps match 'from http import client'
-from_import_submod_match = "from_import_submod=import_from< 'from' {fmt_name} 'import' {fmt_attr} >"
+from_import_submod_match = "from_import_submod=import_from< 'from' {fmt_name} 'import' {fmt_attr} > | from_import_submod=import_from< 'from' {fmt_name} 'import' import_as_name< {fmt_attr} 'as' renamed=any > > | from_import_submod=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< any* {fmt_attr} any* > > | from_import_submod=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< any* import_as_name< {fmt_attr} 'as' renamed=any > any* > >"
 # helps match 'import urllib.request'
-name_import_match = "name_import=import_name< 'import' {fmt_name} > | name_import=import_name< 'import' dotted_as_name< {fmt_name} 'as' renamed=any > >"
-# helps match 'import http.client, winreg'
-multiple_name_import_match = "name_import=import_name< 'import' dotted_as_names< names=any* > >"
+name_import_match = "name_import=import_name< 'import' {fmt_name} > | name_import=import_name< 'import' dotted_as_name< {fmt_name} 'as' renamed=any > > | name_import=import_name< 'import' dotted_as_names< any* in_list=dotted_as_name< {fmt_name} > any* > > | name_import=import_name< 'import' dotted_as_names< any* in_list=dotted_as_name< {fmt_name} 'as' renamed=any > any* > >"
+
+def build_import_pattern(mapping1, mapping2):
+    """
+    mapping1: A dict mapping py3k modules to all possible py2k replacements
+    mapping2: A dict mapping py2k modules to the things they do
+    This builds a HUGE pattern to match all conceivable ways that things can be imported
+    """
+    import_pattern_builder = []
+    # py3k: urllib.request, py2k: ('urllib2', 'urllib')
+    for py3k, py2k in mapping1.items():
+        name, attr = py3k.split('.')
+        simple_name = simple_name_match.format(name=name)
+        simple_attr = subname_match.format(attr=attr)
+        dotted_name = dotted_name_match.format(fmt_name=simple_name, fmt_attr=simple_attr)
+        # import urllib.request
+        import_pattern_builder.append(name_import_match.format(fmt_name=dotted_name))
+        # from urllib import [spam, spam, ...,] request[, spam, spam...]
+        import_pattern_builder.append(from_import_submod_match.format(fmt_name=simple_name, fmt_attr=simple_attr))
+        for candidate in py2k:
+            for using in mapping2[candidate]:
+                simple_using = using_match.format(using=using)
+                # from urllib.request import ..., urlretrieve, ...
+                import_pattern_builder.append(from_import_match.format(fmt_name=dotted_name, fmt_using=simple_using))
+    return import_pattern_builder
 
 class FixImports2(fixer_base.BaseFix):
 
     explicit = True # Doesn't do anything
 
-    PATTERN = "'STRING'" # Stub
-
-    def match(self, node):
-        """Stub"""
-        return False
+    PATTERN = " | \n".join(build_import_pattern(MAPPING, PY2MODULES))
 
     def transform(self, node, results):
         """Stub"""
-        pass
+        print(repr(node))
