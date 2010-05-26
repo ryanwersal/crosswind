@@ -1,4 +1,8 @@
-from .fix_imports import FixImports
+"""
+Fixer for complicated imports
+"""
+
+from lib2to3 import fixer_base
 from lib2to3.pytree import Leaf, Node
 from lib2to3.fixer_util import Dot, Comma, Name, Newline, FromImport, find_root
 from lib2to3.pygram import python_symbols as syms
@@ -192,357 +196,46 @@ MAPPING = { 'urllib.request' :
                 ('DocXMLRPCServer', 'SimpleXMLRPCServer'),
             }
 
-def is_from_import(node):
-    """Returns true if the node is a from x import y statement"""
-    return node.type == syms.import_from
+###############################################################
+# TODO                                                   TODO #
+#                                                             #
+#       Just import these from fix_imports, though it's       #
+#       very convenient to reference them from here...        #
+#                                                             #
+# TODO                                                   TODO #
+###############################################################
 
-def is_name_import(node):
-    """Returns true if the node is a import y statement."""
-    return node.type == syms.import_name
+# helps match 'queue', as in 'from queue import ...'
+simple_name_match = "name='{name}'"
+# helps match 'client', to be used if client has been imported from http
+subname_match = "attr='{attr}'"
+# helps match 'http.client', as in 'import urllib.request'
+dotted_name_match = "dotted_name=dotted_name< {fmt_name} '.' {fmt_attr} >"
+# helps match 'queue', as in 'queue.Queue(...)'
+power_onename_match = "power< {fmt_name} trailer< '.' using=NAME > any* >"
+# helps match 'http.client', as in 'http.client.HTTPConnection(...)'
+power_twoname_match = "power< {fmt_name} trailer< '.' {fmt_attr} > [trailer< '.' using=NAME >] any* >"
+# helps match 'client.HTTPConnection', if 'client' has been imported from http
+power_subname_match = "power< {fmt_attr} trailer< '.' using=NAME > any* >"
+# helps match 'from http.client import HTTPConnection'
+from_import_match = "from_import=import_from< 'from' {fmt_name} 'import' imported=any >"
+# helps match 'from http import client'
+from_import_submod_match = "from_import_submod=import_from< 'from' {fmt_name} 'import' {fmt_attr} >"
+# helps match 'import urllib.request'
+name_import_match = "name_import=import_name< 'import' {fmt_name} > | name_import=import_name< 'import' dotted_as_name< {fmt_name} 'as' renamed=any > >"
+# helps match 'import http.client, winreg'
+multiple_name_import_match = "name_import=import_name< 'import' dotted_as_names< names=any* > >"
 
-def dot_used(node):
-    """
-    Returns the dot of a node if it has one, None if it does not.
-    Must look like (foo)(.)(*), doesn't care if anything comes after a dot.
-    """
-    next_node = node.next_sibling
-    parent = node.parent
-    if parent is None: return None
-    next_uncle = parent.next_sibling if parent is None else None
-    if next_node is not None:
-        if next_node.type == syms.trailer:
-            kid = next_node.children[0]
-            return kid if kid.type == token.DOT else None
-        elif next_node.type == token.DOT:
-            return next_node
-    elif parent.type == syms.trailer and node.prev_sibling.type == token.DOT:
-        assert parent.parent.type == syms.power
-        return dot_used(parent)
-    else:
-        return None
+class FixImports2(fixer_base.BaseFix):
 
-def attr_used(node):
-    """
-    Returns the attribute of a node if it has one, None if it does not.
-    Attribute must look like (foo)(.)(bar), with any prefix on bar acceptable
-    """
-    dot = dot_used(node)
-    if dot is None:
-        return None
-    next = dot.next_sibling
-    assert next is not None, repr(dot.parent)
-    if next.type == token.NAME:
-        return next
-    else:
-        return None
+    explicit = True # Doesn't do anything
 
-def pref(node, prefix=" "):
-    node.prefix = prefix
-    return node
-
-def names_imported_from(node):
-    """
-    Accepts an import_from node and returns a list of the name leafs
-    that the node imports
-    """
-    for child in node.children:
-        if (isinstance(child, Leaf) and child.value == "import"):
-            child = child.next_sibling
-            while (child is not None and
-                  child.type not in (syms.import_as_names, token.NAME, token.STAR)):
-                child = child.next_sibling
-            break
-    else:
-        return None
-    return [kid for kid in child.children if kid.type == token.NAME] \
-                             if child.type == syms.import_as_names else [child]
-
-def full_name(node):
-    """
-    Shortcut for str(name_dot_attr(node))
-    No error checking in this one.  Should only be used with nodes
-    that return not None from name_dot_attr
-    """
-    assert name_dot_attr(node), repr(node.parent)
-    return node.value + "." + attr_used(node).value
-
-def name_dot_attr(node):
-    """
-    Shortcut for (node, dot_used(node), attr_used(node))
-    """
-    return (node, dot_used(node), attr_used(node))
-
-def scrub_results(results):
-    """
-    Deletes all keys with a val that evals to False
-    """
-    items = list(results.items())
-    for key, val in items:
-        if not val:
-            del results[key]
-
-def get_indent(suite):
-    """
-    Gets the indentation from an indent leaf in Suite
-    Error-checked: Anything other than a suite will return None
-    """
-    if suite is None: return None
-    if not suite.type == syms.suite: return None
-    for child in suite.children:
-        if child.type == token.INDENT:
-            return child
-    else:
-        return None
-
-def imports_to_stmts(imports, indent=None):
-    """
-    Accepts an iterable of import_stmt nodes and an optional indentation
-    Returns a list of simple_stmt nodes with newlines in them.
-    """
-    typ = syms.simple_stmt
-    new_stmts = [Node(typ, [child, Newline()]) for child in imports]
-    if indent is not None:
-        for stmt in new_stmts[:-1]:
-            stmt.prefix = indent.value
-    return new_stmts
-
-def new_from_imports(replacers, from_imports):
-    """
-    Build new name import statements based on replacers
-    """
-    for import_statement in from_imports:
-        new_nodes = []
-        for replacing_name in replacers[str(import_statement)]:
-            imported_nodes = [pref(name.clone()) for name in replacers[str(import_statement)][replacing_name]]
-            new_nodes.append(FromImport(replacing_name, commatize(imported_nodes)))
-        parent = import_statement.parent.parent
-        simple_stmts = imports_to_stmts(new_nodes, indent=get_indent(parent))
-        simple_stmts[-1].prefix = import_statement.parent.prefix
-        pos = import_statement.parent.remove()
-        for node in simple_stmts:
-            parent.insert_child(pos, node)
-
-def NameImport(package_name, as_name=None):
-    """
-    Return an import statement in the form:
-    import package [as name]
-    """
-    children = [Name("import"), Name(package_name, prefix=" ")]
-    if as_name:
-        children.append(Name("as", prefix=" "))
-        children.append(Name(as_name, prefix=" "))
-    return Node(syms.import_name, children)
-
-def remove_comma(node):
-    """
-    Remove a comma from the previous sibling, if it exists
-    and is indeed a comma
-    """
-    if node.prev_sibling and node.prev_sibling.type == token.COMMA:
-        node.prev_sibling.remove()
-
-def new_name_imports(replacers, name_imports, mapping):
-    """
-    Build new name import statements based on replacers
-    """
-    for import_statement in name_imports:
-        new_nodes = []
-        for replacing_name in replacers[str(import_statement)]:
-            new_nodes.append(NameImport(replacing_name))
-        simple_stmts = imports_to_stmts(new_nodes, indent=get_indent(import_statement.parent.parent))
-        simple_stmts[-1].prefix = import_statement.parent.prefix
-    for import_statement in set(name_imports):
-        parent = import_statement.parent
-        gparent = parent.parent
-        for node in relevant_import_nodes(import_statement, mapping):
-            if node.parent.type == syms.dotted_name:
-                remove_comma(node.parent)
-                node.parent.remove()
-            elif node.parent.type == syms.dotted_as_names:
-                remove_comma(node)
-                node.remove()
-            kids = import_statement.children
-            if len(kids) == 1 or not kids[1].children:
-                pos = parent.remove()
-            else:
-                if kids[1].children[0].type == token.COMMA:
-                    kids[1].children[0].remove()
-                for i, n in enumerate(parent.children):
-                    if n is import_statement:
-                        pos = i+1
-                        break
-        for node in simple_stmts:
-            gparent.insert_child(pos, node)
-
-def relevant_import_nodes(import_statement, mapping):
-    assert import_statement.type == syms.import_name, repr(import_statement)
-    names = []
-    imported = import_statement.children[1]
-    if imported.type == syms.dotted_name and \
-       full_name(imported.children[0]) in mapping:
-        return [imported.children[0]]
-    elif imported.type == syms.dotted_as_name and \
-       full_name(imported.children[0].children[0]) in mapping:
-        return [imported.children[0].children[0]]
-    elif imported.type == syms.dotted_as_names:
-        for name in imported.children:
-            if name.type == syms.dotted_name and \
-               full_name(name.children[0]) in mapping:
-                names.append(name.children[0])
-            elif name.type == syms.dotted_as_name and \
-               full_name(name.children[0].children[0]) in mapping:
-                names.append(name.children[0].children[0])
-    return names
-
-def which_are_imports(relevant_leaves):
-    """
-    Accepts relevant_leaves and returns a tuple of objects of that structure
-    that contain just those nodes that are import statements.
-    """
-    from_import = []
-    name_import = []
-    for name in relevant_leaves:
-        for node in relevant_leaves[name]:
-            while node.parent and not \
-                                (is_from_import(node) or is_name_import(node)):
-                node = node.parent
-            if is_from_import(node):
-                node._mod = name
-                from_import.append(node)
-            elif is_name_import(node):
-                node._mod = name
-                name_import.append(node)
-    return (from_import, name_import)
-
-def names_used(relevant_leaves, mapping):
-    """
-    Returns tuples of (main, sub, name) from name_imported relevant_leaves
-    e.g. urllib.request.urlopen("some url") returns (urllib, request, urlopen)
-    """
-    relevant_usages = []
-    for package in relevant_leaves:
-        for leaf in relevant_leaves[package]:
-            attr_one = attr_used(leaf)
-            attr_two = attr_used(attr_one)
-            if attr_two: relevant_usages.append((leaf, attr_one, attr_two))
-    return relevant_usages
-
-def find_relevant_leaves(tree, mapping):
-    """
-    Searches through the whole tree and returns a mapping of each package in
-    mapping to the nodes that include it
-    """
-    base_names = [name.split(".")[0] for name in mapping]
-    results = {}
-    for name in mapping:
-        results[name] = []
-    for node in tree.pre_order():
-        if not isinstance(node, Leaf): continue
-        attr = attr_used(node)
-        if attr and (node.value in base_names):
-            for name in mapping:
-                if full_name(node) == name:
-                    results[name].append(node)
-    scrub_results(results)
-    return results
-
-def commatize(leafs):
-    """
-    Accepts/turns: (Name, Name, ..., Name, Name) 
-    Returns/into: (Name, Comma, Name, Comma, ..., Name, Comma, Name)
-    """
-    new_leafs = []
-    for leaf in leafs:
-        new_leafs.append(leaf)
-        new_leafs.append(Comma())
-    del new_leafs[-1]
-    return new_leafs
-
-
-class FixImports2(FixImports):
-
-    explicit = True # Not stable enough
-    mapping = MAPPING
-    modules = PY2MODULES
-
-    # This should be run pretty late, as it scans the whole code.
-    run_order = 7
-
-    # Avoid working with the whole tree all of the time
-
-    def start_tree(self, tree, filename):
-        """This is only run once; we want to remember the first node"""
-        super(FixImports2, self).start_tree(tree, filename)
-        self.run_once = True
-        self.relevant_leaves = find_relevant_leaves(tree, self.mapping)
-
-    def which_candidate(self, module_name, node):
-        """
-        Accepts the old module name and a node that it imports
-        Returns the best module to import that node from
-        """
-        modules = self.modules
-        candidates = []
-        for candidate in self.mapping[module_name]:
-            if node.value in modules[candidate]:
-                return candidate
+    PATTERN = "'STRING'" # Stub
 
     def match(self, node):
-        return self.run_once and self.relevant_leaves
+        """Stub"""
+        return False
 
     def transform(self, node, results):
-        self.run_once = False
-        full_nodes = []
-        relevant_leaves = self.relevant_leaves
-        mapping = self.mapping
-        for package in relevant_leaves:
-            for leaf in relevant_leaves[package]:
-                full_nodes.append(name_dot_attr(leaf))
-        # which_are_imports MUST be run, because it adds a _mod attr to stmts.
-        from_imports, name_imports = which_are_imports(relevant_leaves)
-        self.fix_from_imports(from_imports)
-        self.fix_name_imports(name_imports)
-
-    def handle_import_all(self, import_statement, replacer):
-        astrsk = names_imported_from(import_statement)[0]
-        assert astrsk.type == token.STAR, repr(astrsk)
-        for name in self.mapping[import_statement._mod]:
-            if not name in replacer: replacer[name] = []
-            replacer[name].append(astrsk)
-        self.warning(import_statement, 
-                "Importing * may lead to name conflicts. "
-                "Double-check that you are not re-using names.")
-
-    def fix_from_imports(self, from_imports):
-        replacers = {}
-        for import_statement in from_imports:
-            if not str(import_statement) in replacers:
-                replacers[str(import_statement)] = {}
-            curr_replacer = replacers[str(import_statement)]
-            for node_imported in names_imported_from(import_statement):
-                if node_imported.value == "*":
-                    self.handle_import_all(import_statement, curr_replacer)
-                    continue
-                replacing_name = self.which_candidate(import_statement._mod, node_imported)
-                if not replacing_name in curr_replacer: curr_replacer[replacing_name] = []
-                curr_replacer[replacing_name].append(node_imported)
-        new_from_imports(replacers, from_imports)
-
-    def fix_name_imports(self, name_imports):
-        replacers = {}
-        usages = names_used(self.relevant_leaves, self.mapping)
-        for import_statement in name_imports:
-            if str(import_statement) in replacers:
-                continue
-            replacers[str(import_statement)] = {}
-            curr_replacer = replacers[str(import_statement)]
-            usages_subset = [(pkg, sub, name) for pkg,sub,name in usages \
-              if pkg.parent and \
-              full_name(pkg) in (full_name(node) for node in relevant_import_nodes(import_statement, self.mapping))]
-            for pkg, sub, name in usages_subset:
-                must_import = self.which_candidate(full_name(pkg), name)
-                if not must_import in curr_replacer: curr_replacer[must_import] = []
-                curr_replacer[must_import].append(name)
-                sub.parent.remove()
-                pkg.replace(Name(must_import, prefix=pkg.prefix))
-        new_name_imports(replacers, name_imports, self.mapping)
+        """Stub"""
+        pass
