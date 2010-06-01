@@ -184,9 +184,9 @@ class Test_imports2(lib3to2FixerTestCase):
         a = """
         def try_import(package):
             try:
+                from BaseHTTPServer import *
                 from CGIHTTPServer import *
                 from SimpleHTTPServer import *
-                from BaseHTTPServer import *
                 print('success')
             except ImportError:
                 print('failure', end="")
@@ -204,9 +204,9 @@ class Test_imports2(lib3to2FixerTestCase):
         """
         a = """
         def testing_http_server():
+            from BaseHTTPServer import *
             from CGIHTTPServer import *
             from SimpleHTTPServer import *
-            from BaseHTTPServer import *
             test_all_imports()
         def testing_xmlrpc_server():
             from SimpleXMLRPCServer import *

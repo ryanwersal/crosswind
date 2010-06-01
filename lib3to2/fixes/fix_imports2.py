@@ -3,10 +3,8 @@ Fixer for complicated imports
 """
 
 from lib2to3 import fixer_base
-from lib2to3.pytree import Leaf, Node
-from lib2to3.pygram import python_symbols as syms
-from lib2to3.pgen2 import token
-from ..fixer_util import import_binding_scope
+from lib2to3.fixer_util import Name, FromImport, Newline
+from ..fixer_util import token, syms, Leaf, Node, import_binding_scope, Star, indentation
 
 TK_BASE_NAMES = ('ACTIVE', 'ALL', 'ANCHOR', 'ARC','BASELINE', 'BEVEL', 'BOTH',
                  'BOTTOM', 'BROWSE', 'BUTT', 'CASCADE', 'CENTER', 'CHAR',
@@ -121,11 +119,35 @@ power_twoname = "power< {fmt_name} trailer< '.' {fmt_attr} > [trailer< '.' {fmt_
 # helps match 'client.HTTPConnection', if 'client' has been imported from http
 power_subname = "power< {fmt_attr} trailer< '.' {fmt_using} > any* >"
 # helps match 'from http.client import HTTPConnection'
-from_import_1 = "from_import=import_from< 'from' {fmt_name} 'import' {fmt_using} > | from_import=import_from< 'from' {fmt_name} 'import' import_as_name< {fmt_using} 'as' renamed=any > > | from_import=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< any* {fmt_using} any* > > | from_import=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< any* import_as_name< {fmt_using} 'as' renamed=any > any* > > | from_import=import_from< 'from' {fmt_name} 'import' all='*' >"
+from_import_1 = "from_import=import_from< 'from' {fmt_name} 'import' {fmt_using} > | from_import=import_from< 'from' {fmt_name} 'import' import_as_name< {fmt_using} 'as' renamed=any > > | from_import=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< using=any* > > | from_import=import_from< 'from' {fmt_name} 'import' using='*' >"
 # helps match 'from http import client'
 from_import_2 = "from_import_submod=import_from< 'from' {fmt_name} 'import' {fmt_attr} > | from_import_submod=import_from< 'from' {fmt_name} 'import' import_as_name< {fmt_attr} 'as' renamed=any > > | from_import_submod=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< any* {fmt_attr} any* > > | from_import_submod=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< any* import_as_name< {fmt_attr} 'as' renamed=any > any* > >"
 # helps match 'import urllib.request'
 name_import = "name_import=import_name< 'import' {fmt_name} > | name_import=import_name< 'import' dotted_as_name< {fmt_name} 'as' renamed=any > > | name_import=import_name< 'import' dotted_as_names< any* in_list=dotted_as_name< {fmt_name} > any* > > | name_import=import_name< 'import' dotted_as_names< any* in_list=dotted_as_name< {fmt_name} 'as' renamed=any > any* > >"
+
+def all_candidates(name, attr):
+    """
+    Returns all candidate packages for the name.attr
+    """
+    dotted = name + '.' + attr
+    assert dotted in MAPPING, "No matching package found."
+    return MAPPING[name + '.' + attr]
+
+def new_package(name, attr, using):
+    """
+    Returns which candidate package for name.attr provides using
+    """
+    for candidate in all_candidates(name, attr):
+        if False:
+            print('Trying {candidate} for {name}.{attr}.{using}'.format(candidate=candidate, name=name, attr=attr, using=using))
+        if using in PY2MODULES[candidate]:
+            if False:
+                print('found it in {candidate}'.format(candidate=candidate))
+            break
+    else:
+        candidate = None
+
+    return candidate
 
 def build_import_pattern(mapping1, mapping2):
     """
@@ -154,7 +176,7 @@ def build_import_pattern(mapping1, mapping2):
 
 class FixImports2(fixer_base.BaseFix):
 
-    explicit = True # Doesn't do anything
+    explicit = True # Doesn't do much yet
 
     PATTERN = build_import_pattern(MAPPING, PY2MODULES)
 
@@ -163,6 +185,9 @@ class FixImports2(fixer_base.BaseFix):
         name = results.get("name")
         attr = results.get("attr")
         using = results.get("using")
+        in_list = results.get("in_list")
+        simple_stmt = node.parent
+        parent = simple_stmt.parent
         if using is None:
             #################################################
             # "from urllib import request", or              #
@@ -180,14 +205,44 @@ class FixImports2(fixer_base.BaseFix):
                 #################################################
                 pass # TODO: STUB
 
+        elif in_list:
+            ##########################################################
+            # "from urllib.request import urlopen, urlretrieve, ..." #
+            # Replace one import statement with potentially many.    #
+            ##########################################################
+            idx = parent.children.index(simple_stmt)
+            packages = dict([(n,[]) for n in all_candidates(name.value, attr.value)])
+            for imported in using:
+                if imported.type == token.COMMA:
+                    continue
+                if imported.type == syms.import_as_name:
+                    test_name = imported.children[0].value
+                    rename = len(imported.children) > 2 and imported.children[2].value
+                else:
+                    test_name = imported.value
+                    rename = False
+                pkg = new_package(name.value, attr.value, test_name)
+                packages[pkg].append((test_name, rename))
+
+            ##############################################
+            # Remove the offending import statement.     #
+            # Replace it with what is needed to satisfy. #
+            ##############################################
+
+        elif using.type == token.STAR:
+            idx = parent.children.index(simple_stmt)
+            nodes = [FromImport(pkg, [Star(prefix=' ')]) for pkg in all_candidates(name.value, attr.value)]
+            node.replace(nodes.pop())
+            indent = indentation(simple_stmt)
+            while nodes:
+                next_stmt = Node(syms.simple_stmt, [nodes.pop(), Newline()])
+                parent.insert_child(idx+1, next_stmt)
+                parent.insert_child(idx+1, Leaf(token.INDENT, indent))
         else:
             ########################################
             # "from urllib.request import urlopen" #
             # We know what to import.              #
             ########################################
-            pass # TODO: STUB
+            pkg = new_package(name.value, attr.value, using.value)
+            node.replace(FromImport(pkg, [using]))
 
-        ##############################################
-        # Remove the offending import statement.     #
-        # Replace it with what is needed to satisfy. #
-        ##############################################

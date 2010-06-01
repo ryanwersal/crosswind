@@ -2,6 +2,9 @@ from lib2to3.pygram import token, python_symbols as syms
 from lib2to3.pytree import Leaf, Node
 from lib2to3.fixer_util import Comma, Name
 
+def Star(prefix=None):
+    return Leaf(token.STAR, '*', prefix=prefix)
+
 def commatize(leafs):
     """
     Accepts/turns: (Name, Name, ..., Name, Name) 
@@ -82,12 +85,21 @@ def import_binding_scope(node):
 
     # Can't chain one-liners on one line, so that takes care of that.
 
-    while context.type == syms.suite:
-        # in a multi-line suite
-        p = context.parent
-        while p.type in _compound_stmts:
-            yield context.next_sibling
-            context = context.next_sibling
-            if context is None:
-                context = p.parent
+    p = context.parent
+    if p is None:
+        return
+
+    # in a multi-line suite
+
+    while p.type in _compound_stmts:
+
+        if context.type == syms.suite:
+            yield context
+
+        context = context.next_sibling
+
+        if context is None:
+            context = p.parent
+            p = context.parent
+            if p is None:
                 break
