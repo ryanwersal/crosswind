@@ -118,14 +118,14 @@ dotted_name = "dotted_name=dotted_name< {fmt_name} '.' {fmt_attr} >"
 # helps match 'http.server', as in 'http.server.HTTPServer(...)'
 power_twoname = "power< {fmt_name} trailer< '.' {fmt_attr} > [trailer< '.' using=any >] any* >"
 # helps match 'from http.server import HTTPServer'
-from_import_1 = "from_import=import_from< 'from' {fmt_name} 'import' {fmt_using} > | from_import=import_from< 'from' {fmt_name} 'import' import_as_name< {fmt_using} 'as' renamed=any > >"
+from_import_1 = "from_import=import_from< 'from' {fmt_name} 'import' (import_as_name< {fmt_using} 'as' renamed=any > | {fmt_using}) >"
 # helps match 'from http.server import HTTPServer, SimpleHTTPRequestHandler'
 # also helps match 'from http.server import *'
-from_import_n = "from_import=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< using=any* > > | from_import=import_from< 'from' {fmt_name} 'import' using='*' >"
+from_import_n = "from_import=import_from< 'from' {fmt_name} 'import' (in_list=import_as_names< using=any* > | using='*') >"
 # helps match 'from http import server'
-mod_import = "from_import_submod=import_from< 'from' {fmt_name} 'import' {fmt_attr} > | from_import_submod=import_from< 'from' {fmt_name} 'import' import_as_name< {fmt_attr} 'as' renamed=any > > | from_import_submod=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< any* {fmt_attr} any* > > | from_import_submod=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< any* import_as_name< {fmt_attr} 'as' renamed=any > any* > >"
+mod_import = "from_import_submod=import_from< 'from' {fmt_name} 'import' ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any > | in_list=import_as_names< any* ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any >) any* >) >"
 # helps match 'import urllib.request'
-name_import = "name_import=import_name< 'import' {fmt_name} > | name_import=import_name< 'import' dotted_as_name< {fmt_name} 'as' renamed=any > > | name_import=import_name< 'import' dotted_as_names< any* in_list=dotted_as_name< {fmt_name} > any* > > | name_import=import_name< 'import' dotted_as_names< any* in_list=dotted_as_name< {fmt_name} 'as' renamed=any > any* > >"
+name_import = "name_import=import_name< 'import' ({fmt_name} | dotted_as_name< {fmt_name} 'as' renamed=any > | dotted_as_names< any* in_list=dotted_as_name< {fmt_name} ['as' renamed=any] > any* >) >"
 
 def all_candidates(name, attr, MAPPING=MAPPING):
     """
