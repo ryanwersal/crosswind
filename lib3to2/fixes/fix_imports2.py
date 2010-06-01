@@ -6,6 +6,7 @@ from lib2to3 import fixer_base
 from lib2to3.pytree import Leaf, Node
 from lib2to3.pygram import python_symbols as syms
 from lib2to3.pgen2 import token
+from ..fixer_util import import_binding_scope
 
 TK_BASE_NAMES = ('ACTIVE', 'ALL', 'ANCHOR', 'ARC','BASELINE', 'BEVEL', 'BOTH',
                  'BOTTOM', 'BROWSE', 'BUTT', 'CASCADE', 'CENTER', 'CHAR',
@@ -126,34 +127,6 @@ from_import_2 = "from_import_submod=import_from< 'from' {fmt_name} 'import' {fmt
 # helps match 'import urllib.request'
 name_import = "name_import=import_name< 'import' {fmt_name} > | name_import=import_name< 'import' dotted_as_name< {fmt_name} 'as' renamed=any > > | name_import=import_name< 'import' dotted_as_names< any* in_list=dotted_as_name< {fmt_name} > any* > > | name_import=import_name< 'import' dotted_as_names< any* in_list=dotted_as_name< {fmt_name} 'as' renamed=any > any* > >"
 
-def import_binding_scope(node):
-    """
-    Generator yields all nodes for which a node (an import_stmt) has scope
-    The purpose of this is for a call to _find() on each of them
-    """
-    # import_name / import_from are small_stmts
-    assert node.type in (syms.import_name, syms.import_from)
-    test = node.next_sibling
-    # A small_stmt can only be followed by a SEMI or a NEWLINE.
-    while test.type == token.SEMI:
-        nxt = test.next_sibling
-        # A SEMI can only be followed by a small_stmt or a NEWLINE
-        if nxt.type == token.NEWLINE:
-            break
-        else:
-            yield nxt
-        # A small_stmt can only be followed by either a SEMI or a NEWLINE
-        test = nxt.next_sibling
-    # Covered all subsequent small_stmts after the import_stmt
-    # Now to cover all subsequent stmts after the parent simple_stmt
-    parent = node.parent
-    assert parent.type == syms.simple_stmt
-    test = parent.next_sibling
-    while test is not None:
-        # Yes, this will yield NEWLINE and DEDENT.  Deal with it.
-        yield test
-        test = test.next_sibling
-
 def build_import_pattern(mapping1, mapping2):
     """
     mapping1: A dict mapping py3k modules to all possible py2k replacements
@@ -187,12 +160,31 @@ class FixImports2(fixer_base.BaseFix):
 
     def transform(self, node, results):
         """Stub"""
-        for relevant_node in import_binding_scope(node):
+        name = results.get("name")
+        attr = results.get("attr")
+        using = results.get("using")
+        if using is None:
             #################################################
-            # Each node here can be affected by the import. #
-            # Check to see which ones use names imported.   #
-            # Fix them to the corresponding Python 2 names. #
+            # "from urllib import request", or              #
+            # "import urllib.request"                       #
+            # We have to work to figure out what to import. #
+            # We need to examine each statement affected.   #
             #################################################
+
+            for statement_affected in import_binding_scope(node):
+                #################################################
+                # Each node here can be affected by the import. #
+                # Check to see which ones use names imported.   #
+                # Fix them to the corresponding Python 2 names. #
+                # Keep track of what we fix.                    #
+                #################################################
+                pass # TODO: STUB
+
+        else:
+            ########################################
+            # "from urllib.request import urlopen" #
+            # We know what to import.              #
+            ########################################
             pass # TODO: STUB
 
         ##############################################

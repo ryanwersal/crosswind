@@ -40,3 +40,54 @@ def NameImport(package, as_name=None, prefix=None):
                          Name(as_name, prefix=" ")])
     return Node(syms.import_name, children)
 
+_compound_stmts = (syms.if_stmt, syms.while_stmt, syms.for_stmt, syms.try_stmt, syms.with_stmt)
+_import_stmts = (syms.import_name, syms.import_from)
+def import_binding_scope(node):
+    """
+    Generator yields all nodes for which a node (an import_stmt) has scope
+    The purpose of this is for a call to _find() on each of them
+    """
+    # import_name / import_from are small_stmts
+    assert node.type in _import_stmts
+    test = node.next_sibling
+    # A small_stmt can only be followed by a SEMI or a NEWLINE.
+    while test.type == token.SEMI:
+        nxt = test.next_sibling
+        # A SEMI can only be followed by a small_stmt or a NEWLINE
+        if nxt.type == token.NEWLINE:
+            break
+        else:
+            yield nxt
+        # A small_stmt can only be followed by either a SEMI or a NEWLINE
+        test = nxt.next_sibling
+    # Covered all subsequent small_stmts after the import_stmt
+    # Now to cover all subsequent stmts after the parent simple_stmt
+    parent = node.parent
+    assert parent.type == syms.simple_stmt
+    test = parent.next_sibling
+    while test is not None:
+        # Yes, this will yield NEWLINE and DEDENT.  Deal with it.
+        yield test
+        test = test.next_sibling
+
+    context = parent.parent
+    # Recursively yield nodes following imports inside of a if/while/for/try/with statement
+    if context.type in _compound_stmts:
+        # import is in a one-liner
+        c = context
+        while c.next_sibling is not None:
+            yield c.next_sibling
+            c = c.next_sibling
+        context = context.parent
+
+    # Can't chain one-liners on one line, so that takes care of that.
+
+    while context.type == syms.suite:
+        # in a multi-line suite
+        p = context.parent
+        while p.type in _compound_stmts:
+            yield context.next_sibling
+            context = context.next_sibling
+            if context is None:
+                context = p.parent
+                break
