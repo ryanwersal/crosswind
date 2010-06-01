@@ -4,7 +4,8 @@ Fixer for complicated imports
 
 from lib2to3 import fixer_base
 from lib2to3.fixer_util import Name, FromImport, Newline
-from ..fixer_util import token, syms, Leaf, Node, import_binding_scope, Star, indentation
+from ..fixer_util import token, syms, Leaf, Node, Star, \
+                         import_binding_scope, indentation
 
 TK_BASE_NAMES = ('ACTIVE', 'ALL', 'ANCHOR', 'ARC','BASELINE', 'BEVEL', 'BOTH',
                  'BOTTOM', 'BROWSE', 'BUTT', 'CASCADE', 'CENTER', 'CHAR',
@@ -138,11 +139,7 @@ def new_package(name, attr, using):
     Returns which candidate package for name.attr provides using
     """
     for candidate in all_candidates(name, attr):
-        if False:
-            print('Trying {candidate} for {name}.{attr}.{using}'.format(candidate=candidate, name=name, attr=attr, using=using))
         if using in PY2MODULES[candidate]:
-            if False:
-                print('found it in {candidate}'.format(candidate=candidate))
             break
     else:
         candidate = None
@@ -211,13 +208,15 @@ class FixImports2(fixer_base.BaseFix):
             # Replace one import statement with potentially many.    #
             ##########################################################
             idx = parent.children.index(simple_stmt)
-            packages = dict([(n,[]) for n in all_candidates(name.value, attr.value)])
+            packages = dict([(n,[]) for n in all_candidates(name.value,
+                                                            attr.value)])
             for imported in using:
                 if imported.type == token.COMMA:
                     continue
                 if imported.type == syms.import_as_name:
                     test_name = imported.children[0].value
-                    rename = len(imported.children) > 2 and imported.children[2].value
+                    rename = len(imported.children) > 2 and \
+                                 imported.children[2].value
                 else:
                     test_name = imported.value
                     rename = False
@@ -231,7 +230,8 @@ class FixImports2(fixer_base.BaseFix):
 
         elif using.type == token.STAR:
             idx = parent.children.index(simple_stmt)
-            nodes = [FromImport(pkg, [Star(prefix=' ')]) for pkg in all_candidates(name.value, attr.value)]
+            nodes = [FromImport(pkg, [Star(prefix=' ')]) for pkg in \
+                                        all_candidates(name.value, attr.value)]
             node.replace(nodes.pop())
             indent = indentation(simple_stmt)
             while nodes:
@@ -239,10 +239,6 @@ class FixImports2(fixer_base.BaseFix):
                 parent.insert_child(idx+1, next_stmt)
                 parent.insert_child(idx+1, Leaf(token.INDENT, indent))
         else:
-            ########################################
-            # "from urllib.request import urlopen" #
-            # We know what to import.              #
-            ########################################
             pkg = new_package(name.value, attr.value, using.value)
             node.replace(FromImport(pkg, [using]))
 
