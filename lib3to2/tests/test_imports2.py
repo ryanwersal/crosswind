@@ -3,7 +3,7 @@ from test_all_fixers import lib3to2FixerTestCase
 class Test_imports2(lib3to2FixerTestCase):
     fixer = "imports2"
 
-    def test_def_scope(self):
+    def test_name_scope_def(self):
 
         b = """
         import urllib.request
@@ -20,53 +20,54 @@ class Test_imports2(lib3to2FixerTestCase):
         self.check(b, a)
 
 
-    def test_class_scope(self):
+    if False:
+        def test_name_scope_class(self):
 
-        b = """
-        import http.server
+            # This one might be impossible to implement completely.
+            # It's also probably unnecessary and definitely impractical.
+            # One obvious limitation is that it only could ever hope to do the
+            # right thing if all the classes are defined in one module.
 
-        class StuffDoer(object):
+            b = """
             import http.server
 
-            def __init__(self):
-                # class namespace search after instance namespace lookup fails
-                self.http.server.HTTPServer(('localhost','80'), http.server.SimpleHTTPRequestHandler)
+            class StuffDoer(object):
+                import http.server
 
-        class OtherStuffDoer(StuffDoer):
-            def serve(self):
-                # base class namespace search after derived class namespace lookup fails
-                self.http.server.HTTPServer(('localhost', '8080'), self.http.server.CGIHTTPRequestHandler)
+                def __init__(self):
+                    # class namespace search after instance namespace lookup fails
+                    self.http.server.HTTPServer(('localhost','80'), http.server.SimpleHTTPRequestHandler)
 
-        http.server.HTTPServer(('localhost', '8000'), http.server.BaseHTTPRequestHandler)"""
-        a = """
-        import BaseHTTPServer
-        import SimpleHTTPServer
+            class OtherStuffDoer(StuffDoer):
+                def serve(self):
+                    # base class namespace search after derived class namespace lookup fails
+                    self.http.server.HTTPServer(('localhost', '8080'), self.http.server.CGIHTTPRequestHandler)
 
-        class StuffDoer(object):
-
+            http.server.HTTPServer(('localhost', '8000'), http.server.BaseHTTPRequestHandler)"""
+            a = """
             import BaseHTTPServer
-            import CGIHTTPServer
+            import SimpleHTTPServer
 
-            def __init__(self):
-                # class namespace search after instance namespace lookup fails
-                self.BaseHTTPServer.HTTPServer(('localhost', '80'), SimpleHTTPServer.SimpleHTTPRequestHandler)
+            class StuffDoer(object):
 
-        class OtherStuffDoer(StuffDoer):
+                import BaseHTTPServer
+                import CGIHTTPServer
 
-            def serve(self):
-                # base class namespace search after derived class namespace lookup fails
-                self.BaseHTTPServer.HTTPServer(('localhost', '8080'), self.CGIHTTPServer.CGIHTTPRequestHandler)
+                def __init__(self):
+                    # class namespace search after instance namespace lookup fails
+                    self.BaseHTTPServer.HTTPServer(('localhost', '80'), SimpleHTTPServer.SimpleHTTPRequestHandler)
 
-        BaseHTTPServer.HTTPServer(('localhost', '8080'), BaseHTTPServer.BaseHTTPRequestHandler)"""
+            class OtherStuffDoer(StuffDoer):
 
-        # This one might be impossible to implement completely.
-        # It's also probably unnecessary and definitely impractical.
-        # One obvious limitation is that it only could ever hope to do the
-        # right thing if all the classes are defined in one module.
+                def serve(self):
+                    # base class namespace search after derived class namespace lookup fails
+                    self.BaseHTTPServer.HTTPServer(('localhost', '8080'), self.CGIHTTPServer.CGIHTTPRequestHandler)
 
-        # self.check(b, a)
+            BaseHTTPServer.HTTPServer(('localhost', '8080'), BaseHTTPServer.BaseHTTPRequestHandler)"""
+
+            self.check(b, a)
     
-    def test_if_else_scope(self):
+    def test_name_scope_if(self):
         
         b = """
         if thing:
@@ -97,7 +98,7 @@ class Test_imports2(lib3to2FixerTestCase):
         monkey_wrench_in_the_works = SimpleHTTPServer.SimpleHTTPRequestHandler"""
         self.check(b, a)
 
-    def test_try_except_scope(self):
+    def test_name_scope_try_except(self):
         
         b = """
         try:
@@ -125,36 +126,40 @@ class Test_imports2(lib3to2FixerTestCase):
         srv = BaseHTTPServer.HTTPServer(addr, CGIHTTPServer.CGIHTTPRequestHandler)"""
         self.check(b, a)
 
-    def test_try_except_conditional(self):
+    if False:
+        def test_name_bind_try(self):
         
-        b = """
-        try:
-            import http.server as s
-        except ImportError:
-            import xmlrpc.server as s
+            # Don't expect this to work.  It requires semantics checking, and it
+            # would be limited to py3k library module imports that only use a
+            # subset of the members that are provided by a single py2k module.
+            # self.check(b, a)
 
-        srv = s.DocXMLRPCServer(addr, s.DocCGIXMLRPCRequestHandler)
+            b = """
+            try:
+                import http.server as s
+            except ImportError:
+                import xmlrpc.server as s
 
-        # some more time has passed, and we know that http.server is good.
-        srv = s.HTTPServer(addr, s.BaseHTTPRequestHandler)"""
+            srv = s.DocXMLRPCServer(addr, s.DocCGIXMLRPCRequestHandler)
 
-        a = """
-        try:
-            import BaseHTTPServer as s
-        except ImportError:
-            import DocXMLRPCServer as s
+            # some more time has passed, and we know that http.server is good.
+            srv = s.HTTPServer(addr, s.BaseHTTPRequestHandler)"""
 
-        # some time has passed, and we know that http.server was bad.
-        srv = s.DocXMLRPCServer(addr, s.DocCGIXMLRPCRequestHandler)
+            a = """
+            try:
+                import BaseHTTPServer as s
+            except ImportError:
+                import DocXMLRPCServer as s
 
-        # some more time has passed, and we know that http.server is good.
-        srv = s.HTTPServer(addr, s.BaseHTTPRequestHandler)"""
-        # Don't expect this to work.  It requires semantics checking, and it
-        # would be limited to py3k library module imports that only use a
-        # subset of the members that are provided by a single py2k module.
-        # self.check(b, a)
+            # some time has passed, and we know that http.server was bad.
+            srv = s.DocXMLRPCServer(addr, s.DocCGIXMLRPCRequestHandler)
 
-    def test_import_names(self):
+            # some more time has passed, and we know that http.server is good.
+            srv = s.HTTPServer(addr, s.BaseHTTPRequestHandler)"""
+            self.check(b, a)
+
+
+    def test_from_single(self):
 
         b = "from urllib.request import urlopen"
         a = "from urllib2 import urlopen"
@@ -170,7 +175,7 @@ class Test_imports2(lib3to2FixerTestCase):
         a = "from SimpleDialog import SimpleDialog"
         self.check(b, a)
         
-    def test_nested_import_all(self):
+    def test_from_star(self):
         
         b = """
         def try_import(package):
@@ -215,7 +220,7 @@ class Test_imports2(lib3to2FixerTestCase):
         """
         self.check(b, a, ignore_warnings=True)
 
-    def test_nested_import_named(self):
+    def test_from_list(self):
 
         b = """
         with open('myFile', 'r') as myFile:
@@ -228,7 +233,7 @@ class Test_imports2(lib3to2FixerTestCase):
             fileList = [ln for ln in myFile]"""
         self.check(b, a, ignore_warnings=True)
 
-    def test_from_import_module(self):
+    def test_modulefrom(self):
 
         b = """
         if spam.is_good():
@@ -243,7 +248,7 @@ class Test_imports2(lib3to2FixerTestCase):
             urllib.urlencode(spam_site)"""
         self.check(b, a)
 
-    def test_simplest_usage(self):
+    def test_name_usage_simple(self):
 
         b = """
         import urllib.request
