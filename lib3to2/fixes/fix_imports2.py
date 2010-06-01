@@ -4,8 +4,8 @@ Fixer for complicated imports
 
 from lib2to3 import fixer_base
 from lib2to3.fixer_util import Name, FromImport, Newline
-from ..fixer_util import token, syms, Leaf, Node, Star, \
-                         import_binding_scope, indentation
+from ..fixer_util import (token, syms, Leaf, Node, Star, 
+                          import_binding_scope, indentation)
 
 TK_BASE_NAMES = ('ACTIVE', 'ALL', 'ANCHOR', 'ARC','BASELINE', 'BEVEL', 'BOTH',
                  'BOTTOM', 'BROWSE', 'BUTT', 'CASCADE', 'CENTER', 'CHAR',
@@ -215,8 +215,10 @@ class FixImports2(fixer_base.BaseFix):
                     continue
                 if imported.type == syms.import_as_name:
                     test_name = imported.children[0].value
-                    rename = len(imported.children) > 2 and \
-                                 imported.children[2].value
+                    if len(imported.children) > 2:
+                        rename = imported.children[2].value
+                    else:
+                        rename = False
                 else:
                     test_name = imported.value
                     rename = False
@@ -230,7 +232,7 @@ class FixImports2(fixer_base.BaseFix):
 
         elif using.type == token.STAR:
             idx = parent.children.index(simple_stmt)
-            nodes = [FromImport(pkg, [Star(prefix=' ')]) for pkg in \
+            nodes = [FromImport(pkg, [Star(prefix=' ')]) for pkg in
                                         all_candidates(name.value, attr.value)]
             node.replace(nodes.pop())
             indent = indentation(simple_stmt)
