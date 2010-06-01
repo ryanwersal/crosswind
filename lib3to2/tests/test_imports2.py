@@ -19,7 +19,6 @@ class Test_imports2(lib3to2FixerTestCase):
         urllib.urlretrieve(stuff)"""
         self.check(b, a)
 
-
     if False:
         def test_name_scope_class(self):
 

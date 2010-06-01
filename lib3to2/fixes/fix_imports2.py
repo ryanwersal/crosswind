@@ -107,26 +107,27 @@ MAPPING = { 'urllib.request' :
 # TODO                                                   TODO #
 ###############################################################
 
-# helps match 'queue', as in 'from queue import ...'
+# helps match 'http', as in 'from http.server import ...'
 simple_name = "name='{name}'"
-# helps match 'client', to be used if client has been imported from http
+# helps match 'server', as in 'from http.server import ...'
 simple_attr = "attr='{attr}'"
-# helps match 'HTTPConnection', as in 'http.client.HTTPConnection'
+# helps match 'HTTPServer', as in 'from http.server import HTTPServer'
 simple_using = "using='{using}'"
-# helps match 'http.client', as in 'import urllib.request'
+# helps match 'urllib.request', as in 'import urllib.request'
 dotted_name = "dotted_name=dotted_name< {fmt_name} '.' {fmt_attr} >"
-# helps match 'http.client', as in 'http.client.HTTPConnection(...)'
-power_twoname = "power< {fmt_name} trailer< '.' {fmt_attr} > [trailer< '.' {fmt_using} >] any* >"
-# helps match 'client.HTTPConnection', if 'client' has been imported from http
-power_subname = "power< {fmt_attr} trailer< '.' {fmt_using} > any* >"
-# helps match 'from http.client import HTTPConnection'
-from_import_1 = "from_import=import_from< 'from' {fmt_name} 'import' {fmt_using} > | from_import=import_from< 'from' {fmt_name} 'import' import_as_name< {fmt_using} 'as' renamed=any > > | from_import=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< using=any* > > | from_import=import_from< 'from' {fmt_name} 'import' using='*' >"
-# helps match 'from http import client'
-from_import_2 = "from_import_submod=import_from< 'from' {fmt_name} 'import' {fmt_attr} > | from_import_submod=import_from< 'from' {fmt_name} 'import' import_as_name< {fmt_attr} 'as' renamed=any > > | from_import_submod=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< any* {fmt_attr} any* > > | from_import_submod=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< any* import_as_name< {fmt_attr} 'as' renamed=any > any* > >"
+# helps match 'http.server', as in 'http.server.HTTPServer(...)'
+power_twoname = "power< {fmt_name} trailer< '.' {fmt_attr} > [trailer< '.' using=any >] any* >"
+# helps match 'from http.server import HTTPServer'
+from_import_1 = "from_import=import_from< 'from' {fmt_name} 'import' {fmt_using} > | from_import=import_from< 'from' {fmt_name} 'import' import_as_name< {fmt_using} 'as' renamed=any > >"
+# helps match 'from http.server import HTTPServer, SimpleHTTPRequestHandler'
+# also helps match 'from http.server import *'
+from_import_n = "from_import=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< using=any* > > | from_import=import_from< 'from' {fmt_name} 'import' using='*' >"
+# helps match 'from http import server'
+mod_import = "from_import_submod=import_from< 'from' {fmt_name} 'import' {fmt_attr} > | from_import_submod=import_from< 'from' {fmt_name} 'import' import_as_name< {fmt_attr} 'as' renamed=any > > | from_import_submod=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< any* {fmt_attr} any* > > | from_import_submod=import_from< 'from' {fmt_name} 'import' in_list=import_as_names< any* import_as_name< {fmt_attr} 'as' renamed=any > any* > >"
 # helps match 'import urllib.request'
 name_import = "name_import=import_name< 'import' {fmt_name} > | name_import=import_name< 'import' dotted_as_name< {fmt_name} 'as' renamed=any > > | name_import=import_name< 'import' dotted_as_names< any* in_list=dotted_as_name< {fmt_name} > any* > > | name_import=import_name< 'import' dotted_as_names< any* in_list=dotted_as_name< {fmt_name} 'as' renamed=any > any* > >"
 
-def all_candidates(name, attr):
+def all_candidates(name, attr, MAPPING=MAPPING):
     """
     Returns all candidate packages for the name.attr
     """
@@ -134,11 +135,11 @@ def all_candidates(name, attr):
     assert dotted in MAPPING, "No matching package found."
     return MAPPING[dotted]
 
-def new_package(name, attr, using):
+def new_package(name, attr, using, MAPPING=MAPPING, PY2MODULES=PY2MODULES):
     """
     Returns which candidate package for name.attr provides using
     """
-    for candidate in all_candidates(name, attr):
+    for candidate in all_candidates(name, attr, MAPPING):
         if using in PY2MODULES[candidate]:
             break
     else:
@@ -160,22 +161,21 @@ def build_import_pattern(mapping1, mapping2):
         s_attr = simple_attr.format(attr=attr)
         d_name = dotted_name.format(fmt_name=s_name, fmt_attr=s_attr)
         # import urllib.request
-        pats.append(name_import.format(fmt_name=d_name))
+        yield name_import.format(fmt_name=d_name)
         # from urllib import [spam, spam, ...,] request[, spam, spam...]
-        pats.append(from_import_2.format(fmt_name=s_name, fmt_attr=s_attr))
+        yield mod_import.format(fmt_name=s_name, fmt_attr=s_attr)
+        yield from_import_n.format(fmt_name=d_name)
         for candidate in py2k:
             for using in mapping2[candidate]:
                 s_using = simple_using.format(using=using)
                 # from urllib.request import ..., urlretrieve, ...
-                pats.append(from_import_1.format(fmt_name=d_name,
-                                                 fmt_using=s_using))
-    return " | \n".join(pats)
+                yield from_import_1.format(fmt_name=d_name, fmt_using=s_using)
 
 class FixImports2(fixer_base.BaseFix):
 
     explicit = True # Doesn't do much yet
 
-    PATTERN = build_import_pattern(MAPPING, PY2MODULES)
+    PATTERN = " | \n".join(build_import_pattern(MAPPING, PY2MODULES))
 
     def transform(self, node, results):
         """Stub"""
