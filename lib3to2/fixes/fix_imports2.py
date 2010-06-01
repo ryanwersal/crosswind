@@ -132,7 +132,7 @@ def all_candidates(name, attr):
     """
     dotted = name + '.' + attr
     assert dotted in MAPPING, "No matching package found."
-    return MAPPING[name + '.' + attr]
+    return MAPPING[dotted]
 
 def new_package(name, attr, using):
     """
