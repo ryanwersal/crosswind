@@ -98,15 +98,6 @@ MAPPING = { 'urllib.request' :
                 ('DocXMLRPCServer', 'SimpleXMLRPCServer'),
             }
 
-###############################################################
-# TODO                                                   TODO #
-#                                                             #
-#       Just import these from fix_imports, though it's       #
-#       very convenient to reference them from here...        #
-#                                                             #
-# TODO                                                   TODO #
-###############################################################
-
 # helps match 'http', as in 'from http.server import ...'
 simple_name = "name='{name}'"
 # helps match 'server', as in 'from http.server import ...'
@@ -118,14 +109,22 @@ dotted_name = "dotted_name=dotted_name< {fmt_name} '.' {fmt_attr} >"
 # helps match 'http.server', as in 'http.server.HTTPServer(...)'
 power_twoname = "power< {fmt_name} trailer< '.' {fmt_attr} > [trailer< '.' using=any >] any* >"
 # helps match 'from http.server import HTTPServer'
-from_import_1 = "from_import=import_from< 'from' {fmt_name} 'import' (import_as_name< {fmt_using} 'as' renamed=any > | {fmt_using}) >"
-# helps match 'from http.server import HTTPServer, SimpleHTTPRequestHandler'
+# also helps match 'from http.server import HTTPServer, SimpleHTTPRequestHandler'
 # also helps match 'from http.server import *'
-from_import_n = "from_import=import_from< 'from' {fmt_name} 'import' (in_list=import_as_names< using=any* > | using='*') >"
+from_import = "from_import=import_from< 'from' {modules} 'import' (import_as_name< using=any 'as' renamed=any> | in_list=import_as_names< (import_as_name< using=any 'as' renamed=any > | using=NAME) > | using='*' | using=NAME) >"
 # helps match 'from http import server'
 mod_import = "from_import_submod=import_from< 'from' {fmt_name} 'import' ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any > | in_list=import_as_names< any* ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any >) any* >) >"
 # helps match 'import urllib.request'
 name_import = "name_import=import_name< 'import' ({fmt_name} | dotted_as_name< {fmt_name} 'as' renamed=any > | dotted_as_names< any* in_list=dotted_as_name< {fmt_name} ['as' renamed=any] > any* >) >"
+
+def all_modules_subpattern():
+    """
+    Builds a pattern for all toplevel names
+    (urllib, http, etc)
+    """
+    names_dot_attrs = [mod.split('.') for mod in MAPPING]
+    return "( " + " | ".join([dotted_name.format(fmt_name=simple_name.format(name=mod[0]),
+                                                 fmt_attr=simple_attr.format(attr=mod[1])) for mod in names_dot_attrs]) + " )"
 
 def all_candidates(name, attr, MAPPING=MAPPING):
     """
@@ -160,16 +159,8 @@ def build_import_pattern(mapping1, mapping2):
         s_name = simple_name.format(name=name)
         s_attr = simple_attr.format(attr=attr)
         d_name = dotted_name.format(fmt_name=s_name, fmt_attr=s_attr)
-        # import urllib.request
         yield name_import.format(fmt_name=d_name)
-        # from urllib import [spam, spam, ...,] request[, spam, spam...]
-        yield mod_import.format(fmt_name=s_name, fmt_attr=s_attr)
-        yield from_import_n.format(fmt_name=d_name)
-        for candidate in py2k:
-            for using in mapping2[candidate]:
-                s_using = simple_using.format(using=using)
-                # from urllib.request import ..., urlretrieve, ...
-                yield from_import_1.format(fmt_name=d_name, fmt_using=s_using)
+        yield from_import.format(modules=all_modules_subpattern())
 
 class FixImports2(fixer_base.BaseFix):
 
