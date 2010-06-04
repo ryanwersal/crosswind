@@ -41,3 +41,7 @@ python2: clean
 	mv lib3to2/fixes/imports_fix_alt_formatting.py __TEMPFILE__
 	mv lib3to2/fixes/fix_imports.py lib3to2/fixes/imports_fix_alt_formatting.py
 	mv __TEMPFILE__ lib3to2/fixes/fix_imports.py
+	mv lib3to2/fixes/imports2_fix_alt_formatting.py __TEMPFILE__
+	mv lib3to2/fixes/fix_imports2.py lib3to2/fixes/imports2_fix_alt_formatting.py
+	mv __TEMPFILE__ lib3to2/fixes/fix_imports2.py
+	sed -i 's/u"/"/' lib3to2/main.py
