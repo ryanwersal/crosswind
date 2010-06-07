@@ -106,7 +106,7 @@ simple_using = "using='{using}'"
 # helps match 'urllib.request', as in 'import urllib.request'
 dotted_name = "dotted_name=dotted_name< {fmt_name} '.' {fmt_attr} >"
 # helps match 'http.server', as in 'http.server.HTTPServer(...)'
-power_twoname = "power< {fmt_name} trailer< '.' {fmt_attr} > [trailer< '.' using=any >] any* >"
+power_twoname = "pow=power< {fmt_name} trailer< '.' {fmt_attr} > trailer< '.' using=any > any* >"
 # helps match 'from http.server import HTTPServer'
 # also helps match 'from http.server import HTTPServer, SimpleHTTPRequestHandler'
 # also helps match 'from http.server import *'
@@ -160,6 +160,7 @@ def build_import_pattern(mapping1, mapping2):
         d_name = dotted_name.format(fmt_name=s_name, fmt_attr=s_attr)
         yield name_import.format(fmt_name=d_name)
         yield from_import.format(modules=all_modules_subpattern())
+        yield power_twoname.format(fmt_name=s_name, fmt_attr=s_attr)
 
 class FixImports2(fixer_base.BaseFix):
 
@@ -172,6 +173,7 @@ class FixImports2(fixer_base.BaseFix):
         attr = results.get("attr")
         using = results.get("using")
         in_list = results.get("in_list")
+        power = results.get("pow")
         simple_stmt = node.parent
         parent = simple_stmt.parent
         idx = parent.children.index(simple_stmt)
@@ -249,6 +251,11 @@ class FixImports2(fixer_base.BaseFix):
                 next_stmt = Node(syms.simple_stmt, [nodes.pop(), Newline()])
                 parent.insert_child(idx+1, next_stmt)
                 parent.insert_child(idx+1, Leaf(token.INDENT, indent))
+        elif power is not None:
+            pkg = new_package(name.value, attr.value, using.value)
+            attr.parent.remove()
+            name.replace(Name(pkg, prefix=name.prefix))
+
         else:
             pkg = new_package(name.value, attr.value, using.value)
             node.replace(FromImport(pkg, [using]))

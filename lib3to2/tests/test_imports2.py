@@ -251,17 +251,18 @@ class Test_imports2(lib3to2FixerTestCase):
             fileList = [ln for ln in myFile]"""
         self.check(b, a, ignore_warnings=True)
 
-    def test_modulefrom(self):
+    if False:
+        def test_modulefrom(self):
 
-        b = """
-        if spam.is_good():
-            from urllib import request, parse
-            request.urlopen(spam_site)
-            parse.urlencode(spam_site)"""
-        a = """
-        if spam.is_good():
-            import urllib
-            import urllib2
-            urllib2.urlopen(spam_site)
-            urllib.urlencode(spam_site)"""
-        self.check(b, a)
+            b = """
+            if spam.is_good():
+                from urllib import request, parse
+                request.urlopen(spam_site)
+                parse.urlencode(spam_site)"""
+            a = """
+            if spam.is_good():
+                import urllib
+                import urllib2
+                urllib2.urlopen(spam_site)
+                urllib.urlencode(spam_site)"""
+            self.check(b, a)
