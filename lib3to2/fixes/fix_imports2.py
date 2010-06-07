@@ -3,7 +3,7 @@ Fixer for complicated imports
 """
 
 from lib2to3 import fixer_base
-from lib2to3.fixer_util import Name, FromImport, Newline, Comma
+from lib2to3.fixer_util import Name, String, FromImport, Newline, Comma
 from ..fixer_util import token, syms, Leaf, Node, Star, indentation, ImportAsName
 
 TK_BASE_NAMES = ('ACTIVE', 'ALL', 'ANCHOR', 'ARC','BASELINE', 'BEVEL', 'BOTH',
@@ -177,9 +177,16 @@ class FixImports2(fixer_base.BaseFix):
         idx = parent.children.index(simple_stmt)
         if using is None:
             # import urllib.request
-            for node in all_candidates(name.value, attr.value):
-                # fix it!
-                pass
+            candidates = all_candidates(name.value, attr.value)
+            nodes = [Node(syms.import_name, [Name("import"), Name(c, prefix=" ")]) for c in candidates]
+            replacement = nodes.pop()
+            replacement.prefix = node.prefix
+            node.replace(replacement)
+            indent = indentation(simple_stmt)
+            while nodes:
+                next_stmt = Node(syms.simple_stmt, [nodes.pop(), Newline()])
+                parent.insert_child(idx+1, next_stmt)
+                parent.insert_child(idx+1, Leaf(token.INDENT, indent))
 
         elif in_list:
             ##########################################################
@@ -216,7 +223,9 @@ class FixImports2(fixer_base.BaseFix):
                     new_names.append(Comma())
                 new_names.pop()
                 imports.append(FromImport(new_pkg, new_names))
-            node.replace(imports.pop())
+            replacement = imports.pop()
+            replacement.prefix = node.prefix
+            node.replace(replacement)
             indent = indentation(simple_stmt)
             while imports:
                 next_stmt = Node(syms.simple_stmt, [imports.pop(), Newline()])
@@ -232,7 +241,9 @@ class FixImports2(fixer_base.BaseFix):
         elif using.type == token.STAR:
             nodes = [FromImport(pkg, [Star(prefix=" ")]) for pkg in
                                         all_candidates(name.value, attr.value)]
-            node.replace(nodes.pop())
+            replacement = nodes.pop()
+            replacement.prefix = node.prefix
+            node.replace(replacement)
             indent = indentation(simple_stmt)
             while nodes:
                 next_stmt = Node(syms.simple_stmt, [nodes.pop(), Newline()])

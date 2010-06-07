@@ -3,6 +3,20 @@ from test_all_fixers import lib3to2FixerTestCase
 class Test_imports2(lib3to2FixerTestCase):
     fixer = "imports2"
 
+    def test_name_usage_simple(self):
+
+        b = """
+        import urllib.request
+        urllib.request.urlopen(spam)"""
+
+        a = """
+        import urllib
+        import urllib2
+        urllib2.urlopen(spam)"""
+
+        self.check(b, a)
+
+
     def test_name_scope_def(self):
 
         b = """
@@ -13,7 +27,9 @@ class Test_imports2(lib3to2FixerTestCase):
         urllib.request.urlretrieve(stuff)"""
         a = """
         import urllib
+        import urllib2
         def importing_stuff():
+            import urllib
             import urllib2
             urllib2.urlopen(stuff)
         urllib.urlretrieve(stuff)"""
@@ -88,6 +104,7 @@ class Test_imports2(lib3to2FixerTestCase):
             import SimpleHTTPServer
         elif other_thing:
             import SimpleXMLRPCServer
+            import DocXMLRPCServer
         if related_thing:
             myServ = BaseHTTPServer.HTTPServer(('localhost', '80'), CGIHTTPServer.CGIHTTPRequestHandler)
         elif other_related_thing:
@@ -115,7 +132,9 @@ class Test_imports2(lib3to2FixerTestCase):
         try:
             import BaseHTTPServer
             import CGIHTTPServer
+            import SimpleHTTPServer
         except ImportError:
+            import SimpleXMLRPCServer
             import DocXMLRPCServer
 
         # some time has passed, and we know that http.server was bad.
@@ -245,16 +264,4 @@ class Test_imports2(lib3to2FixerTestCase):
             import urllib2
             urllib2.urlopen(spam_site)
             urllib.urlencode(spam_site)"""
-        self.check(b, a)
-
-    def test_name_usage_simple(self):
-
-        b = """
-        import urllib.request
-        urllib.request.urlopen(spam)"""
-
-        a = """
-        import urllib2
-        urllib2.urlopen(spam)"""
-
         self.check(b, a)
