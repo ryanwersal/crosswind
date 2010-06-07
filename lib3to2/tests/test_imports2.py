@@ -223,11 +223,11 @@ class Test_imports2(lib3to2FixerTestCase):
 
         b = """
         with open('myFile', 'r') as myFile:
-            from urllib.request import install_opener, urlretrieve
+            from urllib.request import install_opener, urlretrieve, unquote as billybob
             fileList = [ln for ln in myFile]"""
         a = """
         with open('myFile', 'r') as myFile:
-            from urllib import urlretrieve
+            from urllib import urlretrieve, unquote as billybob
             from urllib2 import install_opener
             fileList = [ln for ln in myFile]"""
         self.check(b, a, ignore_warnings=True)

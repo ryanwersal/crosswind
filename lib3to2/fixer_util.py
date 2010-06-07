@@ -103,3 +103,12 @@ def import_binding_scope(node):
             p = context.parent
             if p is None:
                 break
+
+def ImportAsName(name, as_name, prefix=None):
+    new_name = Name(name)
+    new_as = Name("as", prefix=" ")
+    new_as_name = Name(as_name, prefix=" ")
+    new_node = Node(syms.import_as_name, [new_name, new_as, new_as_name])
+    if prefix is not None:
+        new_node.prefix = prefix
+    return new_node

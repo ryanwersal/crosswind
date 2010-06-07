@@ -3,9 +3,8 @@ Fixer for complicated imports
 """
 
 from lib2to3 import fixer_base
-from lib2to3.fixer_util import Name, FromImport, Newline
-from ..fixer_util import (token, syms, Leaf, Node, Star, 
-                          import_binding_scope, indentation)
+from lib2to3.fixer_util import Name, FromImport, Newline, Comma
+from ..fixer_util import token, syms, Leaf, Node, Star, indentation, ImportAsName
 
 TK_BASE_NAMES = ('ACTIVE', 'ALL', 'ANCHOR', 'ARC','BASELINE', 'BEVEL', 'BOTH',
                  'BOTTOM', 'BROWSE', 'BUTT', 'CASCADE', 'CENTER', 'CHAR',
@@ -111,7 +110,7 @@ power_twoname = "power< {fmt_name} trailer< '.' {fmt_attr} > [trailer< '.' using
 # helps match 'from http.server import HTTPServer'
 # also helps match 'from http.server import HTTPServer, SimpleHTTPRequestHandler'
 # also helps match 'from http.server import *'
-from_import = "from_import=import_from< 'from' {modules} 'import' (import_as_name< using=any 'as' renamed=any> | in_list=import_as_names< (import_as_name< using=any 'as' renamed=any > | using=NAME) > | using='*' | using=NAME) >"
+from_import = "from_import=import_from< 'from' {modules} 'import' (import_as_name< using=any 'as' renamed=any> | in_list=import_as_names< using=any* > | using='*' | using=NAME) >"
 # helps match 'from http import server'
 mod_import = "from_import_submod=import_from< 'from' {fmt_name} 'import' ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any > | in_list=import_as_names< any* ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any >) any* >) >"
 # helps match 'import urllib.request'
@@ -122,7 +121,7 @@ def all_modules_subpattern():
     Builds a pattern for all toplevel names
     (urllib, http, etc)
     """
-    names_dot_attrs = [mod.split('.') for mod in MAPPING]
+    names_dot_attrs = [mod.split(".") for mod in MAPPING]
     return "( " + " | ".join([dotted_name.format(fmt_name=simple_name.format(name=mod[0]),
                                                  fmt_attr=simple_attr.format(attr=mod[1])) for mod in names_dot_attrs]) + " )"
 
@@ -164,41 +163,29 @@ def build_import_pattern(mapping1, mapping2):
 
 class FixImports2(fixer_base.BaseFix):
 
-    explicit = True # Doesn't do much yet
+    explicit = True
 
     PATTERN = " | \n".join(build_import_pattern(MAPPING, PY2MODULES))
 
     def transform(self, node, results):
-        """Stub"""
         name = results.get("name")
         attr = results.get("attr")
         using = results.get("using")
         in_list = results.get("in_list")
         simple_stmt = node.parent
         parent = simple_stmt.parent
+        idx = parent.children.index(simple_stmt)
         if using is None:
-            #################################################
-            # "from urllib import request", or              #
-            # "import urllib.request"                       #
-            # We have to work to figure out what to import. #
-            # We need to examine each statement affected.   #
-            #################################################
-
-            for statement_affected in import_binding_scope(node):
-                #################################################
-                # Each node here can be affected by the import. #
-                # Check to see which ones use names imported.   #
-                # Fix them to the corresponding Python 2 names. #
-                # Keep track of what we fix.                    #
-                #################################################
-                pass # TODO: STUB
+            # import urllib.request
+            for node in all_candidates(name.value, attr.value):
+                # fix it!
+                pass
 
         elif in_list:
             ##########################################################
             # "from urllib.request import urlopen, urlretrieve, ..." #
             # Replace one import statement with potentially many.    #
             ##########################################################
-            idx = parent.children.index(simple_stmt)
             packages = dict([(n,[]) for n in all_candidates(name.value,
                                                             attr.value)])
             for imported in using:
@@ -209,12 +196,33 @@ class FixImports2(fixer_base.BaseFix):
                     if len(imported.children) > 2:
                         rename = imported.children[2].value
                     else:
-                        rename = False
+                        rename = None
                 else:
                     test_name = imported.value
-                    rename = False
+                    rename = None
                 pkg = new_package(name.value, attr.value, test_name)
                 packages[pkg].append((test_name, rename))
+
+            imports = []
+            for new_pkg, names in packages.items():
+                if not names:
+                    continue
+                new_names = []
+                for test_name, rename in names:
+                    if rename is None:
+                        new_names.append(Name(test_name, prefix=" "))
+                    else:
+                        new_names.append(ImportAsName(test_name, rename, prefix=" "))
+                    new_names.append(Comma())
+                new_names.pop()
+                imports.append(FromImport(new_pkg, new_names))
+            node.replace(imports.pop())
+            indent = indentation(simple_stmt)
+            while imports:
+                next_stmt = Node(syms.simple_stmt, [imports.pop(), Newline()])
+                parent.insert_child(idx+1, next_stmt)
+                parent.insert_child(idx+1, Leaf(token.INDENT, indent))
+                
 
             ##############################################
             # Remove the offending import statement.     #
@@ -222,8 +230,7 @@ class FixImports2(fixer_base.BaseFix):
             ##############################################
 
         elif using.type == token.STAR:
-            idx = parent.children.index(simple_stmt)
-            nodes = [FromImport(pkg, [Star(prefix=' ')]) for pkg in
+            nodes = [FromImport(pkg, [Star(prefix=" ")]) for pkg in
                                         all_candidates(name.value, attr.value)]
             node.replace(nodes.pop())
             indent = indentation(simple_stmt)
