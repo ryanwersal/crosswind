@@ -5,7 +5,7 @@
 +#!/usr/bin/env python2.7
  
  classifiers = [
- "Development Status :: 3 - Alpha",
+ "Development Status :: 4 - Beta",
 @@ -6,7 +6,7 @@
  "Intended Audience :: Developers",
  "License :: OSI Approved :: Apache Software License",
@@ -23,7 +23,7 @@
 +   name="3to2",
     packages=["lib3to2","lib3to2.fixes","lib3to2.tests"],
     scripts=["3to2"],
-    version="0.1a4",
+    version="0.1b1",
 
 --- 3to2	2010-05-24 19:45:12.000000000 -0400
 +++ 3to2	2010-05-24 19:49:01.000000000 -0400

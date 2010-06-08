@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 classifiers = [
-"Development Status :: 3 - Alpha",
+"Development Status :: 4 - Beta",
 "Environment :: Console",
 "Intended Audience :: Developers",
 "License :: OSI Approved :: Apache Software License",
@@ -17,7 +17,7 @@ setup(
    name="3to2_py3k",
    packages=["lib3to2","lib3to2.fixes","lib3to2.tests"],
    scripts=["3to2"],
-   version="0.1a4",
+   version="0.1b1",
    url="http://www.startcodon.com/wordpress/?cat=8",
    author="Joe Amenta",
    author_email="amentajo@msu.edu",
