@@ -98,6 +98,18 @@ class Test_imports2(lib3to2FixerTestCase):
         
         self.check(b, a)
 
+    def test_name_mutiple_imports_indented(self):
+
+        b = """
+        def indented():
+            import math, http.server, urllib.request, string"""
+        a = """
+        def indented():
+            import CGIHTTPServer, SimpleHTTPServer, BaseHTTPServer
+            import urllib2, urllib
+            import math, string"""
+        self.check(b, a)
+
     def test_from_single(self):
 
         b = "from urllib.request import urlopen"
