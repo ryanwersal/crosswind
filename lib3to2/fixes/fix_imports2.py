@@ -114,7 +114,7 @@ from_import = "from_import=import_from< 'from' {modules} 'import' (import_as_nam
 # helps match 'from http import server'
 mod_import = "from_import_submod=import_from< 'from' {fmt_name} 'import' ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any > | in_list=import_as_names< any* ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any >) any* >) >"
 # helps match 'import urllib.request'
-name_import = "name_import=import_name< 'import' ({fmt_name} | in_list=dotted_as_names< before=(any ',')* {fmt_name} after=(',' any)* >) >"
+name_import = "name_import=import_name< 'import' ({fmt_name} | in_list=dotted_as_names< imp_list=any* >) >"
 
 def all_modules_subpattern():
     """
@@ -182,6 +182,7 @@ class FixImports2(fixer_base.BaseFix):
         attr = results.get("attr")
         using = results.get("using")
         in_list = results.get("in_list")
+        imp_list = results.get("imp_list")
         power = results.get("pow")
         before = results.get("before")
         after = results.get("after")
@@ -199,32 +200,32 @@ class FixImports2(fixer_base.BaseFix):
 
         elif using is None:
             # import ..., urllib.request, math, http.sever, ...
-            if before and not after:
-                # Remove the comma before this one, because this is the end of the list
-                before[-1].remove()
-            elif after:
-                # Remove the comma after this one, because this node is being removed
-                after[0].remove()
-            elif not before and not after:
-                # This used to be a list, but now there's only one.
-                replacement = name_import_replacement(name, attr)
-                replacement.prefix = node.prefix
-                node.replace(replacement)
-                return
-            # Create a new import statement for all the replacements.
-            candidates = all_candidates(name.value, attr.value)
-            children = [Name("import")]
-            for c in candidates:
-                children.append(Name(c, prefix=" "))
-                children.append(Comma())
-            children.pop()
-            # Put in the new statement.
-            replacement = Node(syms.import_name, children)
-            replacement.prefix = node.prefix
-            replacement = Node(syms.simple_stmt, [replacement, Newline()])
-            parent.insert_child(idx, replacement)
-            # Remove the old imported name
-            d_name.remove()
+            for d_name in imp_list:
+                if d_name.type == syms.dotted_name:
+                    name = d_name.children[0]
+                    attr = d_name.children[2]
+                else:
+                    continue
+                if name.value + "." + attr.value not in MAPPING:
+                    continue
+                candidates = all_candidates(name.value, attr.value)
+                children = [Name("import")]
+                for c in candidates:
+                    children.append(Name(c, prefix=" "))
+                    children.append(Comma())
+                children.pop()
+                # Put in the new statement.
+                indent = indentation(simple_stmt)
+                next_stmt = Node(syms.simple_stmt, [Node(syms.import_name, children), Newline()])
+                parent.insert_child(idx+1, next_stmt)
+                parent.insert_child(idx+1, Leaf(token.INDENT, indent))
+                # Remove the old imported name
+                test_comma = d_name.next_sibling
+                if test_comma and test_comma.type == token.COMMA:
+                    d_name.next_sibling.remove()
+                d_name.remove()
+            if not in_list.children:
+                simple_stmt.remove()
 
         elif in_list is not None:
             ##########################################################
@@ -276,7 +277,7 @@ class FixImports2(fixer_base.BaseFix):
                 next_stmt = Node(syms.simple_stmt, [imports.pop(), Newline()])
                 parent.insert_child(idx+1, next_stmt)
                 parent.insert_child(idx+1, Leaf(token.INDENT, indent))
-                
+
         elif using.type == token.STAR:
             # from urllib.request import *
             nodes = [FromImport(pkg, [Star(prefix=" ")]) for pkg in

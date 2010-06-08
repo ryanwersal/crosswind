@@ -92,9 +92,9 @@ class Test_imports2(lib3to2FixerTestCase):
         b = """
         import math, http.server, urllib.request, string"""
         a = """
-        import CGIHTTPServer, SimpleHTTPServer, BaseHTTPServer
+        import math, string
         import urllib2, urllib
-        import math, string"""
+        import CGIHTTPServer, SimpleHTTPServer, BaseHTTPServer"""
         
         self.check(b, a)
 
@@ -105,9 +105,10 @@ class Test_imports2(lib3to2FixerTestCase):
             import math, http.server, urllib.request, string"""
         a = """
         def indented():
-            import CGIHTTPServer, SimpleHTTPServer, BaseHTTPServer
+            import math, string
             import urllib2, urllib
-            import math, string"""
+            import CGIHTTPServer, SimpleHTTPServer, BaseHTTPServer"""
+
         self.check(b, a)
 
     def test_from_single(self):
