@@ -114,7 +114,7 @@ from_import = "from_import=import_from< 'from' {modules} 'import' (import_as_nam
 # helps match 'from http import server'
 mod_import = "from_import_submod=import_from< 'from' {fmt_name} 'import' ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any > | in_list=import_as_names< any* ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any >) any* >) >"
 # helps match 'import urllib.request'
-name_import = "name_import=import_name< 'import' ({fmt_name} | dotted_as_name< {fmt_name} 'as' renamed=any > | dotted_as_names< any* in_list=dotted_as_name< {fmt_name} ['as' renamed=any] > any* >) >"
+name_import = "name_import=import_name< 'import' ({fmt_name} | in_list=dotted_as_names< before=(any ',')* {fmt_name} after=(',' any)* >) >"
 
 def all_modules_subpattern():
     """
@@ -162,59 +162,99 @@ def build_import_pattern(mapping1, mapping2):
         yield from_import.format(modules=all_modules_subpattern())
         yield power_twoname.format(fmt_name=s_name, fmt_attr=s_attr)
 
-class FixImports2(fixer_base.BaseFix):
+def name_import_replacement(name, attr):
+    children = [Name("import")]
+    for c in all_candidates(name.value, attr.value):
+        children.append(Name(c, prefix=" "))
+        children.append(Comma())
+    children.pop()
+    replacement = Node(syms.import_name, children)
+    return replacement
 
-    explicit = True
+
+class FixImports2(fixer_base.BaseFix):
 
     PATTERN = " | \n".join(build_import_pattern(MAPPING, PY2MODULES))
 
     def transform(self, node, results):
+        # The patterns dictate which of these names will be defined
         name = results.get("name")
         attr = results.get("attr")
         using = results.get("using")
         in_list = results.get("in_list")
         power = results.get("pow")
+        before = results.get("before")
+        after = results.get("after")
+        d_name = results.get("dotted_name")
+        # An import_stmt is always contained within a simple_stmt
         simple_stmt = node.parent
+        # The parent is useful for adding new import_stmts
         parent = simple_stmt.parent
         idx = parent.children.index(simple_stmt)
-        if using is None:
-            # import urllib.request
-            candidates = all_candidates(name.value, attr.value)
-            nodes = [Node(syms.import_name, [Name("import"), Name(c, prefix=" ")]) for c in candidates]
-            replacement = nodes.pop()
+        if using is None and not in_list:
+            # import urllib.request, single-name import
+            replacement = name_import_replacement(name, attr)
             replacement.prefix = node.prefix
             node.replace(replacement)
-            indent = indentation(simple_stmt)
-            while nodes:
-                next_stmt = Node(syms.simple_stmt, [nodes.pop(), Newline()])
-                parent.insert_child(idx+1, next_stmt)
-                parent.insert_child(idx+1, Leaf(token.INDENT, indent))
 
-        elif in_list:
+        elif using is None:
+            # import ..., urllib.request, math, http.sever, ...
+            if before and not after:
+                # Remove the comma before this one, because this is the end of the list
+                before[-1].remove()
+            elif after:
+                # Remove the comma after this one, because this node is being removed
+                after[0].remove()
+            elif not before and not after:
+                # This used to be a list, but now there's only one.
+                replacement = name_import_replacement(name, attr)
+                replacement.prefix = node.prefix
+                node.replace(replacement)
+                return
+            # Create a new import statement for all the replacements.
+            candidates = all_candidates(name.value, attr.value)
+            children = [Name("import")]
+            for c in candidates:
+                children.append(Name(c, prefix=" "))
+                children.append(Comma())
+            children.pop()
+            # Put in the new statement.
+            replacement = Node(syms.import_name, children)
+            replacement.prefix = node.prefix
+            parent.insert_child(idx, replacement)
+            # Remove the old imported name
+            d_name.remove()
+
+        elif in_list is not None:
             ##########################################################
             # "from urllib.request import urlopen, urlretrieve, ..." #
             # Replace one import statement with potentially many.    #
             ##########################################################
             packages = dict([(n,[]) for n in all_candidates(name.value,
                                                             attr.value)])
+            # Figure out what names need to be imported from what
+            # Add them to a dict to be parsed once we're completely done
             for imported in using:
                 if imported.type == token.COMMA:
                     continue
                 if imported.type == syms.import_as_name:
                     test_name = imported.children[0].value
                     if len(imported.children) > 2:
+                        # 'as' whatever
                         rename = imported.children[2].value
                     else:
                         rename = None
-                else:
+                elif imported.type == token.NAME:
                     test_name = imported.value
                     rename = None
                 pkg = new_package(name.value, attr.value, test_name)
                 packages[pkg].append((test_name, rename))
 
+            # Parse the dict to create new import statements to replace this one
             imports = []
             for new_pkg, names in packages.items():
                 if not names:
+                    # Didn't import anything from that package, move along
                     continue
                 new_names = []
                 for test_name, rename in names:
@@ -225,22 +265,19 @@ class FixImports2(fixer_base.BaseFix):
                     new_names.append(Comma())
                 new_names.pop()
                 imports.append(FromImport(new_pkg, new_names))
+            # Replace this import statement with one of the others
             replacement = imports.pop()
             replacement.prefix = node.prefix
             node.replace(replacement)
             indent = indentation(simple_stmt)
+            # Add the remainder of the imports as new statements.
             while imports:
                 next_stmt = Node(syms.simple_stmt, [imports.pop(), Newline()])
                 parent.insert_child(idx+1, next_stmt)
                 parent.insert_child(idx+1, Leaf(token.INDENT, indent))
                 
-
-            ##############################################
-            # Remove the offending import statement.     #
-            # Replace it with what is needed to satisfy. #
-            ##############################################
-
         elif using.type == token.STAR:
+            # from urllib.request import *
             nodes = [FromImport(pkg, [Star(prefix=" ")]) for pkg in
                                         all_candidates(name.value, attr.value)]
             replacement = nodes.pop()
@@ -252,11 +289,14 @@ class FixImports2(fixer_base.BaseFix):
                 parent.insert_child(idx+1, next_stmt)
                 parent.insert_child(idx+1, Leaf(token.INDENT, indent))
         elif power is not None:
+            # urllib.request.urlopen
+            # Replace it with urllib2.urlopen
             pkg = new_package(name.value, attr.value, using.value)
+            # Remove the trailer node that contains attr.
             attr.parent.remove()
             name.replace(Name(pkg, prefix=name.prefix))
 
-        else:
+        elif using.type == token.NAME:
+            # from urllib.request import urlopen
             pkg = new_package(name.value, attr.value, using.value)
             node.replace(FromImport(pkg, [using]))
-
