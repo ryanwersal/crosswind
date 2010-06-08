@@ -221,6 +221,7 @@ class FixImports2(fixer_base.BaseFix):
             # Put in the new statement.
             replacement = Node(syms.import_name, children)
             replacement.prefix = node.prefix
+            replacement = Node(syms.simple_stmt, [replacement, Newline()])
             parent.insert_child(idx, replacement)
             # Remove the old imported name
             d_name.remove()
