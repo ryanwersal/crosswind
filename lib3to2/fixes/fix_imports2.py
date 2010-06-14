@@ -186,6 +186,8 @@ def name_import_replacement(name, attr):
 
 class FixImports2(fixer_base.BaseFix):
 
+    run_order = 4
+
     PATTERN = " | \n".join(build_import_pattern(MAPPING, PY2MODULES))
 
     def transform(self, node, results):
@@ -323,4 +325,9 @@ class FixImports2(fixer_base.BaseFix):
         elif using.type == token.NAME:
             # from urllib.request import urlopen
             pkg = new_package(name.value, attr.value, using.value)
-            node.replace(FromImport(pkg, [using]))
+            if attr.value == "__init__" and pkg == name.value:
+                # Replacing "from abc import xyz" with "from abc import xyz"
+                # Just leave it alone so as not to mess with other fixers
+                return
+            else:
+                node.replace(FromImport(pkg, [using]))
