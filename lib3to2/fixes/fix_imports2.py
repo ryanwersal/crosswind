@@ -48,6 +48,8 @@ PY2MODULES = {
               'urlparse' : (
                   'parse_qs', 'parse_qsl', 'urldefrag', 'urljoin',
                   'urlparse', 'urlsplit', 'urlunparse', 'urlunsplit'),
+              'dbm' : (
+                  'ndbm', 'gnu', 'dumb'),
               'anydbm' : (
                   'error', 'open'),
               'whichdb' : (
@@ -107,6 +109,8 @@ simple_using = "using='{using}'"
 dotted_name = "dotted_name=dotted_name< {fmt_name} '.' {fmt_attr} >"
 # helps match 'http.server', as in 'http.server.HTTPServer(...)'
 power_twoname = "pow=power< {fmt_name} trailer< '.' {fmt_attr} > trailer< '.' using=any > any* >"
+# helps match 'dbm.whichdb', as in 'dbm.whichdb(...)'
+power_onename = "pow=power< {fmt_name} trailer< '.' using=any > any* >"
 # helps match 'from http.server import HTTPServer'
 # also helps match 'from http.server import HTTPServer, SimpleHTTPRequestHandler'
 # also helps match 'from http.server import *'
@@ -122,8 +126,11 @@ def all_modules_subpattern():
     (urllib, http, etc)
     """
     names_dot_attrs = [mod.split(".") for mod in MAPPING]
-    return "( " + " | ".join([dotted_name.format(fmt_name=simple_name.format(name=mod[0]),
-                                                 fmt_attr=simple_attr.format(attr=mod[1])) for mod in names_dot_attrs]) + " )"
+    ret =  "( " + " | ".join([dotted_name.format(fmt_name=simple_name.format(name=mod[0]),
+                                                 fmt_attr=simple_attr.format(attr=mod[1])) for mod in names_dot_attrs])
+    ret += " | "
+    ret += " | ".join([simple_name.format(name=mod[0]) for mod in names_dot_attrs if mod[1] == "__init__"]) + " )"
+    return ret
 
 def all_candidates(name, attr, MAPPING=MAPPING):
     """
@@ -131,7 +138,10 @@ def all_candidates(name, attr, MAPPING=MAPPING):
     """
     dotted = name + '.' + attr
     assert dotted in MAPPING, "No matching package found."
-    return MAPPING[dotted]
+    ret = MAPPING[dotted]
+    if attr == '__init__':
+        return ret + (name,)
+    return ret
 
 def new_package(name, attr, using, MAPPING=MAPPING, PY2MODULES=PY2MODULES):
     """
@@ -151,16 +161,18 @@ def build_import_pattern(mapping1, mapping2):
     mapping2: A dict mapping py2k modules to the things they do
     This builds a HUGE pattern to match all ways that things can be imported
     """
-    pats = []
     # py3k: urllib.request, py2k: ('urllib2', 'urllib')
+    yield from_import.format(modules=all_modules_subpattern())
     for py3k, py2k in mapping1.items():
         name, attr = py3k.split('.')
         s_name = simple_name.format(name=name)
         s_attr = simple_attr.format(attr=attr)
         d_name = dotted_name.format(fmt_name=s_name, fmt_attr=s_attr)
         yield name_import.format(fmt_name=d_name)
-        yield from_import.format(modules=all_modules_subpattern())
         yield power_twoname.format(fmt_name=s_name, fmt_attr=s_attr)
+        if attr == '__init__':
+            yield name_import.format(fmt_name=s_name)
+            yield power_onename.format(fmt_name=s_name)
 
 def name_import_replacement(name, attr):
     children = [Name("import")]
@@ -180,6 +192,8 @@ class FixImports2(fixer_base.BaseFix):
         # The patterns dictate which of these names will be defined
         name = results.get("name")
         attr = results.get("attr")
+        if attr is None:
+            attr = Name("__init__")
         using = results.get("using")
         in_list = results.get("in_list")
         imp_list = results.get("imp_list")
@@ -204,6 +218,9 @@ class FixImports2(fixer_base.BaseFix):
                 if d_name.type == syms.dotted_name:
                     name = d_name.children[0]
                     attr = d_name.children[2]
+                elif d_name.type == token.NAME and d_name.value + ".__init__" in MAPPING:
+                    name = d_name
+                    attr = Name("__init__")
                 else:
                     continue
                 if name.value + "." + attr.value not in MAPPING:
@@ -222,7 +239,11 @@ class FixImports2(fixer_base.BaseFix):
                 # Remove the old imported name
                 test_comma = d_name.next_sibling
                 if test_comma and test_comma.type == token.COMMA:
-                    d_name.next_sibling.remove()
+                    test_comma.remove()
+                elif test_comma is None:
+                    test_comma = d_name.prev_sibling
+                    if test_comma and test_comma.type == token.COMMA:
+                        test_comma.remove()
                 d_name.remove()
             if not in_list.children:
                 simple_stmt.remove()
@@ -295,7 +316,8 @@ class FixImports2(fixer_base.BaseFix):
             # Replace it with urllib2.urlopen
             pkg = new_package(name.value, attr.value, using.value)
             # Remove the trailer node that contains attr.
-            attr.parent.remove()
+            if attr.parent:
+                attr.parent.remove()
             name.replace(Name(pkg, prefix=name.prefix))
 
         elif using.type == token.NAME:

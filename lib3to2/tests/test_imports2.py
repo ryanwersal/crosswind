@@ -15,6 +15,26 @@ class Test_imports2(lib3to2FixerTestCase):
 
         self.check(b, a)
 
+        b = """
+        if True:
+            import http.server
+        else:
+            import this
+        while True:
+            http.server.HTTPServer(('localhost', 80), http.server.SimpleHTTPRequestHandler)
+        else:
+            import urllib.request"""
+        a = """
+        if True:
+            import CGIHTTPServer, SimpleHTTPServer, BaseHTTPServer
+        else:
+            import this
+        while True:
+            BaseHTTPServer.HTTPServer(('localhost', 80), SimpleHTTPServer.SimpleHTTPRequestHandler)
+        else:
+            import urllib2, urllib"""
+        self.check(b, a)
+
     def test_name_scope_def(self):
 
         b = """
@@ -29,6 +49,23 @@ class Test_imports2(lib3to2FixerTestCase):
             import urllib2, urllib
             urllib2.urlopen(stuff)
         urllib.urlretrieve(stuff)"""
+        self.check(b, a)
+
+        b = """
+        import math, urllib.request, http.server, dbm
+
+        w = dbm.whichdb()
+        g = dbm.gnu()
+        a = dbm.open()"""
+        a = """
+        import math
+        import anydbm, whichdb, dbm
+        import CGIHTTPServer, SimpleHTTPServer, BaseHTTPServer
+        import urllib2, urllib
+
+        w = whichdb.whichdb()
+        g = dbm.gnu()
+        a = anydbm.open()"""
         self.check(b, a)
 
     def test_name_scope_if(self):
