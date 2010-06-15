@@ -2,6 +2,49 @@
 3to2 Releases
 =============
 
+3to2 0.1
+========
+
+General Notes
+-------------
+
+- First non-alpha, non-beta release!
+
+- Using "#!/usr/bin/env python3.1" instead of "#!/usr/bin/env python3" to
+  reflect that lib3to2 has only been tested with Python 3.1.
+
+Specific Fixers
+---------------
+
+- fix_imports2: treating "from dbm import ..." as though it were written
+  "from dbm.__init__ import ...", for the purpose of catching whichdb and
+  anydbm usage.
+
+- fix_imports2: warning about "from urllib import request" and
+  "import urllib.request as spam" ambiguity.
+
+
+3to2 0.1b1
+==========
+
+General Notes
+-------------
+
+- Development is now done exclusively in Python 3, and releases are generated
+  by running 3to2 on itself.
+  For now, this requires that 3to2 already be installed.
+
+- Given a recent enough version of lib2to3 installed, 3to2 will now run on
+  Python 2.5.
+
+Specific Fixers
+---------------
+
+- fix_imports2 rewritten, now fixes cases of "from urllib.request import ..."
+  and "import urllib.request".  No fixes are currently planned for the
+  "from urllib import request" or "import urllib.request as spam" wordings.
+
+
 3to2 0.1a3
 ==========
 

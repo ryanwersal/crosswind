@@ -22,10 +22,7 @@ standard output and a "what was changed" summary on standard error, but the
 If you are root, you can also install with "./setup.py build" and
 "./setup.py install" ("make install" does this for you).
 
-This branch of 3to2 must be run with Python 3.  Scripts assume that you have
-the Python 3 executable installed as "python3".  If this does not exist, then
-you should either symlink "python3" to your preferred Python 3 executable, or
-modify the lines that start with "#!" in scripts.
+This branch of 3to2 must be run with Python 3.
 
 To install locally (used for running tests as a non-privileged user), the
 scripts assume you are using python3.1.  Modify accordingly if you are not.

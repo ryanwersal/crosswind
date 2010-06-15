@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.1
 """
 Runs all tests in the same directory named test_*.py
 """
