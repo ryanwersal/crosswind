@@ -115,10 +115,17 @@ power_onename = "pow=power< {fmt_name} trailer< '.' using=any > any* >"
 # also helps match 'from http.server import HTTPServer, SimpleHTTPRequestHandler'
 # also helps match 'from http.server import *'
 from_import = "from_import=import_from< 'from' {modules} 'import' (import_as_name< using=any 'as' renamed=any> | in_list=import_as_names< using=any* > | using='*' | using=NAME) >"
-# helps match 'from http import server'
-mod_import = "from_import_submod=import_from< 'from' {fmt_name} 'import' ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any > | in_list=import_as_names< any* ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any >) any* >) >"
 # helps match 'import urllib.request'
 name_import = "name_import=import_name< 'import' ({fmt_name} | in_list=dotted_as_names< imp_list=any* >) >"
+
+#############
+# WON'T FIX #
+#############
+
+# helps match 'import urllib.request as name'
+name_import_rename = "name_import_rename=dotted_as_name< {fmt_name} 'as' renamed=any >"
+# helps match 'from http import server'
+from_import_rename = "from_import_rename=import_from< 'from' {fmt_name} 'import' ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any > | in_list=import_as_names< any* ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any >) any* >) >"
 
 def all_modules_subpattern():
     """
@@ -173,6 +180,8 @@ def build_import_pattern(mapping1, mapping2):
         if attr == '__init__':
             yield name_import.format(fmt_name=s_name)
             yield power_onename.format(fmt_name=s_name)
+        yield name_import_rename.format(fmt_name=d_name)
+        yield from_import_rename.format(fmt_name=s_name, fmt_attr=s_attr)
 
 def name_import_replacement(name, attr):
     children = [Name("import")]
@@ -208,7 +217,11 @@ class FixImports2(fixer_base.BaseFix):
         # The parent is useful for adding new import_stmts
         parent = simple_stmt.parent
         idx = parent.children.index(simple_stmt)
-        if using is None and not in_list:
+        if any((results.get("from_import_rename") is not None,
+                results.get("name_import_rename") is not None)): 
+            self.cannot_convert(node, reason="ambiguity: import binds a single name")
+
+        elif using is None and not in_list:
             # import urllib.request, single-name import
             replacement = name_import_replacement(name, attr)
             replacement.prefix = node.prefix
