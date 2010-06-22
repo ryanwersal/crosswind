@@ -64,3 +64,25 @@ class Test_classdecorator(lib3to2FixerTestCase):
         awesome = should_work.with_dots(and_parens)(dotted.name(with_args(in_parens)(awesome)))"""
 
         self.check(b, a)
+
+    def test_indentation(self):
+
+        b = """
+        if 1:
+            if 2:
+                if 3:
+                    @something
+                    @something_else
+                    class foo(bar):
+                        do_stuff()
+                elif 4:
+                    pass"""
+        a = """
+        if 1:
+            if 2:
+                if 3:
+                    class foo(bar):
+                        do_stuff()
+                    foo = something(something_else(foo))
+                elif 4:
+                    pass"""
