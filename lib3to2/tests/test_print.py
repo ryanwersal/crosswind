@@ -40,4 +40,4 @@ class Test_print(lib3to2FixerTestCase):
 
     def test_argument_unpacking(self):
         s = "print(*args)"
-        self.warns_unchanged(s, "-fprint does not support argument unpacking.  use -fprintfunction.")
+        self.warns_unchanged(s, "-fprint does not support argument unpacking.  fix using -xprint and then again with  -fprintfunction.")

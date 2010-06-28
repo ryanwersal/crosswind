@@ -202,7 +202,7 @@ class FixPrint(fixer_base.BaseFix):
             return
         pos, opts = map_printargs(args)
         if pos is None or opts is None:
-            self.cannot_convert(node, "-fprint does not support argument unpacking.  use -fprintfunction.")
+            self.cannot_convert(node, "-fprint does not support argument unpacking.  fix using -xprint and then again with  -fprintfunction.")
             return
         if "file" in opts and \
            "end" in opts and \
