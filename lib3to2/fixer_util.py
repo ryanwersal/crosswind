@@ -1,6 +1,6 @@
 from lib2to3.pygram import token, python_symbols as syms
 from lib2to3.pytree import Leaf, Node
-from lib2to3.fixer_util import Comma, Name
+from lib2to3.fixer_util import *
 
 def Star(prefix=None):
     return Leaf(token.STAR, '*', prefix=prefix)
@@ -112,3 +112,28 @@ def ImportAsName(name, as_name, prefix=None):
     if prefix is not None:
         new_node.prefix = prefix
     return new_node
+
+def future_import(feature, node):
+
+    root = find_root(node)
+    
+    if does_tree_import("__future__", feature, node):
+        return
+
+    insert_pos = 0
+    for idx, node in enumerate(root.children):
+        if node.type == syms.simple_stmt and node.children and \
+           node.children[0].type == token.STRING:
+            insert_pos = idx + 1
+            prefix = ""
+            break
+    if insert_pos == 0:
+        first = root.children[0]
+        prefix = first.prefix
+        first.prefix = ""
+    
+    import_ = FromImport("__future__", [Leaf(token.NAME, feature, prefix=" ")])
+
+    children = [import_, Newline()]
+    root.insert_child(insert_pos, Node(syms.simple_stmt, children, prefix=prefix))
+    
