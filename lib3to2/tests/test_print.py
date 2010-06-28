@@ -37,3 +37,7 @@ class Test_print(lib3to2FixerTestCase):
         b = "print(1,2,3,end=None, sep=None, file=None)"
         a = "print 1,2,3"
         self.check(b, a)
+
+    def test_argument_unpacking(self):
+        s = "print(*args)"
+        self.warns_unchanged(s, "-fprint does not support argument unpacking.  use -fprintfunction.")

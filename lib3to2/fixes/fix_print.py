@@ -175,9 +175,11 @@ def map_printargs(args):
             assert str(kids[0].value) in ("sep", "end", "file")
             assert str(kids[0].value) not in mapping, mapping
             mapping[str(kids[0].value)] = kids[2]
+        elif arg.type == token.STAR:
+            return (None, None)
         else:
             pos.append(arg)
-    return pos, mapping
+    return (pos, mapping)
 
 class FixPrint(fixer_base.BaseFix):
 
@@ -199,6 +201,9 @@ class FixPrint(fixer_base.BaseFix):
             parens.remove()
             return
         pos, opts = map_printargs(args)
+        if pos is None or opts is None:
+            self.cannot_convert(node, "-fprint does not support argument unpacking.  use -fprintfunction.")
+            return
         if "file" in opts and \
            "end" in opts and \
            opts["file"].type != token.NAME:
