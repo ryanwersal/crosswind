@@ -114,7 +114,6 @@ def ImportAsName(name, as_name, prefix=None):
     return new_node
 
 def future_import(feature, node):
-
     root = find_root(node)
     
     if does_tree_import("__future__", feature, node):
@@ -125,15 +124,20 @@ def future_import(feature, node):
         if node.type == syms.simple_stmt and node.children and \
            node.children[0].type == token.STRING:
             insert_pos = idx + 1
-            prefix = ""
             break
-    if insert_pos == 0:
-        first = root.children[0]
-        prefix = first.prefix
-        first.prefix = ""
-    
+
+    for thing_after in root.children[insert_pos:]:
+        if thing_after.type == token.NEWLINE:
+            insert_pos += 1
+            continue
+
+        prefix = thing_after.prefix
+        thing_after.prefix = ""
+        break
+    else:
+        prefix = ""
+
     import_ = FromImport("__future__", [Leaf(token.NAME, feature, prefix=" ")])
 
     children = [import_, Newline()]
     root.insert_child(insert_pos, Node(syms.simple_stmt, children, prefix=prefix))
-    
