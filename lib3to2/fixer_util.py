@@ -141,3 +141,22 @@ def future_import(feature, node):
 
     children = [import_, Newline()]
     root.insert_child(insert_pos, Node(syms.simple_stmt, children, prefix=prefix))
+
+def parse_args(arglist, scheme):
+    """
+    Parse a list of arguments into a dict
+    """
+    arglist = [i for i in arglist if i.type != token.COMMA]
+    
+    ret_mapping = dict([(k, None) for k in scheme])
+
+    for i, arg in enumerate(arglist):
+        if arg.type == syms.argument and arg.children[1].type == token.EQUAL:
+            # argument < NAME '=' any >
+            slot = arg.children[0].value
+            ret_mapping[slot] = arg.children[2]
+        else:
+            slot = scheme[i]
+            ret_mapping[slot] = arg
+
+    return [ret_mapping[x].clone() for x in scheme]
