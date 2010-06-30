@@ -39,6 +39,10 @@ class Test_imports(lib3to2FixerTestCase):
         a = "import markupbase"
         self.check(b, a)
 
+        b = "import builtins"
+        a = "import __builtin__"
+        self.check(b, a)
+
     def test_nodotted_names_duo(self):
 
         b = "import configparser, copyreg"
@@ -47,6 +51,10 @@ class Test_imports(lib3to2FixerTestCase):
 
         b = "import _markupbase, queue as bob"
         a = "import markupbase, Queue as bob"
+        self.check(b, a)
+
+        b = "import socketserver, builtins"
+        a = "import SocketServer, __builtin__"
         self.check(b, a)
 
     def test_nodotted_names_quad(self):
@@ -176,6 +184,16 @@ class Test_imports(lib3to2FixerTestCase):
         a = "import test.test_support,  Cookie"
         self.check(b, a)
 
+    def test_from_import(self):
+
+        b = "from test.support import things"
+        a = "from test.test_support import things"
+        self.check(b, a)
+
+        b = "from builtins import open"
+        a = "from __builtin__ import open"
+        self.check(b, a)
+
     def test_dotted_names_quad(self):
 
         b = "import    html.parser as spam,  math,     tkinter.__init__,   dbm.gnu #comment!"
@@ -222,4 +240,14 @@ class Test_imports(lib3to2FixerTestCase):
         tkinter = Dialog(tkColorChooser("Just messing around"))
         tkinter.test_should_work = True
         Dialog.dont.code.like.this = True"""
+        self.check(b, a)
+
+        b = """
+        open = bob
+        import builtins
+        myOpen = builtins.open"""
+        a = """
+        open = bob
+        import __builtin__
+        myOpen = __builtin__.open"""
         self.check(b, a)

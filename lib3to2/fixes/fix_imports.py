@@ -43,6 +43,7 @@ MAPPING = {"reprlib": "repr",
            "tkinter.turtle": "turtle",
            "urllib.robotparser": "robotparser",
            "xmlrpc.client": "xmlrpclib",
+           "builtins": "__builtin__",
 }
 
 # generic strings to help build patterns
