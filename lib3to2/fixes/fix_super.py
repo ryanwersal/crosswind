@@ -31,9 +31,16 @@ def get_firstparam(super_node):
     if len(params.children) < 3:
         # Function has no parameters, therefore super() makes no sense here...
         return None
-    name = params.children[1]
-    assert name.type == token.NAME
-    return name.value
+    args = params.children[1]
+    if args.type == token.NAME:
+        return args.value
+    elif args.type == syms.typedargslist:
+        assert len(args.children) > 0
+        if args.children[0].type == token.NAME:
+            return args.children[0].value
+        else:
+            # Probably a '*'
+            return None
 
 def insert_args(name, rparen):
     parent = rparen.parent
