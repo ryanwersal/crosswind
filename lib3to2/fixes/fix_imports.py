@@ -60,11 +60,11 @@ subname_match = "attr='{attr}'"
 # helps match 'http.client', as in 'import urllib.request'
 dotted_name_match = "dotted_name=dotted_name< {fmt_name} '.' {fmt_attr} >"
 # helps match 'queue', as in 'queue.Queue(...)'
-power_onename_match = "power< {fmt_name} trailer< '.' using=NAME > any* >"
+power_onename_match = "{fmt_name}"
 # helps match 'http.client', as in 'http.client.HTTPConnection(...)'
-power_twoname_match = "power< {fmt_name} trailer< '.' {fmt_attr} > [trailer< '.' using=NAME >] any* >"
+power_twoname_match = "power< {fmt_name} trailer< '.' {fmt_attr} > any* >"
 # helps match 'client.HTTPConnection', if 'client' has been imported from http
-power_subname_match = "power< {fmt_attr} trailer< '.' using=NAME > any* >"
+power_subname_match = "power< {fmt_attr} any* >"
 # helps match 'from http.client import HTTPConnection'
 from_import_match = "from_import=import_from< 'from' {fmt_name} 'import' imported=any >"
 # helps match 'from http import client'

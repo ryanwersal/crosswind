@@ -251,3 +251,13 @@ class Test_imports(lib3to2FixerTestCase):
         import __builtin__
         myOpen = __builtin__.open"""
         self.check(b, a)
+
+    def test_bare_usage(self):
+
+        b = """
+        import builtins
+        hasattr(builtins, "quit")"""
+        a = """
+        import __builtin__
+        hasattr(__builtin__, "quit")"""
+        self.check(b, a)
