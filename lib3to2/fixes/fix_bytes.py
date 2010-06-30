@@ -4,19 +4,17 @@ Fixer for bytes -> str.
 
 import re
 from lib2to3 import fixer_base
+from lib2to3.patcomp import compile_pattern
 from ..fixer_util import Name, token, parse_args, Call, Comma
 
 _literal_re = re.compile(r"[bB][rR]?[\'\"]")
 
 class FixBytes(fixer_base.BaseFix):
 
-    PATTERN = "STRING | power< name='bytes' trailer< '(' (args=arglist | any*) ')' > >"
+    PATTERN = "STRING | power< name='bytes' [trailer< '(' (args=arglist | any*) ')' >] >"
 
     def match(self, node):
         results = super().match(node)
-        if not results:
-            if node.type == token.NAME and node.value == "bytes":
-                return {"node": node, "name": node}
         return results
 
     def transform(self, node, results):
@@ -32,11 +30,13 @@ class FixBytes(fixer_base.BaseFix):
                 return new
         if arglist is not None:
             args = arglist.children
-            source, encoding, errors = parse_args(args, ("source", "encoding", "errors"))
+            parsed = parse_args(args, ("source", "encoding", "errors"))
 
+            source, encoding, errors = (parsed[v] for v in ("source", "encoding", "errors"))
             encoding.prefix = ""
+            str_call = Call(Name("str"), ([source.clone()]))
             if errors is None:
-                arglist.replace(Call(Name(source.value + ".encode"), (encoding,)))
+                node.replace(Call(Name(str(str_call) + ".encode"), (encoding.clone(),)))
             else:
                 errors.prefix = " "
-                arglist.replace(Call(Name(source.value + ".encode"), (encoding, Comma(), errors)))
+                node.replace(Call(Name(str(str_call) + ".encode"), (encoding.clone(), Comma(), errors.clone())))

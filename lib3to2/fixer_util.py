@@ -159,4 +159,4 @@ def parse_args(arglist, scheme):
             slot = scheme[i]
             ret_mapping[slot] = arg
 
-    return [ret_mapping[x].clone() for x in scheme]
+    return ret_mapping

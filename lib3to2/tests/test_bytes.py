@@ -20,12 +20,12 @@ class Test_bytes(lib3to2FixerTestCase):
 
     def test_bytes_call_args_1(self):
         b = """bytes(x, y, z)"""
-        a = """str(x.encode(y, z))"""
+        a = """str(x).encode(y, z)"""
         self.check(b, a)
 
     def test_bytes_call_args_2(self):
         b = """bytes(encoding="utf-8", source="dinosaur", errors="dont-care")"""
-        a = """str("dinosaur".encode("utf-8", "dont-care"))"""
+        a = """str("dinosaur").encode("utf-8", "dont-care")"""
         self.check(b, a)
 
     def test_bytes_literal_1(self):
