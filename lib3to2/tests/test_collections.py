@@ -32,10 +32,10 @@ class Test_collections(lib3to2FixerTestCase):
         b = """
         class Scapegoat(collections.UserDict):
             pass"""
-        a = """
-        import UserDict
-        class Scapegoat(UserDict.UserDict):
-            pass"""
+        a = """import UserDict
+
+class Scapegoat(UserDict.UserDict):
+    pass"""
         self.check(b, a)
 
     def test_using_UserList(self):
@@ -43,9 +43,10 @@ class Test_collections(lib3to2FixerTestCase):
         b = """
         class Scapegoat(collections.UserList):
             pass"""
-        a = """
-        class Scapegoat(UserList.UserList):
-            pass"""
+        a = """import UserList
+
+class Scapegoat(UserList.UserList):
+    pass"""
         self.check(b, a)
 
     def test_using_UserString(self):
@@ -53,7 +54,8 @@ class Test_collections(lib3to2FixerTestCase):
         b = """
         class Scapegoat(collections.UserString):
             pass"""
-        a = """
-        class Scapegoat(UserString.UserString):
-            pass"""
+        a = """import UserString
+
+class Scapegoat(UserString.UserString):
+    pass"""
         self.check(b, a)
