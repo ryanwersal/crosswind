@@ -331,9 +331,10 @@ class FixImports2(fixer_base.BaseFix):
             # Replace it with urllib2.urlopen
             pkg = new_package(name.value, attr.value, using.value)
             # Remove the trailer node that contains attr.
-            if attr.parent:
-                attr.parent.remove()
-            name.replace(Name(pkg, prefix=name.prefix))
+            if pkg:
+                if attr.parent:
+                    attr.parent.remove()
+                name.replace(Name(pkg, prefix=name.prefix))
 
         elif using.type == token.NAME:
             # from urllib.request import urlopen
