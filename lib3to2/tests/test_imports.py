@@ -174,6 +174,10 @@ class Test_imports(lib3to2FixerTestCase):
         a = "import xmlrpclib"
         self.check(b, a)
 
+        b = "from test import support as spam, not_support as not_spam"
+        a = "from test import test_support as spam, not_support as not_spam"
+        self.check(b, a)
+
     def test_dotted_names_duo(self):
 
         b = "import   tkinter.font,  dbm.bsd"

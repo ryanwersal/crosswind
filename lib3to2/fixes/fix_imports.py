@@ -68,7 +68,7 @@ power_subname_match = "power< {fmt_attr} any* >"
 # helps match 'from http.client import HTTPConnection'
 from_import_match = "from_import=import_from< 'from' {fmt_name} 'import' imported=any >"
 # helps match 'from http import client'
-from_import_submod_match = "from_import_submod=import_from< 'from' {fmt_name} 'import' {fmt_attr} >"
+from_import_submod_match = "from_import_submod=import_from< 'from' {fmt_name} 'import' ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any > | import_as_names< any* ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any >) any* > ) >"
 # helps match 'import urllib.request'
 name_import_match = "name_import=import_name< 'import' {fmt_name} > | name_import=import_name< 'import' dotted_as_name< {fmt_name} 'as' renamed=any > >"
 # helps match 'import http.client, winreg'
@@ -186,7 +186,7 @@ class FixImports(fixer_base.BaseFix):
             parent.append_child(orig_stripped)
 
 
-    def get_dotted_import_replacement(self, name_node, attr_node, mapping=MAPPING):
+    def get_dotted_import_replacement(self, name_node, attr_node, mapping=MAPPING, renamed=None):
         """
         For (http, client) given and httplib being the correct replacement,
         returns (httplib as client, None)
@@ -197,7 +197,10 @@ class FixImports(fixer_base.BaseFix):
         replacement = mapping[full_name]
         if '.' in replacement:
             new_name, new_attr = replacement.split('.')
-            return Name(new_name, prefix=name_node.prefix), Node(syms.dotted_as_name, [Name(new_attr, prefix=attr_node.prefix), Name('as', prefix=" "), attr_node.clone()])
+            if renamed is None:
+                return Name(new_name, prefix=name_node.prefix), Node(syms.dotted_as_name, [Name(new_attr, prefix=attr_node.prefix), Name('as', prefix=" "), attr_node.clone()])
+            else:
+                return Name(new_name, prefix=name_node.prefix), Name(new_attr, prefix=attr_node.prefix)
         else:
             return Node(syms.dotted_as_name, [Name(replacement, prefix=name_node.prefix), Name('as', prefix=' '), Name(attr_node.value, prefix=attr_node.prefix)]), None
     
@@ -220,7 +223,8 @@ class FixImports(fixer_base.BaseFix):
                 elif name.type == syms.dotted_name:
                     self.fix_dotted_name(name)
         elif from_import_submod:
-            new_name, new_attr = self.get_dotted_import_replacement(name, attr)
+            renamed = results.get("renamed")
+            new_name, new_attr = self.get_dotted_import_replacement(name, attr, renamed=renamed)
             if new_attr is not None:
                 name.replace(new_name)
                 attr.replace(new_attr)
