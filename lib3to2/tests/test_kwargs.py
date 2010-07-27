@@ -46,9 +46,9 @@ class Test_kwargs(lib3to2FixerTestCase):
         def spam(ham, *, eggs, monkeys):
             funky()"""
         a = """
-        def spam(ham, **kwargs):
-            eggs = kwargs['eggs']
-            monkeys = kwargs['monkeys']            
+        def spam(ham, **_3to2kwargs):
+            eggs = _3to2kwargs['eggs']
+            monkeys = _3to2kwargs['monkeys']            
             funky()"""
         self.check(b, a)
 
@@ -58,14 +58,14 @@ class Test_kwargs(lib3to2FixerTestCase):
         def spam(ham, *, dinosaurs, eggs=3, monkeys=2):
             funky()"""
         a = """
-        def spam(ham, **kwargs):
-            dinosaurs = kwargs['dinosaurs']
-            if 'eggs' in kwargs:
-                eggs = kwargs['eggs']
+        def spam(ham, **_3to2kwargs):
+            dinosaurs = _3to2kwargs['dinosaurs']
+            if 'eggs' in _3to2kwargs:
+                eggs = _3to2kwargs['eggs']
             else:
                 eggs = 3
-            if 'monkeys' in kwargs:
-                monkeys = kwargs['monkeys']
+            if 'monkeys' in _3to2kwargs:
+                monkeys = _3to2kwargs['monkeys']
             else:
                 monkeys = 2
             funky()"""
