@@ -22,15 +22,64 @@ def commatize(leafs):
 
 def indentation(node):
     """
-    Recursively checks every previous sibling for token.INDENT
-
-    Returns empty string if not found, or the indentation if it is.
+    Returns the indentation for this node
+    Iff a node is in a suite, then it has indentation.
     """
-    prev_sibling = node.prev_sibling
+    while node.parent is not None and node.parent.type != syms.suite:
+        node = node.parent
+    if node.parent is None:
+        return ""
+    # The first three children of a suite are NEWLINE, INDENT, (some other node)
+    # INDENT.value contains the indentation for this suite
+    # anything after (some other node) has the indentation as its prefix.
     if node.type == token.INDENT:
         return node.value
+    elif node.prev_sibling is not None and node.prev_sibling.type == token.INDENT:
+        return node.prev_sibling.value
+    elif node.prev_sibling is None:
+        return node.next_sibling.value
     else:
-        return indentation(prev_sibling) if prev_sibling is not None else ""
+        return node.prefix
+
+def indentation_step(node):
+    """
+    Dirty little trick to get the difference between each indentation level
+    Implemented by finding the shortest indentation string
+    (technically, the "least" of all of the indentation strings, but
+    tabs and spaces mixed won't get this far, so those are synonymous.)
+    """
+    r = find_root(node)
+    # Collect all indentations into one set.
+    all_indents = set(i.value for i in r.pre_order() if i.type == token.INDENT)
+    if not all_indents:
+        # nothing is indented anywhere, so we get to pick what we want
+        return "    " # four spaces is a popular convention
+    else:
+        return min(all_indents)
+
+def suitify(parent):
+    """
+    Turn the stuff after the first colon in parent's children
+    into a suite, if it wasn't already
+    """
+    for node in parent.children:
+        if node.type == syms.suite:
+            # already in the prefered format, do nothing
+            return
+
+    # One-liners have no suite node, we have to fake one up
+    for i, node in enumerate(parent.children):
+        if node.type == token.COLON:
+            break
+    else:
+        raise ValueError("No class suite and no ':'!")
+    # Move everything into a suite node
+    suite = Node(syms.suite, [Newline(), Leaf(token.INDENT, indentation(node) + indentation_step(node))])
+    one_node = parent.children[i+1]
+    one_node.remove()
+    one_node.prefix = ''
+    suite.append_child(one_node)
+    parent.append_child(suite)
 
 def NameImport(package, as_name=None, prefix=None):
     """
