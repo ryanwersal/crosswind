@@ -37,7 +37,7 @@ def indentation(node):
     elif node.prev_sibling is not None and node.prev_sibling.type == token.INDENT:
         return node.prev_sibling.value
     elif node.prev_sibling is None:
-        return node.next_sibling.value
+        return ""
     else:
         return node.prefix
 
