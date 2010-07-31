@@ -23,8 +23,8 @@ class Test_kwargs(lib3to2FixerTestCase):
             funky()"""
         a = """
         def spam(ham, *args, **_3to2kwargs):
-            monkeys = _3to2kwargs['monkeys']
-            eggs = _3to2kwargs['eggs']
+            monkeys = _3to2kwargs['monkeys']; del _3to2kwargs['monkeys']
+            eggs = _3to2kwargs['eggs']; del _3to2kwargs['eggs']
             funky()"""
         self.check(b, a)
 
@@ -35,8 +35,8 @@ class Test_kwargs(lib3to2FixerTestCase):
             funky()"""
         a = """
         def spam(ham, *args, **stuff):
-            monkeys = stuff['monkeys']
-            eggs = stuff['eggs']
+            monkeys = stuff['monkeys']; del stuff['monkeys']
+            eggs = stuff['eggs']; del stuff['eggs']
             funky()"""
         self.check(b, a)
 
@@ -47,8 +47,8 @@ class Test_kwargs(lib3to2FixerTestCase):
             funky()"""
         a = """
         def spam(ham, **_3to2kwargs):
-            monkeys = _3to2kwargs['monkeys']
-            eggs = _3to2kwargs['eggs']
+            monkeys = _3to2kwargs['monkeys']; del _3to2kwargs['monkeys']
+            eggs = _3to2kwargs['eggs']; del _3to2kwargs['eggs']
             funky()"""
         self.check(b, a)
 
@@ -59,11 +59,11 @@ class Test_kwargs(lib3to2FixerTestCase):
             funky()"""
         a = """
         def spam(ham, **_3to2kwargs):
-            if 'monkeys' in _3to2kwargs: monkeys = _3to2kwargs['monkeys']
+            if 'monkeys' in _3to2kwargs: monkeys = _3to2kwargs['monkeys']; del _3to2kwargs['monkeys']
             else: monkeys = 2
-            if 'eggs' in _3to2kwargs: eggs = _3to2kwargs['eggs']
+            if 'eggs' in _3to2kwargs: eggs = _3to2kwargs['eggs']; del _3to2kwargs['eggs']
             else: eggs = 3
-            dinosaurs = _3to2kwargs['dinosaurs']
+            dinosaurs = _3to2kwargs['dinosaurs']; del _3to2kwargs['dinosaurs']
             funky()"""
         self.check(b, a)
 
@@ -74,11 +74,11 @@ class Test_kwargs(lib3to2FixerTestCase):
             funky()"""
         a = """
         def spam(ham, **stuff):
-            if 'monkeys' in stuff: monkeys = stuff['monkeys']
+            if 'monkeys' in stuff: monkeys = stuff['monkeys']; del stuff['monkeys']
             else: monkeys = 2
-            if 'eggs' in stuff: eggs = stuff['eggs']
+            if 'eggs' in stuff: eggs = stuff['eggs']; del stuff['eggs']
             else: eggs = 3
-            dinosaurs = stuff['dinosaurs']
+            dinosaurs = stuff['dinosaurs']; del stuff['dinosaurs']
             funky()"""
         self.check(b, a)
         
@@ -88,11 +88,11 @@ class Test_kwargs(lib3to2FixerTestCase):
             funky()"""
         a = """
         def spam(ham, **_3to2kwargs):
-            if 'monkeys' in _3to2kwargs: monkeys = _3to2kwargs['monkeys']
+            if 'monkeys' in _3to2kwargs: monkeys = _3to2kwargs['monkeys']; del _3to2kwargs['monkeys']
             else: monkeys = [i.split() for i in something(args)]
-            if 'eggs' in _3to2kwargs: eggs = _3to2kwargs['eggs']
+            if 'eggs' in _3to2kwargs: eggs = _3to2kwargs['eggs']; del _3to2kwargs['eggs']
             else: eggs = call_fn(lambda a: b)
-            dinosaurs = _3to2kwargs['dinosaurs']
+            dinosaurs = _3to2kwargs['dinosaurs']; del _3to2kwargs['dinosaurs']
             funky()"""
         self.check(b, a)
 
@@ -103,11 +103,11 @@ class Test_kwargs(lib3to2FixerTestCase):
             funky()"""
         a = """
         def spam(ham, **stuff):
-            if 'monkeys' in stuff: monkeys = stuff['monkeys']
+            if 'monkeys' in stuff: monkeys = stuff['monkeys']; del stuff['monkeys']
             else: monkeys = [i.split() for i in something(args)]
-            if 'eggs' in stuff: eggs = stuff['eggs']
+            if 'eggs' in stuff: eggs = stuff['eggs']; del stuff['eggs']
             else: eggs = call_fn(lambda a: b)
-            dinosaurs = stuff['dinosaurs']
+            dinosaurs = stuff['dinosaurs']; del stuff['dinosaurs']
             funky()"""
         self.check(b, a)
         

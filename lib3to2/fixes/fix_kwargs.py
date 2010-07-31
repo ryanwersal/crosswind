@@ -8,7 +8,7 @@ This fixer is rather sensitive to incorrect py3k syntax.
 from lib2to3 import fixer_base
 from ..fixer_util import token, indentation, suitify, String, Newline, Comma, DoubleStar, Name
 
-_assign_template = "%(name)s = %(kwargs)s['%(name)s']"
+_assign_template = "%(name)s = %(kwargs)s['%(name)s']; del %(kwargs)s['%(name)s']"
 _if_template = "if '%(name)s' in %(kwargs)s: %(assign)s"
 _else_template = "else: %(name)s = %(default)s"
 _kwargs_default_name = "_3to2kwargs"
@@ -88,8 +88,8 @@ def needs_fixing(raw_params, kwargs_default=_kwargs_default_name):
 
 class FixKwargs(fixer_base.BaseFix):
 
-    explicit = True # not sufficiently tested
-    
+    run_order = 7 # Run after function annotations are removed
+
     PATTERN = "funcdef< 'def' NAME parameters< '(' arglist=typedargslist< params=any* > ')' > ':' suite=any >"
 
     def transform(self, node, results):
