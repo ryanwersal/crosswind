@@ -69,7 +69,7 @@ def needs_fixing(raw_params, kwargs_default=_kwargs_default_name):
     found_kwargs = False
     needs_fix = False
 
-    for t in raw_params:
+    for t in raw_params[2:]:
         if t.type == token.COMMA:
             # Commas are irrelevant at this stage.
             continue

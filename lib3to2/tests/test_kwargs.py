@@ -5,22 +5,19 @@ class Test_kwargs(lib3to2FixerTestCase):
 
     def test_basic_unchanged(self):
         s = """
-        def spam(ham, eggs):
-            funky()"""
+        def spam(ham, eggs): funky()"""
         self.unchanged(s)
 
 
     def test_args_kwargs_unchanged(self):
         s = """
-        def spam(ham, *args, **kwargs):
-            funky()"""
+        def spam(ham, *args, **kwargs): funky()"""
         self.unchanged(s)
 
 
     def test_args_named_pos(self):
         b = """
-        def spam(ham, *args, eggs, monkeys):
-            funky()"""
+        def spam(ham, *args, eggs, monkeys): funky()"""
         a = """
         def spam(ham, *args, **_3to2kwargs):
             monkeys = _3to2kwargs['monkeys']; del _3to2kwargs['monkeys']
@@ -31,8 +28,7 @@ class Test_kwargs(lib3to2FixerTestCase):
 
     def test_args_named_pos_catchall(self):
         b = """
-        def spam(ham, *args, eggs, monkeys, **stuff):
-            funky()"""
+        def spam(ham, *args, eggs, monkeys, **stuff): funky()"""
         a = """
         def spam(ham, *args, **stuff):
             monkeys = stuff['monkeys']; del stuff['monkeys']
