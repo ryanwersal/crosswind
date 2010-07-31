@@ -5,6 +5,9 @@ from lib2to3.fixer_util import *
 def Star(prefix=None):
     return Leaf(token.STAR, '*', prefix=prefix)
 
+def DoubleStar(prefix=None):
+    return Leaf(token.DOUBLESTAR, '**', prefix=prefix)
+
 def Minus(prefix=None):
     return Leaf(token.MINUS, '-', prefix=prefix)
 
