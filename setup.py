@@ -6,6 +6,7 @@ classifiers = [
 "Intended Audience :: Developers",
 "License :: OSI Approved :: Apache Software License",
 "Operating System :: OS Independent",
+"Programming Language :: Python :: 3",
 "Programming Language :: Python :: 3.1",
 "Topic :: Software Development :: Code Generators",
 "Topic :: Software Development :: Libraries :: Python Modules",

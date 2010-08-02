@@ -6,10 +6,11 @@
  
  classifiers = [
  "Development Status :: 4 - Beta",
-@@ -6,7 +6,7 @@
+@@ -6,8 +6,7 @@
  "Intended Audience :: Developers",
  "License :: OSI Approved :: Apache Software License",
  "Operating System :: OS Independent",
+-"Programming Language :: Python :: 3",
 -"Programming Language :: Python :: 3.1",
 +"Programming Language :: Python :: 2.7",
  "Topic :: Software Development :: Code Generators",
