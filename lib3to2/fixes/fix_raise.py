@@ -9,7 +9,7 @@ class FixRaise(fixer_base.BaseFix):
 
     PATTERN = """
     raise_stmt< 'raise' power< exc=any trailer< '(' val=any* ')' >
-        trailer< '.' 'with_traceback' > trailer< '(' trc=any ')' > > >"""
+        trailer< '.' 'with_traceback' > trailer< '(' trc=any ')' > > ['from' any] >"""
 
     def transform(self, node, results):
         syms = self.syms
