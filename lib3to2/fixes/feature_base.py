@@ -9,7 +9,7 @@ PATTERN = features.PATTERN
 
 pattern_unformatted = "%s=%s" # name=pattern, for dict lookups
 message_unformatted = """
-feature %s is only supported in Python %s and above."""
+%s is only supported in Python %s and above."""
 
 class Feature(object):
     """

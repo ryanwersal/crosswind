@@ -74,3 +74,17 @@ class Test_raise(lib3to2FixerTestCase):
         b = """raise E("Sorry, you cannot do that.").with_traceback(T)"""
         a = """raise E, "Sorry, you cannot do that.", T"""
         self.check(b, a)
+
+    def test_chain(self):
+        b = "raise E(V).with_traceback(t) from exc"
+        a = "raise E, V, t"
+        self.check(b, a, ignore_warnings=True)
+
+        b = "raise E(V) from exc"
+        a = "raise E(V)"
+        self.check(b, a, ignore_warnings=True)
+
+        b = "raise eBob.exception from exc"
+        a = "raise eBob.exception"
+        self.check(b, a, ignore_warnings=True)
+

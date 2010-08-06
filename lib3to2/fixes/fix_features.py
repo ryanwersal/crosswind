@@ -42,9 +42,15 @@ FEATURES = [
         "global_stmt< 'nonlocal' any* >",
      "3.0",
     ),
+    ("with_traceback",
+        "trailer< '.' 'with_traceback' >",
+     "3.0",
+    ),
 ]
 
 class FixFeatures(fixer_base.BaseFix):
+
+    run_order = 9 # Wait until all other fixers have run to check for these
 
     # To avoid spamming, we only want to warn for each feature once.
     features_warned = set()
