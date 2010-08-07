@@ -22,14 +22,15 @@ class FixBytes(fixer_base.BaseFix):
         return results
 
     def transform(self, node, results):
-        new = node.clone()
         name = results.get("name")
         arglist = results.get("args")
         if name is not None:
             assert name.value == "bytes"
-            name.replace(Name("str", prefix=name.prefix))
+            name.value = "str"
+            name.changed()
         elif node.type == token.STRING:
             if _literal_re.match(node.value):
+                new = node.clone()
                 new.value = new.value[1:]
                 return new
         if arglist is not None:
