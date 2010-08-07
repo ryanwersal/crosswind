@@ -5,16 +5,20 @@ Fixer for bytes -> str.
 import re
 from lib2to3 import fixer_base
 from lib2to3.patcomp import compile_pattern
-from ..fixer_util import Name, token, parse_args, Call, Comma
+from ..fixer_util import Name, token, syms, parse_args, Call, Comma
 
 _literal_re = re.compile(r"[bB][rR]?[\'\"]")
 
 class FixBytes(fixer_base.BaseFix):
 
-    PATTERN = "STRING | power< name='bytes' [trailer< '(' (args=arglist | any*) ')' >] >"
+    PATTERN = "STRING | power< name='bytes' [trailer< '(' (args=arglist | any*) ')' >] > | name='bytes'"
 
     def match(self, node):
         results = super().match(node)
+        if results and node.type == token.NAME and node.parent is not None:
+            if super().match(node.parent):
+                # Do not match a simple name if it is within a larger matching context
+                return False
         return results
 
     def transform(self, node, results):
