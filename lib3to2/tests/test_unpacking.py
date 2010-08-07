@@ -35,7 +35,7 @@ class Test_unpacking(lib3to2FixerTestCase):
         self.check(b, a)
 
         b = """
-        for *a, b, c, d, e, f, g in spam:
+        for *a, b, c, d, e, f, g in some_thing:
             pass"""
         a = """
         for _3to2iter in some_thing:

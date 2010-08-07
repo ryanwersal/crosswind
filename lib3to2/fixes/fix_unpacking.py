@@ -5,11 +5,8 @@ for (a,)* *b (,c)* [,] in d: ...
 """
 
 from lib2to3 import fixer_base
-from lib2to3.pytree import Node, Leaf
-from lib2to3.pygram import token, python_symbols as syms
-from lib2to3.fixer_util import Assign, Comma, Call, Newline, Name, Number
-
-from ..fixer_util import indentation, commatize
+from itertools import count
+from ..fixer_util import Assign, Comma, Call, Newline, Name, Number, indentation, suitify, commatize, token, syms, Node, Leaf
 
 def assignment_source(num_pre, num_post, LISTNAME, ITERNAME):
     """
@@ -42,13 +39,13 @@ class FixUnpacking(fixer_base.BaseFix):
         pre=(any ',')*
             star_expr< '*' name=NAME >
         post=(',' any)* [','] > '=' source=any > |
-    impl=for_stmt< 'for' exprlist<
+    impl=for_stmt< 'for' lst=exprlist<
         pre=(any ',')*
             star_expr< '*' name=NAME >
         post=(',' any)* [','] > 'in' it=any ':' suite=any>"""
 
     def fix_explicit_context(self, node, results):
-        pre, name, post, source = results.get("pre"), results.get("name"), results.get("post"), results.get("source")
+        pre, name, post, source = (results.get(n) for n in ("pre", "name", "post", "source"))
         pre = [n.clone() for n in pre if n.type == token.NAME]
         name.prefix = " "
         post = [n.clone() for n in post if n.type == token.NAME]
@@ -66,21 +63,32 @@ class FixUnpacking(fixer_base.BaseFix):
         Only example of the implicit context is
         a for loop, so only fix that.
         """
-        self.cannot_convert(node, "Not implemented yet.")
-
+        pre, name, post, it = (results.get(n) for n in ("pre", "name", "post", "it"))
+        pre = [n.clone() for n in pre if n.type == token.NAME]
+        name.prefix = " "
+        post = [n.clone() for n in post if n.type == token.NAME]
+        target = [n.clone() for n in commatize(pre + [name.clone()] + post)]
+        # to make the special-case fix for "*z, = ..." correct with the least
+        # amount of modification, make the left-side into a guaranteed tuple
+        target.append(Comma())
+        source = it.clone()
+        source.prefix = ""
+        setup_line = Assign(Name(self.LISTNAME), Call(Name("list"), [Name(self.ITERNAME)]))
+        power_line = Assign(target, assignment_source(len(pre), len(post), self.LISTNAME, self.ITERNAME))
+        return setup_line, power_line
 
     def transform(self, node, results):
         """
         a,b,c,d,e,f,*g,h,i = range(100) changes to
         _3to2list = list(range(100))
-        a,b,c,d,e,f,g,h,i = _3to2list[:6] + [_3to2list[6:-2]] + _3to2list[-2:]
+        a,b,c,d,e,f,g,h,i, = _3to2list[:6] + [_3to2list[6:-2]] + _3to2list[-2:]
 
         and
 
         for a,b,*c,d,e in iter_of_iters: do_stuff changes to
         for _3to2iter in iter_of_iters:
             _3to2list = list(_3to2iter)
-            a,b,c,d,e = _3to2list[:2] + [_3to2list[2:-2]] + _3to2list[-2:]
+            a,b,c,d,e, = _3to2list[:2] + [_3to2list[2:-2]] + _3to2list[-2:]
             do_stuff
         """
         self.LISTNAME = self.new_name("_3to2list")
@@ -96,4 +104,14 @@ class FixUnpacking(fixer_base.BaseFix):
             parent.insert_child(i, power_line)
             parent.insert_child(i, setup_line)
         elif impl is not None:
-            self.fix_implicit_context(node, results) # TODO: something with this
+            setup_line, power_line = self.fix_implicit_context(node, results)
+            suitify(node)
+            suite = [k for k in node.children if k.type == syms.suite][0]
+            setup_line.prefix = ""
+            power_line.prefix = suite.children[1].value
+            suite.children[2].prefix = indentation(suite.children[2])
+            suite.insert_child(2, Newline())
+            suite.insert_child(2, power_line)
+            suite.insert_child(2, Newline())
+            suite.insert_child(2, setup_line)
+            results.get("lst").replace(Name(self.ITERNAME, prefix=" "))
