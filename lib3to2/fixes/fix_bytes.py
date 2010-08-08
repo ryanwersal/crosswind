@@ -11,23 +11,15 @@ _literal_re = re.compile(r"[bB][rR]?[\'\"]")
 
 class FixBytes(fixer_base.BaseFix):
 
-    PATTERN = "STRING | power< name='bytes' [trailer< '(' (args=arglist | any*) ')' >] > | name='bytes'"
-
-    def match(self, node):
-        results = super().match(node)
-        if results and node.type == token.NAME and node.parent is not None:
-            if super().match(node.parent):
-                # Do not match a simple name if it is within a larger matching context
-                return False
-        return results
+    order = "pre"
+    
+    PATTERN = "STRING | power< 'bytes' [trailer< '(' (args=arglist | any*) ')' >] > | 'bytes'"
 
     def transform(self, node, results):
         name = results.get("name")
         arglist = results.get("args")
-        if name is not None:
-            assert name.value == "bytes"
-            name.value = "str"
-            name.changed()
+        if node.type == token.NAME:
+            return Name("str", prefix=node.prefix)
         elif node.type == token.STRING:
             if _literal_re.match(node.value):
                 new = node.clone()
