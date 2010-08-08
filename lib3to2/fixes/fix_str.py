@@ -15,6 +15,7 @@ _literal_re = re.compile(r"[rR]?[\'\"]")
 
 class FixStr(fixer_base.BaseFix):
 
+    order = "pre"
     run_order = 4 # Run this before bytes objects are converted to str objects
 
     PATTERN = "STRING | 'str' | 'chr'"
