@@ -3,12 +3,49 @@ Abstract
 
 lib3to2 is a set of fixers that are intended to backport code written for
 Python version 3.x into Python version 2.x.  The final target 2.x version is
-the latest version of the 2.5 branch, though for now, a later branch will be
-necessary for some of the more difficult fixers (or some of the new features
-with no syntactical equivalent in Python 2.5) that have been backported to the
-2.x branches.
+the latest version of the 2.7 branch, as that is the last release in the Python
+2.x branch.  Some attempts have been made, however, to make code compatible as
+much as possible with versions of Python back to 2.5, and bug reports are still
+welcome for Python features only present in 2.6+ that are not addressed by
+lib3to2.
 
 This project came about as a Google Summer of Code (TM) project in 2009.
+
+Status
+======
+
+Because of the nature of the subject matter, 3to2 is not perfect, so check all
+output manually.  3to2 does the bulk of the work, but there is code that simply
+cannot be converted into a Python 2 equivalent for one reason or another.
+
+3to2 will either produce working Python 2 code or warn about why it did not.
+Any other behavior is a bug and should be reported.
+
+lib3to2's fixers are somewhat well-tested individually, but there is no testing
+that is done on interactions between multiple fixers, so most of the bugs in
+the future will likely be found there.
+
+Intention
+=========
+
+lib3to2 is intended to be a tool in the process of developing code that is
+backwards-compatible between Python 3 and Python 2.  It is not intended to be a
+complete solution for directly backporting Python 3 code, though it can often
+be used for this purpose without issue.  Sufficiently large packages should be
+developed with lib3to2 used throughout the process to avoid backwards-
+incompatible code from becoming too embedded.
+
+There are some features of Python 3 that have no equivalent in Python 2, and
+though lib3to2 tries to fix as many of these as it can, some features are
+beyond its grasp.  This is especially true of features not readily detectable
+by their syntax alone and extremely subtle features, so make sure that code
+using lib3to2 is thoroughly tested.
+
+Repository
+==========
+
+lib3to2 resides at http://bitbucket.org/amentajo/lib3to2, where the bug tracker
+can be found at http://bitbucket.org/amentajo/lib3to2/issues
 
 Usage
 =====
@@ -27,25 +64,23 @@ This branch of 3to2 must be run with Python 3.
 To install locally (used for running tests as a non-privileged user), the
 scripts assume you are using python3.1.  Modify accordingly if you are not.
 
-Relationship with 2to3
-======================
+Relationship with lib2to3
+=========================
 
-Many of the fixers for lib3to2 are directly copy-pasted from their 2to3
+Some of the fixers for lib3to2 are directly copy-pasted from their 2to3
 equivalent, with the element of PATTERN and the corresponding transformation
 switched places.  Most fixers written for this program with a corresponding
 2to3 fixer started from a clone of the 2to3 fixer, then modifying that fixer to
 work in reverse.  I do not claim original authorship of these fixers, but I do
 claim that they will work for 3to2, independent of how they work for 2to3.
 In addition, this program depends on lib2to3 to implement fixers, test cases,
-refactoring, and grammar.  Some portions of 2to3 were modified to be more
-generic to support lib3to2's calls.  If the version of 2to3 included with your
-Python version causes problems with this program, the Lib/lib2to3 folder must
-be replaced.  The most recent version of 2to3 can be found at
-http://svn.python.org/sandbox/trunk/2to3/ (check out via svn).  Changes to
-2to3 may not necessarily propagate immediately to the Python trunk.
+refactoring, and grammar.  Some portions of lib2to3 were modified to be more
+generic to support lib3to2's calls.
 
-Status
-======
-
-3to2 is still under development, so check your output manually.  3to2 does the
-bulk of the work, but there may be little tweaks that need to be done.
+You should use the latest version of lib2to3 from the Python sandbox rather
+than the version (if any) that comes with Python.  As a convenience,
+"two2three" from the Python Package Index is a recent enough version of lib2to3
+renamed to avoid conflicts.  To use this package, replace all usage of
+"lib2to3" with "two2three" within the 3to2 source files after installing
+"two2three" from the PyPI.  Depending on the developer's mood, a version of
+3to2 may be provided with this change already made.

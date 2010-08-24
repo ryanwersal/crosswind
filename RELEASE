@@ -2,6 +2,41 @@
 3to2 Releases
 =============
 
+3to2 1.0
+========
+
+General Notes
+-------------
+
+- Calling this 1.0, because it looks pretty close to what it should look like
+
+- Creating a separate branch that uses "two2three" instead of "lib2to3" from
+  PyPI as a dependency, to make 3to2 more accessible to non-bleeding-edge users
+
+- First release after Google Summer of Code 2010 was finished; various small
+  changes are not reported here.
+
+
+Specific Fixers
+---------------
+
+- fix_bytes: much more thorough
+
+- fix_fullargspec: new fixer, fixes "getfullargspec" -> "getargspec"
+
+- fix_raise: added a quick fix for "raise x from y" -> "raise x"
+
+- fix_kwargs: new fixer, fixes keyword-only arguments
+
+- fix_unpacking: added support for implicit assignment context
+
+- fix_open: new fixer, replaces open() with io.open()
+
+- fix_imports and fix_imports2: bugfixes
+
+- fix_unittest: new explicit-only fixer for unittest -> unittest2
+
+
 3to2 0.1
 ========
 
