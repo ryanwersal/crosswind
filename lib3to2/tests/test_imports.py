@@ -133,10 +133,9 @@ class Test_imports(lib3to2FixerTestCase):
         a = "import Tkinter"
         self.check(b, a)
 
-        #TODO: Make this work (see the fix_imports)
-        #b = "import tkinter"
-        #a = "import Tkinter"
-        #self.check(b, a)
+        b = "import tkinter"
+        a = "import Tkinter"
+        self.check(b, a)
 
         b = "import tkinter.colorchooser"
         a = "import tkColorChooser"
