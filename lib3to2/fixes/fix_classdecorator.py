@@ -9,7 +9,7 @@ from ..fixer_util import Leaf, Node, token, syms, indentation
 class FixClassdecorator(fixer_base.BaseFix):
 
     PATTERN = """
-              decorated < one_dec=decorator < any* > cls=classdef < 'class' name=any any* > > | 
+              decorated < one_dec=decorator < any* > cls=classdef < 'class' name=any any* > > |
               decorated < decorators < decs=decorator+ > cls=classdef < 'class' name=any any* > >
               """
     def transform(self, node, results):
@@ -26,7 +26,7 @@ class FixClassdecorator(fixer_base.BaseFix):
         for dec in dec_strings:
             assign += ")"
         assign = String(results["name"].value + " = " + assign)
-        assign_statement = Node(syms.simple_stmt, [assign, Newline()])
+        assign_statement = Node(syms.simple_stmt, [assign, Newline(), Newline()])
         prefix = None
         for dec in decs:
             if prefix is None:
@@ -40,5 +40,5 @@ class FixClassdecorator(fixer_base.BaseFix):
         node.insert_child(pos, Leaf(token.INDENT, i))
         node.insert_child(pos, assign_statement)
         node.insert_child(pos, Leaf(token.INDENT, i))
-        
-        
+
+

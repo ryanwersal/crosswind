@@ -29,6 +29,7 @@ class Test_classdecorator(lib3to2FixerTestCase):
         class decorated(object):
             pass
         decorated = decor(decorated)
+
         print("hello, there!")"""
 
         self.check(b, a)
