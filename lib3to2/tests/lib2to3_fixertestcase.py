@@ -1,5 +1,9 @@
 """ FixerTestCase from lib2to3/tests/test_fixers.py """
 
+from itertools import chain
+
+import lib2to3_support as support
+
 class FixerTestCase(support.TestCase):
 
     # Other test cases can subclass this class and replace "fixer_pkg" with
