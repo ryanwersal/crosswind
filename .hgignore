@@ -3,3 +3,4 @@ syntax:glob
 build/*
 *.pyc
 *~
+lib3to2/Grammar*pickle
