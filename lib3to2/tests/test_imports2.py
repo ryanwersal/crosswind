@@ -1,4 +1,4 @@
-from test_all_fixers import lib3to2FixerTestCase
+from lib3to2.tests.support import lib3to2FixerTestCase
 
 class Test_imports2(lib3to2FixerTestCase):
     fixer = "imports2"
@@ -69,7 +69,7 @@ class Test_imports2(lib3to2FixerTestCase):
         self.check(b, a)
 
     def test_name_scope_if(self):
-        
+
         b = """
         if thing:
             import http.server
@@ -98,7 +98,7 @@ class Test_imports2(lib3to2FixerTestCase):
         self.check(b, a)
 
     def test_name_scope_try_except(self):
-        
+
         b = """
         try:
             import http.server
@@ -132,7 +132,7 @@ class Test_imports2(lib3to2FixerTestCase):
         import math, string
         import urllib2, urllib
         import CGIHTTPServer, SimpleHTTPServer, BaseHTTPServer"""
-        
+
         self.check(b, a)
 
     def test_name_mutiple_imports_indented(self):
@@ -163,9 +163,9 @@ class Test_imports2(lib3to2FixerTestCase):
         b = "from tkinter.simpledialog import SimpleDialog"
         a = "from SimpleDialog import SimpleDialog"
         self.check(b, a)
-        
+
     def test_from_star(self):
-        
+
         b = """
         def try_import(package):
             try:
@@ -187,7 +187,7 @@ class Test_imports2(lib3to2FixerTestCase):
                 print('try again!')
         """
         self.check(b, a, ignore_warnings=True)
-        
+
         b = """
         def testing_http_server():
             from http.server import *

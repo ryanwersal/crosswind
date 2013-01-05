@@ -1,4 +1,4 @@
-from test_all_fixers import lib3to2FixerTestCase
+from lib3to2.tests.support import lib3to2FixerTestCase
 
 class Test_with(lib3to2FixerTestCase):
     fixer = "with"

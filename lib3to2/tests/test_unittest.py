@@ -1,4 +1,4 @@
-from test_all_fixers import lib3to2FixerTestCase
+from lib3to2.tests.support import lib3to2FixerTestCase
 
 class Test_unittest(lib3to2FixerTestCase):
     fixer = 'unittest'
@@ -25,4 +25,4 @@ class Test_unittest(lib3to2FixerTestCase):
     def test_not_base(self):
         s = "not_unittest.unittest.stuff()"
         self.unchanged(s)
-        
+

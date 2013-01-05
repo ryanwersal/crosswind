@@ -1,4 +1,4 @@
-from test_all_fixers import lib3to2FixerTestCase
+from lib3to2.tests.support import lib3to2FixerTestCase
 
 class Test_kwargs(lib3to2FixerTestCase):
     fixer = 'kwargs'
@@ -77,7 +77,7 @@ class Test_kwargs(lib3to2FixerTestCase):
             dinosaurs = stuff['dinosaurs']; del stuff['dinosaurs']
             funky()"""
         self.check(b, a)
-        
+
     def test_bare_star_named_complicated_defaults(self):
         b = """
         def spam(ham, *, dinosaurs, eggs=call_fn(lambda a: b), monkeys=[i.split() for i in something(args)]):
@@ -106,4 +106,4 @@ class Test_kwargs(lib3to2FixerTestCase):
             dinosaurs = stuff['dinosaurs']; del stuff['dinosaurs']
             funky()"""
         self.check(b, a)
-        
+
