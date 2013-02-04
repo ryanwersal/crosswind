@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.1
+#!/usr/bin/env python3.2
 
 classifiers = [
 "Development Status :: 5 - Production/Stable",
@@ -7,7 +7,7 @@ classifiers = [
 "License :: OSI Approved :: Apache Software License",
 "Operating System :: OS Independent",
 "Programming Language :: Python :: 3",
-"Programming Language :: Python :: 3.1",
+"Programming Language :: Python :: 3.2",
 "Topic :: Software Development :: Code Generators",
 "Topic :: Software Development :: Libraries :: Python Modules",
 ]
@@ -21,7 +21,7 @@ setup(
    version="1.0",
    url="http://www.startcodon.com/wordpress/?cat=8",
    author="Joe Amenta",
-   author_email="amentajo@msu.edu",
+   author_email="airbreather@linux.com",
    classifiers=classifiers,
    description="Refactors valid 3.x syntax into valid 2.x syntax, if a syntactical conversion is possible",
    long_description="",

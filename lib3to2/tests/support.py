@@ -10,7 +10,7 @@ def run_all_tests(test_mod=None, tests=None):
     # From lib2to3.tests.support (copied without changes).
     if tests is None:
         tests = unittest.TestLoader().loadTestsFromModule(test_mod)
-    unittest.TextTestRunner(verbosity=2).run(tests)
+    return unittest.TextTestRunner(verbosity=2).run(tests)
 
 
 def reformat(string):

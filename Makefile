@@ -1,8 +1,8 @@
-PYVERSION = python3.1
+PYVERSION = python3.2
 SETUP = ./setup.py
 FIND = find
 
-.PHONY: dist install test install-local test-local uninstall-local clean dangerously-clean
+.PHONY: dist install test install-local uninstall-local clean dangerously-clean
 
 dist:
 	$(SETUP) build sdist
@@ -15,14 +15,11 @@ uninstall-local:
 	rm -rf $(HOME)/.local/lib/$(PYVERSION)/site-packages/3to2-*.egg-info
 	rm -rf $(HOME)/.local/bin/3to2
 
-test-local: uninstall-local install-local
-	$(PYVERSION) $(HOME)/.local/lib/$(PYVERSION)/site-packages/lib3to2/tests/test_all_fixers.py
-
 install:
 	$(SETUP) install
 
 test:
-	lib3to2/tests/test_all_fixers.py
+	$(PYVERSION) test_all_fixers.py
 
 clean:
 	rm -rf build dist MANIFEST
@@ -37,7 +34,7 @@ dangerously-clean: clean
 
 python2: clean
 	cp -r lib3to2 lib3to2_replace
-	python3.1 ./3to2 --no-diffs -n -j 10 -w lib3to2_replace
+	$(PYVERSION) ./3to2 --no-diffs -n -j 10 -w lib3to2_replace
 	rm -rf lib3to2
 	mv lib3to2_replace lib3to2
 	patch -p0 < python2.patch

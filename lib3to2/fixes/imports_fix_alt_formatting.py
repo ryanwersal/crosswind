@@ -28,7 +28,7 @@ MAPPING = {"reprlib": "repr",
            "http.client": "httplib",
            "http.cookies": "Cookie",
            "http.cookiejar": "cookielib",
-#          "tkinter": "Tkinter",
+           "tkinter": "Tkinter",
            "tkinter.dialog": "Dialog",
            "tkinter._fix": "FixTk",
            "tkinter.scrolledtext": "ScrolledText",
@@ -102,6 +102,8 @@ def all_patterns(name):
 
 
 class FixImports(fixer_base.BaseFix):
+
+    order = "pre"
 
     PATTERN = ' | \n'.join([all_patterns(name) for name in MAPPING])
     PATTERN = ' | \n'.join((PATTERN, multiple_name_import_match))
