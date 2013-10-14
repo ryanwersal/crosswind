@@ -74,7 +74,10 @@ class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
             self.log_message("Refactored %s", filename)
             if self.show_diffs:
                 for line in diff_texts(old, new, filename):
-                    print(line)
+                    try:
+                        print(line)
+                    except:
+                        pass
 
 
 def warn(msg):
