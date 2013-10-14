@@ -24,3 +24,25 @@ class Test_super(lib3to2FixerTestCase):
 
         s = "def m():\n    super()"
         self.unchanged(s, ignore_warnings=True)
+
+    def test_class_noargs(self):
+
+        b = "class c:\n    def m(self):\n        super()"
+        a = "class c:\n    def m(self):\n        super(c, self)"
+        self.check(b, a)
+
+    def test_class_other_params(self):
+
+        b = "class c:\n    def m(a, self=None):\n        super()"
+        a = "class c:\n    def m(a, self=None):\n        super(c, a)"
+        self.check(b, a)
+
+    def test_class_no_with_stars(self):
+
+        s = "class c:\n    def m(*args, **kwargs):\n        super()"
+        self.unchanged(s, ignore_warnings=True)
+
+    def test_class_no_with_noargs(self):
+
+        s = "class c:\n    def m():\n        super()"
+        self.unchanged(s, ignore_warnings=True)
