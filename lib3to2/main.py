@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 """
 Main program for 3to2.
 """
-
+from __future__ import print_function
 import sys
 import os
 import difflib
@@ -74,11 +75,7 @@ class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
             self.log_message("Refactored %s", filename)
             if self.show_diffs:
                 for line in diff_texts(old, new, filename):
-                    try:
-                        print(line)
-                    except:
-                        pass
-
+                    print(line.encode('utf-8', 'ignore'))
 
 def warn(msg):
     print("WARNING: %s" % (msg,), file=sys.stderr)
