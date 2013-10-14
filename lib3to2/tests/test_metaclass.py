@@ -2,7 +2,7 @@ from lib3to2.tests.support import lib3to2FixerTestCase
 
 class Test_metaclass(lib3to2FixerTestCase):
 
-    fixer = u'metaclass'
+    fixer = 'metaclass'
 
     def test_unchanged(self):
         self.unchanged("class X(): pass")
