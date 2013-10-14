@@ -197,9 +197,9 @@ class Test_imports(lib3to2FixerTestCase):
         a = "from __builtin__ import open"
         self.check(b, a)
         
-        b = """from SocketServer import (ThreadingUDPServer, DatagramRequestHandler,
+        b = """from socketserver import (ThreadingUDPServer, DatagramRequestHandler,
                           ThreadingTCPServer, StreamRequestHandler)"""
-        a = """from socketserver import (ThreadingUDPServer, DatagramRequestHandler,
+        a = """from SocketServer import (ThreadingUDPServer, DatagramRequestHandler,
                           ThreadingTCPServer, StreamRequestHandler)"""
         self.check(b, a)
         
