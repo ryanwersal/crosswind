@@ -68,20 +68,20 @@ def insert_args(name, class_name, rparen):
         class_node = Node(syms.power, [Name(name), dot_class.clone()])
 
     idx = parent.children.index(rparen)
-    parent.insert_child(idx, Name(name, prefix=u" "))
+    parent.insert_child(idx, Name(name, prefix=" "))
     parent.insert_child(idx, Comma())
     parent.insert_child(idx, class_node)
 
 
 class FixSuper(fixer_base.BaseFix):
 
-    PATTERN = u"power< 'super' trailer< '(' rparen=')' > any* >"
+    PATTERN = "power< 'super' trailer< '(' rparen=')' > any* >"
 
     def transform(self, node, results):
         param = get_firstparam(node)
         if param is None:
-            self.cannot_convert(node, u"super() with no arguments must be called inside a function that has at least one parameter")
+            self.cannot_convert(node, "super() with no arguments must be called inside a function that has at least one parameter")
             return
         class_name = get_class_name(node)
-        rparen = results[u"rparen"]
+        rparen = results["rparen"]
         insert_args(param, class_name, rparen)

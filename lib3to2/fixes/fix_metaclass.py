@@ -80,4 +80,4 @@ class FixMetaclass(fixer_base.BaseFix):
                         item.insert_child(loc, stmt_node)
                         break
         if right_ind - left_ind == 1:
-            node.insert_child(left_ind + 1, Name(u"object"))
+            node.insert_child(left_ind + 1, Name("object"))
