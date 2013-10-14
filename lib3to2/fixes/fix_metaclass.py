@@ -61,7 +61,12 @@ class FixMetaclass(fixer_base.BaseFix):
         stmt_node = Node(syms.atom, [target, equal, name])
         
         suitify(node)
-        for item in node.children:
+        left_ind, right_ind = 0, 0
+        for (ind, item) in enumerate(node.children):
+            if item.type == token.LPAR:
+                left_ind = ind
+            elif item.type == token.RPAR:
+                right_ind = ind
             if item.type == syms.suite:
                 for stmt in item.children:
                     if stmt.type == token.INDENT:
@@ -74,3 +79,5 @@ class FixMetaclass(fixer_base.BaseFix):
                         item.insert_child(loc, Newline())
                         item.insert_child(loc, stmt_node)
                         break
+        if right_ind - left_ind == 1:
+            node.insert_child(left_ind + 1, Name(u"object"))
