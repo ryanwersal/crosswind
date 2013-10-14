@@ -196,7 +196,13 @@ class Test_imports(lib3to2FixerTestCase):
         b = "from builtins import open"
         a = "from __builtin__ import open"
         self.check(b, a)
-
+        
+        b = """from SocketServer import (ThreadingUDPServer, DatagramRequestHandler,
+                          ThreadingTCPServer, StreamRequestHandler)"""
+        a = """from socketserver import (ThreadingUDPServer, DatagramRequestHandler,
+                          ThreadingTCPServer, StreamRequestHandler)"""
+        self.check(b, a)
+        
     def test_dotted_names_quad(self):
 
         b = "import    html.parser as spam,  math,     tkinter.__init__,   dbm.gnu #comment!"

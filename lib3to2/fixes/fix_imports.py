@@ -66,7 +66,7 @@ power_twoname_match = "power< {fmt_name} trailer< '.' {fmt_attr} > any* >"
 # helps match 'client.HTTPConnection', if 'client' has been imported from http
 power_subname_match = "power< {fmt_attr} any* >"
 # helps match 'from http.client import HTTPConnection'
-from_import_match = "from_import=import_from< 'from' {fmt_name} 'import' imported=any >"
+from_import_match = "from_import=import_from< 'from' {fmt_name} 'import' ['('] imported=any [')]>"
 # helps match 'from http import client'
 from_import_submod_match = "from_import_submod=import_from< 'from' {fmt_name} 'import' ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any > | import_as_names< any* ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any >) any* > ) >"
 # helps match 'import urllib.request'
