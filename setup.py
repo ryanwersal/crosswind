@@ -6,16 +6,19 @@ classifiers = [
 "Intended Audience :: Developers",
 "License :: OSI Approved :: Apache Software License",
 "Operating System :: OS Independent",
+"Programming Language :: Python :: 2.7",
 "Programming Language :: Python :: 3",
 "Programming Language :: Python :: 3.2",
+"Programming Language :: Python :: 3.3",
 "Topic :: Software Development :: Code Generators",
 "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
 from distutils.core import setup
 
+
 setup(
-   name="3to2_py3k",
+   name="3to2",
    packages=["lib3to2","lib3to2.fixes","lib3to2.tests"],
    scripts=["3to2"],
    version="1.0",
@@ -27,4 +30,7 @@ setup(
    long_description="",
    license="",
    platforms="",
+   entry_points = {
+    'console_scripts': ['3to2 = lib3to2.main:main'],
+   },
 )
