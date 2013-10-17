@@ -8,6 +8,7 @@ from lib3to2.fixer_util import future_import
 
 class FixAbsimport(fixer_base.BaseFix):
     order = 'post'
+    run_order = 10 
     
     def __init__(self, options, log):
         super(FixAbsimport, self).__init__(options, log)
@@ -22,8 +23,12 @@ class FixAbsimport(fixer_base.BaseFix):
                 and not self.__abs_added)
     
     def transform(self, node, results):
-        future_import('absolute_import', node)
-        self.__abs_added = True
+        try:
+            future_import('absolute_import', node)
+        except ValueError:
+            pass
+        else:
+            self.__abs_added = True
         
     def finish_tree(self, tree, filename):
         fixer_base.BaseFix.finish_tree(self, tree, filename)
