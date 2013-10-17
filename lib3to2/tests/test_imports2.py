@@ -217,10 +217,18 @@ class Test_imports2(lib3to2FixerTestCase):
             fileList = [ln for ln in myFile]"""
         a = """
         with open('myFile', 'r') as myFile:
+            from urllib2 import install_opener
+            from urllib import urlretrieve, unquote as billybob
+            fileList = [ln for ln in myFile]"""
+        try:
+            self.check(b, a, ignore_warnings=True)
+        except AssertionError:
+            a = """
+        with open('myFile', 'r') as myFile:
             from urllib import urlretrieve, unquote as billybob
             from urllib2 import install_opener
             fileList = [ln for ln in myFile]"""
-        self.check(b, a, ignore_warnings=True)
+            self.check(b, a, ignore_warnings=True)
 
     if False:
         def test_modulefrom(self):
