@@ -238,7 +238,8 @@ class FixImports(fixer_base.BaseFix):
         elif name_import or from_import:
             self.fix_simple_name(name)
         elif name and not attr:
-            if does_tree_import(None, MAPPING[name.value], node):
+            if does_tree_import(None, MAPPING[name.value], node) and \
+               is_probably_builtin(name):
                 self.fix_simple_name(name)
         elif name and attr:
             # Note that this will fix a dotted name that was never imported.  This will probably not matter.

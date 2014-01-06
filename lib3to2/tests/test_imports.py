@@ -270,3 +270,27 @@ class Test_imports(lib3to2FixerTestCase):
         import __builtin__
         hasattr(__builtin__, "quit")"""
         self.check(b, a)
+
+    def test_no_attribute(self):
+        b = """
+        import collections
+        import queue
+
+        MyTuple = collections.namedtuple('MyTuple', ['queue', 'queue1'])
+
+        tuple_instance = MyTuple(queue.Queue(), queue.Queue())
+
+        tuple_instance.queue.put(1)
+        tuple_instance.queue1.put(1)"""
+
+        a = """
+        import collections
+        import Queue
+
+        MyTuple = collections.namedtuple('MyTuple', ['queue', 'queue1'])
+
+        tuple_instance = MyTuple(Queue.Queue(), Queue.Queue())
+
+        tuple_instance.queue.put(1)
+        tuple_instance.queue1.put(1)"""
+        self.check(b, a)
