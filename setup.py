@@ -30,7 +30,4 @@ setup(
    long_description="",
    license="",
    platforms="",
-   entry_points = {
-    'console_scripts': ['3to2 = lib3to2.main:main'],
-   },
 )
