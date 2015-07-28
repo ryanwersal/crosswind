@@ -21,7 +21,7 @@ class DistutilsRefactoringTool(refactor.RefactoringTool):
         """Override to keep print statements out of the grammar"""
         try:
             tree = self.driver.parse_string(data)
-        except Exception, err:
+        except Exception as err:
             self.log_error("Can't parse %s: %s: %s",
                            name, err.__class__.__name__, err)
             return
