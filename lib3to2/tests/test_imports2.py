@@ -135,7 +135,7 @@ class Test_imports2(lib3to2FixerTestCase):
 
         self.check(b, a)
 
-    def test_name_mutiple_imports_indented(self):
+    def test_name_multiple_imports_indented(self):
 
         b = """
         def indented():
