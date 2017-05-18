@@ -22,7 +22,7 @@ setup(
    packages=["lib3to2","lib3to2.fixes","lib3to2.tests"],
    entry_points={
       "console_scripts":[
-         "3to2=3to2.__main__:main",
+         "3to2=lib3to2.main:main",
       ],
    },
    version="1.1.1",
