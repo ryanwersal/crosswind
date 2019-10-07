@@ -29,6 +29,7 @@ python = "^3.7"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
+pylint = "^2.4"
 
 [tool.poetry.scripts]
 crosswind = "crosswind.main:main"

@@ -4,3 +4,5 @@ build/*
 crosswind/Grammar*pickle
 __pycache__
 .pytest_cache
+.vscode
+*.egg-info
