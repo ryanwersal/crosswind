@@ -2,13 +2,13 @@
 Fixer for standard library imports renamed in Python 3
 """
 
-from lib2to3 import fixer_base
-from lib2to3.fixer_util import Name, is_probably_builtin, Newline, does_tree_import
-from lib2to3.pygram import python_symbols as syms
-from lib2to3.pgen2 import token
-from lib2to3.pytree import Node, Leaf
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Name, is_probably_builtin, Newline, does_tree_import
+from crosswind.lib2to3.pygram import python_symbols as syms
+from crosswind.lib2to3.pgen2 import token
+from crosswind.lib2to3.pytree import Node, Leaf
 
-from ..fixer_util import NameImport
+from crosswind.lib3to2.fixer_util import NameImport
 
 # used in simple_mapping_to_pattern()
 MAPPING = {"reprlib": "repr",

@@ -2,8 +2,8 @@
 Fixer for unittest -> unittest2
 """
 
-from lib2to3 import fixer_base
-from ..fixer_util import Name
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Name
 
 class FixUnittest(fixer_base.BaseFix):
 

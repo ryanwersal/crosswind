@@ -4,10 +4,10 @@ functools.reduce(f, it) -> reduce(f, it)
 from functools import reduce -> (remove this line)
 """
 
-from lib2to3 import fixer_base
-from lib2to3.fixer_util import Call
-from lib2to3.pytree import Node, Leaf
-from lib2to3.pgen2 import token
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Call
+from crosswind.lib2to3.pytree import Node, Leaf
+from crosswind.lib2to3.pgen2 import token
 
 class FixReduce(fixer_base.BaseFix):
 

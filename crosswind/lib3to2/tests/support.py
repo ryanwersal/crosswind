@@ -1,8 +1,8 @@
 """Support code for test_*.py files"""
 import unittest
 from itertools import chain
-from lib2to3 import pygram
-from lib2to3 import refactor
+from crosswind.lib2to3 import pygram
+from crosswind.lib2to3 import refactor
 from textwrap import dedent
 
 
@@ -18,13 +18,13 @@ def reformat(string):
     return dedent(string) + "\n\n"
 
 
-def get_refactorer(fixer_pkg="lib2to3", fixers=None, options=None):
+def get_refactorer(fixer_pkg="crosswind.lib2to3", fixers=None, options=None):
     # From lib2to3.tests.support (copied without changes).
     """
     A convenience function for creating a RefactoringTool for tests.
 
     fixers is a list of fixers for the RefactoringTool to use. By default
-    "lib2to3.fixes.*" is used. options is an optional dictionary of options to
+    "crosswind.lib2to3.fixes.*" is used. options is an optional dictionary of options to
     be passed to the RefactoringTool.
     """
     if fixers is not None:
@@ -40,7 +40,7 @@ class FixerTestCase(unittest.TestCase):
 
     # Other test cases can subclass this class and replace "fixer_pkg" with
     # their own.
-    def setUp(self, fix_list=None, fixer_pkg="lib2to3", options=None):
+    def setUp(self, fix_list=None, fixer_pkg="crosswind.lib2to3", options=None):
         if fix_list is None:
             fix_list = [self.fixer]
         self.refactor = get_refactorer(fixer_pkg, fix_list, options)
@@ -81,7 +81,7 @@ class FixerTestCase(unittest.TestCase):
     def assert_runs_after(self, *names):
         fixes = [self.fixer]
         fixes.extend(names)
-        r = get_refactorer("lib2to3", fixes)
+        r = get_refactorer("crosswind.lib2to3", fixes)
         (pre, post) = r.get_fixers()
         n = "fix_" + self.fixer
         if post and post[-1].__class__.__module__.endswith(n):
@@ -96,6 +96,6 @@ class FixerTestCase(unittest.TestCase):
 
 class crosswindFixerTestCase(FixerTestCase):
     # From crosswind.tests.test_all_fixers (moved without changes).
-    def setUp(self, fix_list=None, fixer_pkg="crosswind"):
+    def setUp(self, fix_list=None, fixer_pkg="crosswind.lib3to2"):
         super(crosswindFixerTestCase, self).setUp(fixer_pkg=fixer_pkg)
         self.refactor.driver.grammar = pygram.python_grammar_no_print_statement

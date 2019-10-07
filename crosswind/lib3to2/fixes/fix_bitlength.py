@@ -3,8 +3,8 @@ Fixer for:
 anything.bit_length() -> (len(bin(anything)) - 2)
 """
 
-from lib2to3 import fixer_base
-from ..fixer_util import LParen, RParen, Call, Number, Name, Minus, Node, syms
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib3to2.fixer_util import LParen, RParen, Call, Number, Name, Minus, Node, syms
 
 class FixBitlength(fixer_base.BaseFix):
 

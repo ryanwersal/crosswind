@@ -2,9 +2,9 @@
 Fixer for (metaclass=X) -> __metaclass__ = X
 Some semantics (see PEP 3115) may be altered in the translation."""
 
-from lib2to3 import fixer_base
-from ..fixer_util import Name, syms, Node, Leaf, Newline, find_root, indentation, suitify
-from lib2to3.pygram import token
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib3to2.fixer_util import Name, syms, Node, Leaf, Newline, find_root, indentation, suitify
+from crosswind.lib2to3.pygram import token
 
 def has_metaclass(parent):
     results = None

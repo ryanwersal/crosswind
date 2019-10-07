@@ -2,8 +2,8 @@
 Fixer for division: from __future__ import division if needed
 """
 
-from lib2to3 import fixer_base
-from crosswind.fixer_util import token, future_import
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib3to2.fixer_util import token, future_import
 
 def match_division(node):
     """

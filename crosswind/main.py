@@ -10,8 +10,8 @@ import logging
 import shutil
 import optparse
 
-from lib2to3 import refactor
-from lib2to3 import pygram
+from crosswind.lib2to3 import refactor
+from crosswind.lib2to3 import pygram
 
 def diff_texts(a, b, filename):
     """Return a unified diff of two strings."""

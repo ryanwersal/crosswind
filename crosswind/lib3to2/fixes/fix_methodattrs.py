@@ -2,8 +2,8 @@
 Fixer for method.__X__ -> method.im_X
 """
 
-from lib2to3 import fixer_base
-from lib2to3.fixer_util import Name
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Name
 
 MAP = {
     "__func__" : "im_func",

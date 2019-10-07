@@ -2,8 +2,8 @@
 Fixer for open(...) -> io.open(...)
 """
 
-from lib2to3 import fixer_base
-from ..fixer_util import touch_import, is_probably_builtin
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import touch_import, is_probably_builtin
 
 class FixOpen(fixer_base.BaseFix):
 

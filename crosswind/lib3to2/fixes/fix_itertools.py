@@ -6,9 +6,9 @@ zip -> itertools.izip
 itertools.filterfalse -> itertools.ifilterfalse
 """
 
-from lib2to3 import fixer_base
-from lib2to3.pytree import Node
-from lib2to3.fixer_util import touch_import, is_probably_builtin
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.pytree import Node
+from crosswind.lib2to3.fixer_util import touch_import, is_probably_builtin
 
 class FixItertools(fixer_base.BaseFix):
 

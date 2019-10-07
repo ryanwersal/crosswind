@@ -10,8 +10,8 @@ def something(self):
     super(self.__class__, self)
 """
 
-from lib2to3 import fixer_base
-from ..fixer_util import Node, Leaf, token, syms, Name, Comma, Dot
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Node, Leaf, token, syms, Name, Comma, Dot
 
 dot_class = Node(syms.trailer, [Dot(), Name("__class__")])
 

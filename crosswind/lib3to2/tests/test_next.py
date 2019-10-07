@@ -1,4 +1,4 @@
-from crosswind.tests.support import crosswindFixerTestCase
+from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
 class Test_next(crosswindFixerTestCase):
     fixer = "next"

@@ -2,8 +2,8 @@
 Fixer for getfullargspec -> getargspec
 """
 
-from lib2to3 import fixer_base
-from ..fixer_util import Name
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Name
 
 warn_msg = "some of the values returned by getfullargspec are not valid in Python 2 and have no equivalent."
 

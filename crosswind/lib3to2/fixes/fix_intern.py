@@ -2,9 +2,9 @@
 Fixer for sys.intern(s) -> intern(s).
 """
 
-from lib2to3 import pytree
-from lib2to3 import fixer_base
-from lib2to3.fixer_util import Name, BlankLine, find_binding, find_root
+from crosswind.lib2to3 import pytree
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Name, BlankLine, find_binding, find_root
 
 
 class FixIntern(fixer_base.BaseFix):

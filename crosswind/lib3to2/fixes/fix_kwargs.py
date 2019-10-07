@@ -5,8 +5,8 @@ This fixer is rather sensitive to incorrect py3k syntax.
 
 # Note: "relevant" parameters are parameters following the first STAR in the list.
 
-from lib2to3 import fixer_base
-from ..fixer_util import token, indentation, suitify, String, Newline, Comma, DoubleStar, Name
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib3to2.fixer_util import token, indentation, suitify, String, Newline, Comma, DoubleStar, Name
 
 _assign_template = "%(name)s = %(kwargs)s['%(name)s']; del %(kwargs)s['%(name)s']"
 _if_template = "if '%(name)s' in %(kwargs)s: %(assign)s"

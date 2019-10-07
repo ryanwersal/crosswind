@@ -2,9 +2,9 @@
 Add 'from __future__ import absolute_import' to any file
 that uses imports.
 '''
-from lib2to3 import fixer_base
-from lib2to3.pygram import python_symbols as syms
-from crosswind.fixer_util import future_import
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.pygram import python_symbols as syms
+from crosswind.lib3to2.fixer_util import future_import
 
 class FixAbsimport(fixer_base.BaseFix):
     order = 'post'

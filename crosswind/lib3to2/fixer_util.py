@@ -1,6 +1,6 @@
-from lib2to3.pygram import token, python_symbols as syms
-from lib2to3.pytree import Leaf, Node
-from lib2to3.fixer_util import *
+from crosswind.lib2to3.pygram import token, python_symbols as syms
+from crosswind.lib2to3.pytree import Leaf, Node
+from crosswind.lib2to3.fixer_util import *
 
 def Star(prefix=None):
     return Leaf(token.STAR, '*', prefix=prefix)

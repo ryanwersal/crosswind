@@ -3,13 +3,13 @@ Fixer for dictcomp and setcomp:
 {foo comp_for} -> set((foo comp_for))
 {foo:bar comp_for} -> dict(((foo, bar) comp_for))"""
 
-from lib2to3 import fixer_base
-from lib2to3.pytree import Node, Leaf
-from lib2to3.pygram import python_symbols as syms
-from lib2to3.pgen2 import token
-from lib2to3.fixer_util import parenthesize, Name, Call, LParen, RParen
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.pytree import Node, Leaf
+from crosswind.lib2to3.pygram import python_symbols as syms
+from crosswind.lib2to3.pgen2 import token
+from crosswind.lib2to3.fixer_util import parenthesize, Name, Call, LParen, RParen
 
-from ..fixer_util import commatize
+from crosswind.lib3to2.fixer_util import commatize
 
 def tup(args):
     return parenthesize(Node(syms.testlist_gexp, commatize(args)))

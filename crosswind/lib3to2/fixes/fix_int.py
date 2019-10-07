@@ -6,9 +6,9 @@ int -> long
 
 import re
 
-from lib2to3 import fixer_base
-from lib2to3.fixer_util import Name, is_probably_builtin, Number
-from lib2to3.pgen2 import token
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Name, is_probably_builtin, Number
+from crosswind.lib2to3.pgen2 import token
 
 baseMAPPING = {'b':2, 'o':8, 'x':16}
 

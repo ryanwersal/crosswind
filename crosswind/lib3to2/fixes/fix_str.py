@@ -6,9 +6,9 @@ chr -> unichr
 """
 
 import re
-from lib2to3.pgen2 import token
-from lib2to3 import fixer_base
-from lib2to3.fixer_util import Name
+from crosswind.lib2to3.pgen2 import token
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Name
 
 _mapping = {"chr": "unichr", "str": "unicode"}
 _literal_re = re.compile(r"[rR]?[\'\"]")

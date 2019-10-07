@@ -16,10 +16,10 @@ print(1,2,3,sep=" ",end="\n") -> print 1,2,3
 
 from __future__ import with_statement # Aiming for 2.5-compatible code
 
-from lib2to3 import fixer_base
-from lib2to3.pytree import Node, Leaf
-from lib2to3.pygram import python_symbols as syms, token
-from lib2to3.fixer_util import (Name, FromImport, Newline, Call, Comma, Dot,
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.pytree import Node, Leaf
+from crosswind.lib2to3.pygram import python_symbols as syms, token
+from crosswind.lib2to3.fixer_util import (Name, FromImport, Newline, Call, Comma, Dot,
                                 LParen, RParen, touch_import)
 import warnings
 import sys

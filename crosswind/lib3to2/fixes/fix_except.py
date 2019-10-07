@@ -2,8 +2,8 @@
 Fixer for except E as T -> except E, T
 """
 
-from lib2to3 import fixer_base
-from lib2to3.fixer_util import Comma
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Comma
 
 class FixExcept(fixer_base.BaseFix):
 

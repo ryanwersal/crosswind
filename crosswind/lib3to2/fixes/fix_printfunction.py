@@ -2,8 +2,8 @@
 Fixer for print: from __future__ import print_function.
 """
 
-from lib2to3 import fixer_base
-from crosswind.fixer_util import future_import
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib3to2.fixer_util import future_import
 
 class FixPrintfunction(fixer_base.BaseFix):
 

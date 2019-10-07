@@ -2,8 +2,8 @@
 Fixer for "class Foo: ..." -> "class Foo(object): ..."
 """
 
-from lib2to3 import fixer_base
-from ..fixer_util import Node, Leaf, token, syms, LParen, RParen, Name
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Node, Leaf, token, syms, LParen, RParen, Name
 
 def insert_object(node, idx):
     node.insert_child(idx, RParen())

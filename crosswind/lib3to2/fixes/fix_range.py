@@ -4,9 +4,9 @@ range(s) -> xrange(s)
 list(range(s)) -> range(s)
 """
 
-from lib2to3 import fixer_base
-from lib2to3.fixer_util import Name, is_probably_builtin
-from lib2to3.pygram import python_symbols as syms
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Name, is_probably_builtin
+from crosswind.lib2to3.pygram import python_symbols as syms
 import token
 
 def list_called(node):

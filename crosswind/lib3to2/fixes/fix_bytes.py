@@ -3,9 +3,9 @@ Fixer for bytes -> str.
 """
 
 import re
-from lib2to3 import fixer_base
-from lib2to3.patcomp import compile_pattern
-from ..fixer_util import Name, token, syms, parse_args, Call, Comma
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.patcomp import compile_pattern
+from crosswind.lib3to2.fixer_util import Name, token, syms, parse_args, Call, Comma
 
 _literal_re = re.compile(r"[bB][rR]?[\'\"]")
 

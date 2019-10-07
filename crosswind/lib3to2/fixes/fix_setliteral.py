@@ -1,9 +1,9 @@
 """Fixer for '{1, 2, 3}' -> 'set([1, 2, 3])'"""
 
-from lib2to3 import fixer_base
-from lib2to3.pytree import Node, Leaf
-from lib2to3.pgen2 import token
-from lib2to3.fixer_util import Name, LParen, RParen
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.pytree import Node, Leaf
+from crosswind.lib2to3.pgen2 import token
+from crosswind.lib2to3.fixer_util import Name, LParen, RParen
 
 def found_dict(node):
     """Returns true if the node is a dictionary literal (contains a colon)"""

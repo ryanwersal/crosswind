@@ -4,9 +4,9 @@ Fixer for:
 for (a,)* *b (,c)* [,] in d: ...
 """
 
-from lib2to3 import fixer_base
+from crosswind.lib2to3 import fixer_base
 from itertools import count
-from ..fixer_util import Assign, Comma, Call, Newline, Name, Number, indentation, suitify, commatize, token, syms, Node, Leaf
+from crosswind.lib3to2.fixer_util import Assign, Comma, Call, Newline, Name, Number, indentation, suitify, commatize, token, syms, Node, Leaf
 
 def assignment_source(num_pre, num_post, LISTNAME, ITERNAME):
     """
@@ -17,7 +17,7 @@ def assignment_source(num_pre, num_post, LISTNAME, ITERNAME):
     children = []
     pre = str(num_pre)
     post = str(num_post)
-    # This code builds the assignment source from lib2to3 tree primitives.
+    # This code builds the assignment source from crosswind.lib2to3 tree primitives.
     # It's not very readable, but it seems like the most correct way to do it.
     if num_pre > 0:
         pre_part = Node(syms.power, [Name(LISTNAME), Node(syms.trailer, [Leaf(token.LSQB, "["), Node(syms.subscript, [Leaf(token.COLON, ":"), Number(pre)]), Leaf(token.RSQB, "]")])])

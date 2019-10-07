@@ -2,9 +2,9 @@
 Fixer for complicated imports
 """
 
-from lib2to3 import fixer_base
-from lib2to3.fixer_util import Name, String, FromImport, Newline, Comma
-from ..fixer_util import token, syms, Leaf, Node, Star, indentation, ImportAsName
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Name, String, FromImport, Newline, Comma
+from crosswind.lib3to2.fixer_util import token, syms, Leaf, Node, Star, indentation, ImportAsName
 
 TK_BASE_NAMES = ('ACTIVE', 'ALL', 'ANCHOR', 'ARC','BASELINE', 'BEVEL', 'BOTH',
                  'BOTTOM', 'BROWSE', 'BUTT', 'CASCADE', 'CENTER', 'CHAR',

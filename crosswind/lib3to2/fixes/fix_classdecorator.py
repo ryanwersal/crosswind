@@ -2,9 +2,9 @@
 Fixer to remove class decorators
 """
 
-from lib2to3 import fixer_base
-from lib2to3.fixer_util import Call, Assign, String, Newline
-from ..fixer_util import Leaf, Node, token, syms, indentation
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Call, Assign, String, Newline
+from crosswind.lib3to2.fixer_util import Leaf, Node, token, syms, indentation
 
 class FixClassdecorator(fixer_base.BaseFix):
 

@@ -2,8 +2,8 @@
 Fixer for f.__x__ -> f.func_x.
 """
 
-from lib2to3 import fixer_base
-from lib2to3.fixer_util import Name
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Name
 
 
 class FixFuncattrs(fixer_base.BaseFix):

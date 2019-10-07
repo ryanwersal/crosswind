@@ -3,8 +3,8 @@ Fixer for memoryview(s) -> buffer(s).
 Explicit because some memoryview methods are invalid on buffer objects.
 """
 
-from lib2to3 import fixer_base
-from lib2to3.fixer_util import Name
+from crosswind.lib2to3 import fixer_base
+from crosswind.lib2to3.fixer_util import Name
 
 
 class FixMemoryview(fixer_base.BaseFix):
