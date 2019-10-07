@@ -18,11 +18,11 @@ from distutils.core import setup
 
 
 setup(
-   name="3to2",
-   packages=["lib3to2","lib3to2.fixes","lib3to2.tests"],
+   name="crosswind",
+   packages=["crosswind","crosswind.fixes","crosswind.tests"],
    entry_points={
       "console_scripts":[
-         "3to2=lib3to2.main:main",
+         "crosswind=crosswind.main:main",
       ],
    },
    version="1.1.1",

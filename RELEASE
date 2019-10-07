@@ -1,8 +1,8 @@
 =============
-3to2 Releases
+crosswind Releases
 =============
 
-3to2 1.0
+crosswind 1.0
 ========
 
 General Notes
@@ -11,7 +11,7 @@ General Notes
 - Calling this 1.0, because it looks pretty close to what it should look like
 
 - Creating a separate branch that uses "two2three" instead of "lib2to3" from
-  PyPI as a dependency, to make 3to2 more accessible to non-bleeding-edge users
+  PyPI as a dependency, to make crosswind more accessible to non-bleeding-edge users
 
 - First release after Google Summer of Code 2010 was finished; various small
   changes are not reported here.
@@ -37,7 +37,7 @@ Specific Fixers
 - fix_unittest: new explicit-only fixer for unittest -> unittest2
 
 
-3to2 0.1
+crosswind 0.1
 ========
 
 General Notes
@@ -46,7 +46,7 @@ General Notes
 - First non-alpha, non-beta release!
 
 - Using "#!/usr/bin/env python3.1" instead of "#!/usr/bin/env python3" to
-  reflect that lib3to2 has only been tested with Python 3.1.
+  reflect that crosswind has only been tested with Python 3.1.
 
 Specific Fixers
 ---------------
@@ -59,17 +59,17 @@ Specific Fixers
   "import urllib.request as spam" ambiguity.
 
 
-3to2 0.1b1
+crosswind 0.1b1
 ==========
 
 General Notes
 -------------
 
 - Development is now done exclusively in Python 3, and releases are generated
-  by running 3to2 on itself.
-  For now, this requires that 3to2 already be installed.
+  by running crosswind on itself.
+  For now, this requires that crosswind already be installed.
 
-- Given a recent enough version of lib2to3 installed, 3to2 will now run on
+- Given a recent enough version of lib2to3 installed, crosswind will now run on
   Python 2.5.
 
 Specific Fixers
@@ -80,13 +80,13 @@ Specific Fixers
   "from urllib import request" or "import urllib.request as spam" wordings.
 
 
-3to2 0.1a3
+crosswind 0.1a3
 ==========
 
 General Notes
 -------------
 
-- 3to2 now performs an explicit check on the interpreter version
+- crosswind now performs an explicit check on the interpreter version
   when run directly and exits when it is incorrect
 
 - Slightly more robust Makefile adds local targets ('install-local',
@@ -104,7 +104,7 @@ Specific Fixers
   (warns that it cannot convert the implicit assignment context version)
 
 
-3to2 0.1a2
+crosswind 0.1a2
 ==========
 
 General Notes
@@ -124,7 +124,7 @@ Specific Fixers
 - new print fix refactors print functions into print statements.
 
 
-3to2 0.1a1
+crosswind 0.1a1
 ================
 
 General Notes
@@ -135,7 +135,7 @@ General Notes
 Specific Fixers
 ---------------
 
-- imports and imports2 fixes are explicit-only due to known crashes.  Run 3to2
+- imports and imports2 fixes are explicit-only due to known crashes.  Run crosswind
   with the -fimports and/or -fimports2 switch to enable those fixes only.
 
 - features fix might not fix all features.

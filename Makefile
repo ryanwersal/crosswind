@@ -11,9 +11,9 @@ install-local:
 	$(SETUP) install --prefix=$(HOME)/.local
 
 uninstall-local:
-	rm -rf $(HOME)/.local/lib/$(PYVERSION)/site-packages/lib3to2
-	rm -rf $(HOME)/.local/lib/$(PYVERSION)/site-packages/3to2-*.egg-info
-	rm -rf $(HOME)/.local/bin/3to2
+	rm -rf $(HOME)/.local/lib/$(PYVERSION)/site-packages/crosswind
+	rm -rf $(HOME)/.local/lib/$(PYVERSION)/site-packages/crosswind-*.egg-info
+	rm -rf $(HOME)/.local/bin/crosswind
 
 install:
 	$(SETUP) install
@@ -33,15 +33,15 @@ dangerously-clean: clean
 	\) -exec rm -fv {} \;
 
 python2: clean
-	cp -r lib3to2 lib3to2_replace
-	$(PYVERSION) ./3to2 --no-diffs -n -j 10 -w lib3to2_replace
-	rm -rf lib3to2
-	mv lib3to2_replace lib3to2
+	cp -r crosswind crosswind_replace
+	$(PYVERSION) ./crosswind --no-diffs -n -j 10 -w crosswind_replace
+	rm -rf crosswind
+	mv crosswind_replace crosswind
 	patch -p0 < python2.patch
-	mv lib3to2/fixes/imports_fix_alt_formatting.py __TEMPFILE__
-	mv lib3to2/fixes/fix_imports.py lib3to2/fixes/imports_fix_alt_formatting.py
-	mv __TEMPFILE__ lib3to2/fixes/fix_imports.py
-	mv lib3to2/fixes/imports2_fix_alt_formatting.py __TEMPFILE__
-	mv lib3to2/fixes/fix_imports2.py lib3to2/fixes/imports2_fix_alt_formatting.py
-	mv __TEMPFILE__ lib3to2/fixes/fix_imports2.py
-	sed -i 's/u"/"/' lib3to2/main.py
+	mv crosswind/fixes/imports_fix_alt_formatting.py __TEMPFILE__
+	mv crosswind/fixes/fix_imports.py crosswind/fixes/imports_fix_alt_formatting.py
+	mv __TEMPFILE__ crosswind/fixes/fix_imports.py
+	mv crosswind/fixes/imports2_fix_alt_formatting.py __TEMPFILE__
+	mv crosswind/fixes/fix_imports2.py crosswind/fixes/imports2_fix_alt_formatting.py
+	mv __TEMPFILE__ crosswind/fixes/fix_imports2.py
+	sed -i 's/u"/"/' crosswind/main.py

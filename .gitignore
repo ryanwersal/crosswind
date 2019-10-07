@@ -1,0 +1,5 @@
+build/*
+*.pyc
+*~
+crosswind/Grammar*pickle
+__pycache__
