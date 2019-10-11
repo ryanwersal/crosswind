@@ -1,8 +1,9 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_unpacking(crosswindFixerTestCase):
 
-    fixer = 'unpacking'
+    fixer = "unpacking"
 
     def test_unchanged(self):
         s = "def f(*args): pass"

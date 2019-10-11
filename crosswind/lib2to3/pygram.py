@@ -13,12 +13,10 @@ from . import pytree
 
 # The grammar file
 _GRAMMAR_FILE = os.path.join(os.path.dirname(__file__), "Grammar.txt")
-_PATTERN_GRAMMAR_FILE = os.path.join(os.path.dirname(__file__),
-                                     "PatternGrammar.txt")
+_PATTERN_GRAMMAR_FILE = os.path.join(os.path.dirname(__file__), "PatternGrammar.txt")
 
 
 class Symbols(object):
-
     def __init__(self, grammar):
         """Initializer.
 
@@ -39,5 +37,7 @@ del python_grammar_no_print_statement.keywords["print"]
 python_grammar_no_print_and_exec_statement = python_grammar_no_print_statement.copy()
 del python_grammar_no_print_and_exec_statement.keywords["exec"]
 
-pattern_grammar = driver.load_packaged_grammar("crosswind.lib2to3", _PATTERN_GRAMMAR_FILE)
+pattern_grammar = driver.load_packaged_grammar(
+    "crosswind.lib2to3", _PATTERN_GRAMMAR_FILE
+)
 pattern_symbols = Symbols(pattern_grammar)

@@ -59,7 +59,7 @@ def _get_head_types(pat):
     if isinstance(pat, pytree.NegatedPattern):
         if pat.content:
             return _get_head_types(pat.content)
-        raise _EveryNode # Negated Patterns don't have a type
+        raise _EveryNode  # Negated Patterns don't have a type
 
     if isinstance(pat, pytree.WildcardPattern):
         # Recurse on each node in content
@@ -69,7 +69,7 @@ def _get_head_types(pat):
                 r.update(_get_head_types(x))
         return r
 
-    raise Exception("Oh no! I don't understand pattern %s" %(pat))
+    raise Exception("Oh no! I don't understand pattern %s" % (pat))
 
 
 def _get_headnode_dict(fixer_list):
@@ -91,8 +91,9 @@ def _get_headnode_dict(fixer_list):
                 head_nodes[fixer._accept_type].append(fixer)
             else:
                 every.append(fixer)
-    for node_type in chain(pygram.python_grammar.symbol2number.values(),
-                           pygram.python_grammar.tokens):
+    for node_type in chain(
+        pygram.python_grammar.symbol2number.values(), pygram.python_grammar.tokens
+    ):
         head_nodes[node_type].extend(every)
     return dict(head_nodes)
 
@@ -101,8 +102,10 @@ def get_fixers_from_package(pkg_name):
     """
     Return the fully qualified names for fixers in the package pkg_name.
     """
-    return [pkg_name + "." + fix_name
-            for fix_name in get_all_fix_names(pkg_name, False)]
+    return [
+        pkg_name + "." + fix_name for fix_name in get_all_fix_names(pkg_name, False)
+    ]
+
 
 def _identity(obj):
     return obj
@@ -111,9 +114,11 @@ def _identity(obj):
 def _detect_future_features(source):
     have_docstring = False
     gen = tokenize.generate_tokens(io.StringIO(source).readline)
+
     def advance():
         tok = next(gen)
         return tok[0], tok[1]
+
     ignore = frozenset({token.NEWLINE, tokenize.NL, token.COMMENT})
     features = set()
     try:
@@ -154,11 +159,10 @@ class FixerError(Exception):
 
 class RefactoringTool(object):
 
-    _default_options = {"print_function" : False,
-                        "write_unchanged_files" : False}
+    _default_options = {"print_function": False, "write_unchanged_files": False}
 
-    CLASS_PREFIX = "Fix" # The prefix for fixer classes
-    FILE_PREFIX = "fix_" # The prefix for modules with a fixer within
+    CLASS_PREFIX = "Fix"  # The prefix for fixer classes
+    FILE_PREFIX = "fix_"  # The prefix for modules with a fixer within
 
     def __init__(self, fixer_names, options=None, explicit=None):
         """Initializer.
@@ -185,16 +189,15 @@ class RefactoringTool(object):
         self.logger = logging.getLogger("RefactoringTool")
         self.fixer_log = []
         self.wrote = False
-        self.driver = driver.Driver(self.grammar,
-                                    convert=pytree.convert,
-                                    logger=self.logger)
+        self.driver = driver.Driver(
+            self.grammar, convert=pytree.convert, logger=self.logger
+        )
         self.pre_order, self.post_order = self.get_fixers()
-
 
         self.files = []  # List of files that were or should be modified
 
         self.BM = bm.BottomMatcher()
-        self.bmi_pre_order = [] # Bottom Matcher incompatible fixers
+        self.bmi_pre_order = []  # Bottom Matcher incompatible fixers
         self.bmi_post_order = []
 
         for fixer in chain(self.post_order, self.pre_order):
@@ -210,8 +213,6 @@ class RefactoringTool(object):
         self.bmi_pre_order_heads = _get_headnode_dict(self.bmi_pre_order)
         self.bmi_post_order_heads = _get_headnode_dict(self.bmi_post_order)
 
-
-
     def get_fixers(self):
         """Inspects the options to load the requested patterns and handlers.
 
@@ -226,7 +227,7 @@ class RefactoringTool(object):
             mod = __import__(fix_mod_path, {}, {}, ["*"])
             fix_name = fix_mod_path.rsplit(".", 1)[-1]
             if fix_name.startswith(self.FILE_PREFIX):
-                fix_name = fix_name[len(self.FILE_PREFIX):]
+                fix_name = fix_name[len(self.FILE_PREFIX) :]
             parts = fix_name.split("_")
             class_name = self.CLASS_PREFIX + "".join([p.title() for p in parts])
             try:
@@ -234,8 +235,11 @@ class RefactoringTool(object):
             except AttributeError:
                 raise FixerError("Can't find %s.%s" % (fix_name, class_name)) from None
             fixer = fix_class(self.options, self.fixer_log)
-            if fixer.explicit and self.explicit is not True and \
-                    fix_mod_path not in self.explicit:
+            if (
+                fixer.explicit
+                and self.explicit is not True
+                and fix_mod_path not in self.explicit
+            ):
                 self.log_message("Skipping optional fixer: %s", fix_name)
                 continue
 
@@ -294,8 +298,7 @@ class RefactoringTool(object):
             dirnames.sort()
             filenames.sort()
             for name in filenames:
-                if (not name.startswith(".") and
-                    os.path.splitext(name)[1] == py_ext):
+                if not name.startswith(".") and os.path.splitext(name)[1] == py_ext:
                     fullname = os.path.join(dirpath, name)
                     self.refactor_file(fullname, write, doctests_only)
             # Modify dirnames in-place to remove subdirs with leading dots
@@ -314,7 +317,7 @@ class RefactoringTool(object):
             encoding = tokenize.detect_encoding(f.readline)[0]
         finally:
             f.close()
-        with io.open(filename, "r", encoding=encoding, newline='') as f:
+        with io.open(filename, "r", encoding=encoding, newline="") as f:
             return f.read(), encoding
 
     def refactor_file(self, filename, write=False, doctests_only=False):
@@ -323,7 +326,7 @@ class RefactoringTool(object):
         if input is None:
             # Reading the file failed.
             return
-        input += "\n" # Silence certain parse errors
+        input += "\n"  # Silence certain parse errors
         if doctests_only:
             self.log_debug("Refactoring doctests in %s", filename)
             output = self.refactor_docstring(input, filename)
@@ -335,8 +338,9 @@ class RefactoringTool(object):
             tree = self.refactor_string(input, filename)
             if self.write_unchanged_files or (tree and tree.was_changed):
                 # The [:-1] is to take off the \n we added earlier
-                self.processed_file(str(tree)[:-1], filename,
-                                    write=write, encoding=encoding)
+                self.processed_file(
+                    str(tree)[:-1], filename, write=write, encoding=encoding
+                )
             else:
                 self.log_debug("No changes in %s", filename)
 
@@ -357,8 +361,7 @@ class RefactoringTool(object):
         try:
             tree = self.driver.parse_string(data)
         except Exception as err:
-            self.log_error("Can't parse %s: %s: %s",
-                           name, err.__class__.__name__, err)
+            self.log_error("Can't parse %s: %s: %s", name, err.__class__.__name__, err)
             return
         finally:
             self.driver.grammar = self.grammar
@@ -402,7 +405,7 @@ class RefactoringTool(object):
         for fixer in chain(self.pre_order, self.post_order):
             fixer.start_tree(tree, name)
 
-        #use traditional matching for the incompatible fixers
+        # use traditional matching for the incompatible fixers
         self.traverse_by(self.bmi_pre_order_heads, tree.pre_order())
         self.traverse_by(self.bmi_post_order_heads, tree.post_order())
 
@@ -412,12 +415,12 @@ class RefactoringTool(object):
         while any(match_set.values()):
             for fixer in self.BM.fixers:
                 if fixer in match_set and match_set[fixer]:
-                    #sort by depth; apply fixers from bottom(of the AST) to top
+                    # sort by depth; apply fixers from bottom(of the AST) to top
                     match_set[fixer].sort(key=pytree.Base.depth, reverse=True)
 
                     if fixer.keep_line_order:
-                        #some fixers(eg fix_imports) must be applied
-                        #with the original file's line order
+                        # some fixers(eg fix_imports) must be applied
+                        # with the original file's line order
                         match_set[fixer].sort(key=pytree.Base.get_lineno)
 
                     for node in list(match_set[fixer]):
@@ -441,7 +444,7 @@ class RefactoringTool(object):
                             new = fixer.transform(node, results)
                             if new is not None:
                                 node.replace(new)
-                                #new.fixers_applied.append(fixer)
+                                # new.fixers_applied.append(fixer)
                                 for node in new.post_order():
                                     # do not apply the fixer again to
                                     # this or any subnode
@@ -454,7 +457,7 @@ class RefactoringTool(object):
                                 new_matches = self.BM.run(new.leaves())
                                 for fxr in new_matches:
                                     if not fxr in match_set:
-                                        match_set[fxr]=[]
+                                        match_set[fxr] = []
 
                                     match_set[fxr].extend(new_matches[fxr])
 
@@ -485,8 +488,9 @@ class RefactoringTool(object):
                         node.replace(new)
                         node = new
 
-    def processed_file(self, new_text, filename, old_text=None, write=False,
-                       encoding=None):
+    def processed_file(
+        self, new_text, filename, old_text=None, write=False, encoding=None
+    ):
         """
         Called when a file has been refactored and there may be changes.
         """
@@ -514,7 +518,7 @@ class RefactoringTool(object):
         set.
         """
         try:
-            fp = io.open(filename, "w", encoding=encoding, newline='')
+            fp = io.open(filename, "w", encoding=encoding, newline="")
         except OSError as err:
             self.log_error("Can't create %s: %s", filename, err)
             return
@@ -551,26 +555,28 @@ class RefactoringTool(object):
             lineno += 1
             if line.lstrip().startswith(self.PS1):
                 if block is not None:
-                    result.extend(self.refactor_doctest(block, block_lineno,
-                                                        indent, filename))
+                    result.extend(
+                        self.refactor_doctest(block, block_lineno, indent, filename)
+                    )
                 block_lineno = lineno
                 block = [line]
                 i = line.find(self.PS1)
                 indent = line[:i]
-            elif (indent is not None and
-                  (line.startswith(indent + self.PS2) or
-                   line == indent + self.PS2.rstrip() + "\n")):
+            elif indent is not None and (
+                line.startswith(indent + self.PS2)
+                or line == indent + self.PS2.rstrip() + "\n"
+            ):
                 block.append(line)
             else:
                 if block is not None:
-                    result.extend(self.refactor_doctest(block, block_lineno,
-                                                        indent, filename))
+                    result.extend(
+                        self.refactor_doctest(block, block_lineno, indent, filename)
+                    )
                 block = None
                 indent = None
                 result.append(line)
         if block is not None:
-            result.extend(self.refactor_doctest(block, block_lineno,
-                                                indent, filename))
+            result.extend(self.refactor_doctest(block, block_lineno, indent, filename))
         return "".join(result)
 
     def refactor_doctest(self, block, lineno, indent, filename):
@@ -587,14 +593,19 @@ class RefactoringTool(object):
             if self.logger.isEnabledFor(logging.DEBUG):
                 for line in block:
                     self.log_debug("Source: %s", line.rstrip("\n"))
-            self.log_error("Can't parse docstring in %s line %s: %s: %s",
-                           filename, lineno, err.__class__.__name__, err)
+            self.log_error(
+                "Can't parse docstring in %s line %s: %s: %s",
+                filename,
+                lineno,
+                err.__class__.__name__,
+                err,
+            )
             return block
         if self.refactor_tree(tree, filename):
             new = str(tree).splitlines(keepends=True)
             # Undo the adjustment of the line numbers in wrap_toks() below.
-            clipped, new = new[:lineno-1], new[lineno-1:]
-            assert clipped == ["\n"] * (lineno-1), clipped
+            clipped, new = new[: lineno - 1], new[lineno - 1 :]
+            assert clipped == ["\n"] * (lineno - 1), clipped
             if not new[-1].endswith("\n"):
                 new[-1] += "\n"
             block = [indent + self.PS1 + new.pop(0)]
@@ -648,7 +659,6 @@ class RefactoringTool(object):
             # end of the prompt string (PS1 or PS2).
             yield type, value, (line0, col0), (line1, col1), line_text
 
-
     def gen_lines(self, block, indent):
         """Generates lines as expected by tokenize from a list of lines.
 
@@ -659,7 +669,7 @@ class RefactoringTool(object):
         prefix = prefix1
         for line in block:
             if line.startswith(prefix):
-                yield line[len(prefix):]
+                yield line[len(prefix) :]
             elif line == prefix.rstrip() + "\n":
                 yield "\n"
             else:
@@ -674,17 +684,16 @@ class MultiprocessingUnsupported(Exception):
 
 
 class MultiprocessRefactoringTool(RefactoringTool):
-
     def __init__(self, *args, **kwargs):
         super(MultiprocessRefactoringTool, self).__init__(*args, **kwargs)
         self.queue = None
         self.output_lock = None
 
-    def refactor(self, items, write=False, doctests_only=False,
-                 num_processes=1):
+    def refactor(self, items, write=False, doctests_only=False, num_processes=1):
         if num_processes == 1:
             return super(MultiprocessRefactoringTool, self).refactor(
-                items, write, doctests_only)
+                items, write, doctests_only
+            )
         try:
             import multiprocessing
         except ImportError:
@@ -693,13 +702,15 @@ class MultiprocessRefactoringTool(RefactoringTool):
             raise RuntimeError("already doing multiple processes")
         self.queue = multiprocessing.JoinableQueue()
         self.output_lock = multiprocessing.Lock()
-        processes = [multiprocessing.Process(target=self._child)
-                     for i in range(num_processes)]
+        processes = [
+            multiprocessing.Process(target=self._child) for i in range(num_processes)
+        ]
         try:
             for p in processes:
                 p.start()
-            super(MultiprocessRefactoringTool, self).refactor(items, write,
-                                                              doctests_only)
+            super(MultiprocessRefactoringTool, self).refactor(
+                items, write, doctests_only
+            )
         finally:
             self.queue.join()
             for i in range(num_processes):
@@ -714,8 +725,7 @@ class MultiprocessRefactoringTool(RefactoringTool):
         while task is not None:
             args, kwargs = task
             try:
-                super(MultiprocessRefactoringTool, self).refactor_file(
-                    *args, **kwargs)
+                super(MultiprocessRefactoringTool, self).refactor_file(*args, **kwargs)
             finally:
                 self.queue.task_done()
             task = self.queue.get()
@@ -725,4 +735,5 @@ class MultiprocessRefactoringTool(RefactoringTool):
             self.queue.put((args, kwargs))
         else:
             return super(MultiprocessRefactoringTool, self).refactor_file(
-                *args, **kwargs)
+                *args, **kwargs
+            )

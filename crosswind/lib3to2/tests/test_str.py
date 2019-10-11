@@ -1,5 +1,6 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_str(crosswindFixerTestCase):
     fixer = "str"
 
@@ -27,4 +28,3 @@ class Test_str(crosswindFixerTestCase):
         b = """R'''x'''"""
         a = """uR'''x'''"""
         self.check(b, a)
-

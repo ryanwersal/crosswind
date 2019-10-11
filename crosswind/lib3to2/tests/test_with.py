@@ -1,5 +1,6 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_with(crosswindFixerTestCase):
     fixer = "with"
 

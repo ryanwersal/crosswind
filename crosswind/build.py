@@ -13,6 +13,7 @@ from crosswind.lib2to3 import pygram
 
 class DistutilsRefactoringTool(refactor.RefactoringTool):
     """Refactoring tool for crosswind building"""
+
     def __init__(self, fixers, options=None, explicit=None):
         super(DistutilsRefactoringTool, self).__init__(fixers, options, explicit)
         self.driver.grammar = pygram.python_grammar_no_print_statement
@@ -22,19 +23,18 @@ class DistutilsRefactoringTool(refactor.RefactoringTool):
         try:
             tree = self.driver.parse_string(data)
         except Exception as err:
-            self.log_error("Can't parse %s: %s: %s",
-                           name, err.__class__.__name__, err)
+            self.log_error("Can't parse %s: %s: %s", name, err.__class__.__name__, err)
             return
         self.log_debug("Refactoring %s", name)
         self.refactor_tree(tree, name)
         return tree
-        
+
     def log_error(self, msg, *args, **kw):
         log.error(msg, *args)
 
     def log_message(self, msg, *args):
         log.info(msg, *args)
-    
+
     def log_debug(self, msg, *args):
         log.debug(msg, *args)
 
@@ -49,13 +49,14 @@ def run_crosswind(files, fixer_names=None, options=None, explicit=None):
     if not files:
         return
     if fixer_names is None:
-        fixer_names = refactor.get_fixers_from_package('crosswind.fixes')
+        fixer_names = refactor.get_fixers_from_package("crosswind.fixes")
     r = DistutilsRefactoringTool(fixer_names, options=options)
     r.refactor(files, write=True)
-    
-    
-def copydir_run_crosswind(src, dest, template=None, fixer_names=None,
-                     options=None, explicit=None):
+
+
+def copydir_run_crosswind(
+    src, dest, template=None, fixer_names=None, options=None, explicit=None
+):
     """Recursively copy a directory, only copying new and changed files,
     running run_crosswind over all newly copied Python modules afterward.
 
@@ -64,6 +65,7 @@ def copydir_run_crosswind(src, dest, template=None, fixer_names=None,
     from distutils.dir_util import mkpath
     from distutils.file_util import copy_file
     from distutils.filelist import FileList
+
     filelist = FileList()
     curdir = os.getcwd()
     os.chdir(src)
@@ -75,24 +77,30 @@ def copydir_run_crosswind(src, dest, template=None, fixer_names=None,
     if template:
         for line in template.splitlines():
             line = line.strip()
-            if not line: continue
+            if not line:
+                continue
             filelist.process_template_line(line)
     copied = []
     for filename in filelist.files:
         outname = os.path.join(dest, filename)
         mkpath(os.path.dirname(outname))
         res = copy_file(os.path.join(src, filename), outname, update=1)
-        if res[1]: copied.append(outname)
-    run_crosswind([fn for fn in copied if fn.lower().endswith('.py')],
-             fixer_names=fixer_names, options=options, explicit=explicit)
+        if res[1]:
+            copied.append(outname)
+    run_crosswind(
+        [fn for fn in copied if fn.lower().endswith(".py")],
+        fixer_names=fixer_names,
+        options=options,
+        explicit=explicit,
+    )
     return copied
 
 
 class Mixincrosswind:
-    '''Mixin class for commands that run crosswind.
+    """Mixin class for commands that run crosswind.
     To configure crosswind, setup scripts may either change
     the class variables, or inherit from individual commands
-    to override how crosswind is invoked.'''
+    to override how crosswind is invoked."""
 
     # provide list of fixers to run;
     # defaults to all from crosswind.fixers
@@ -106,7 +114,7 @@ class Mixincrosswind:
 
     def run_crosswind(self, files):
         return run_crosswind(files, self.fixer_names, self.options, self.explicit)
-        
+
 
 class build_py_crosswind(build_py, Mixincrosswind):
     def run(self):

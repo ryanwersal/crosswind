@@ -1,5 +1,6 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_dctsetcomp(crosswindFixerTestCase):
     fixer = "dctsetcomp"
 
@@ -29,11 +30,15 @@ class Test_dctsetcomp(crosswindFixerTestCase):
         """
         tests = []
         tests.append("milk.price for milk in find_milk(store)")
-        tests.append("compute_nth_prime(generate_complicated_thing(\
-            n.value(hashlifier))) for n in my_range_func(1, (how_far+offset))")
-        tests.append("compute_nth_prime(generate_complicated_thing(\
+        tests.append(
+            "compute_nth_prime(generate_complicated_thing(\
+            n.value(hashlifier))) for n in my_range_func(1, (how_far+offset))"
+        )
+        tests.append(
+            "compute_nth_prime(generate_complicated_thing(\
             n.value(hashlifier))) for n in my_range_func(1, (how_far+offset))\
-            if a==b.spam()")
+            if a==b.spam()"
+        )
         for comp in tests:
             b = "{%s}" % comp
             a = "set(%s)" % comp

@@ -26,8 +26,8 @@ finally:
 
 _2TO3_FIXERS = refactor.get_fixers_from_package("crosswind.lib2to3.fixes")
 
-class TestRefactoringTool(unittest.TestCase):
 
+class TestRefactoringTool(unittest.TestCase):
     def setUp(self):
         sys.path.append(FIXER_DIR)
 
@@ -43,15 +43,14 @@ class TestRefactoringTool(unittest.TestCase):
         return refactor.RefactoringTool(fixers, options, explicit)
 
     def test_print_function_option(self):
-        rt = self.rt({"print_function" : True})
+        rt = self.rt({"print_function": True})
         self.assertIs(rt.grammar, pygram.python_grammar_no_print_statement)
-        self.assertIs(rt.driver.grammar,
-                      pygram.python_grammar_no_print_statement)
+        self.assertIs(rt.driver.grammar, pygram.python_grammar_no_print_statement)
 
     def test_write_unchanged_files_option(self):
         rt = self.rt()
         self.assertFalse(rt.write_unchanged_files)
-        rt = self.rt({"write_unchanged_files" : True})
+        rt = self.rt({"write_unchanged_files": True})
         self.assertTrue(rt.write_unchanged_files)
 
     def test_fixer_loading_helpers(self):
@@ -61,23 +60,24 @@ class TestRefactoringTool(unittest.TestCase):
         full_names = refactor.get_fixers_from_package("myfixes")
         self.assertEqual(prefixed, ["fix_" + name for name in contents])
         self.assertEqual(non_prefixed, contents)
-        self.assertEqual(full_names,
-                         ["myfixes.fix_" + name for name in contents])
+        self.assertEqual(full_names, ["myfixes.fix_" + name for name in contents])
 
     def test_detect_future_features(self):
         run = refactor._detect_future_features
         fs = frozenset
         empty = fs()
         self.assertEqual(run(""), empty)
-        self.assertEqual(run("from __future__ import print_function"),
-                         fs(("print_function",)))
-        self.assertEqual(run("from __future__ import generators"),
-                         fs(("generators",)))
-        self.assertEqual(run("from __future__ import generators, feature"),
-                         fs(("generators", "feature")))
+        self.assertEqual(
+            run("from __future__ import print_function"), fs(("print_function",))
+        )
+        self.assertEqual(run("from __future__ import generators"), fs(("generators",)))
+        self.assertEqual(
+            run("from __future__ import generators, feature"),
+            fs(("generators", "feature")),
+        )
         inp = "from __future__ import generators, print_function"
         self.assertEqual(run(inp), fs(("generators", "print_function")))
-        inp ="from __future__ import print_function, generators"
+        inp = "from __future__ import print_function, generators"
         self.assertEqual(run(inp), fs(("print_function", "generators")))
         inp = "from __future__ import (print_function,)"
         self.assertEqual(run(inp), fs(("print_function",)))
@@ -88,14 +88,15 @@ class TestRefactoringTool(unittest.TestCase):
         inp = """from __future__ import generators
 from __future__ import print_function"""
         self.assertEqual(run(inp), fs(("generators", "print_function")))
-        invalid = ("from",
-                   "from 4",
-                   "from x",
-                   "from x 5",
-                   "from x im",
-                   "from x import",
-                   "from x import 4",
-                   )
+        invalid = (
+            "from",
+            "from 4",
+            "from x",
+            "from x 5",
+            "from x im",
+            "from x import",
+            "from x import 4",
+        )
         for inp in invalid:
             self.assertEqual(run(inp), empty)
         inp = "'docstring'\nfrom __future__ import print_function"
@@ -158,9 +159,7 @@ from __future__ import print_function"""
         self.assertEqual(str(tree), input)
 
     def test_refactor_stdin(self):
-
         class MyRT(refactor.RefactoringTool):
-
             def print_output(self, old_text, new_text, filename, equal):
                 results.extend([old_text, new_text, filename, equal])
 
@@ -172,14 +171,22 @@ from __future__ import print_function"""
             rt.refactor_stdin()
         finally:
             sys.stdin = save
-        expected = ["def parrot(): pass\n\n",
-                    "def cheese(): pass\n\n",
-                    "<stdin>", False]
+        expected = [
+            "def parrot(): pass\n\n",
+            "def cheese(): pass\n\n",
+            "<stdin>",
+            False,
+        ]
         self.assertEqual(results, expected)
 
-    def check_file_refactoring(self, test_file, fixers=_2TO3_FIXERS,
-                               options=None, mock_log_debug=None,
-                               actually_write=True):
+    def check_file_refactoring(
+        self,
+        test_file,
+        fixers=_2TO3_FIXERS,
+        options=None,
+        mock_log_debug=None,
+        actually_write=True,
+    ):
         test_file = self.init_test_file(test_file)
         old_contents = self.read_file(test_file)
         rt = self.rt(fixers=fixers, options=options)
@@ -223,16 +230,22 @@ from __future__ import print_function"""
     def test_refactor_file_write_unchanged_file(self):
         test_file = os.path.join(FIXER_DIR, "parrot_example.py")
         debug_messages = []
+
         def recording_log_debug(msg, *args):
             debug_messages.append(msg % args)
-        self.check_file_refactoring(test_file, fixers=(),
-                                    options={"write_unchanged_files": True},
-                                    mock_log_debug=recording_log_debug,
-                                    actually_write=False)
+
+        self.check_file_refactoring(
+            test_file,
+            fixers=(),
+            options={"write_unchanged_files": True},
+            mock_log_debug=recording_log_debug,
+            actually_write=False,
+        )
         # Testing that it logged this message when write=False was passed is
         # sufficient to see that it did not bail early after "No changes".
-        message_regex = r"Not writing changes to .*%s" % \
-                re.escape(os.sep + os.path.basename(test_file))
+        message_regex = r"Not writing changes to .*%s" % re.escape(
+            os.sep + os.path.basename(test_file)
+        )
         for message in debug_messages:
             if "Not writing changes" in message:
                 self.assertRegex(message, message_regex)
@@ -244,6 +257,7 @@ from __future__ import print_function"""
         def check(structure, expected):
             def mock_refactor_file(self, f, *args):
                 got.append(f)
+
             save_func = refactor.RefactoringTool.refactor_file
             refactor.RefactoringTool.refactor_file = mock_refactor_file
             rt = self.rt()
@@ -257,19 +271,13 @@ from __future__ import print_function"""
             finally:
                 refactor.RefactoringTool.refactor_file = save_func
                 shutil.rmtree(dir)
-            self.assertEqual(got,
-                             [os.path.join(dir, path) for path in expected])
+            self.assertEqual(got, [os.path.join(dir, path) for path in expected])
+
         check([], [])
-        tree = ["nothing",
-                "hi.py",
-                ".dumb",
-                ".after.py",
-                "notpy.npy",
-                "sappy"]
+        tree = ["nothing", "hi.py", ".dumb", ".after.py", "notpy.npy", "sappy"]
         expected = ["hi.py"]
         check(tree, expected)
-        tree = ["hi.py",
-                os.path.join("a_dir", "stuff.py")]
+        tree = ["hi.py", os.path.join("a_dir", "stuff.py")]
         check(tree, tree)
 
     def test_file_encoding(self):

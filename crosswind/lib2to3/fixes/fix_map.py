@@ -59,15 +59,15 @@ class FixMap(fixer_base.ConditionalFix):
     >
     """
 
-    skip_on = 'future_builtins.map'
+    skip_on = "future_builtins.map"
 
     def transform(self, node, results):
         if self.should_skip(node):
             return
 
         trailers = []
-        if 'extra_trailers' in results:
-            for t in results['extra_trailers']:
+        if "extra_trailers" in results:
+            for t in results["extra_trailers"]:
                 trailers.append(t.clone())
 
         if node.parent.type == syms.simple_stmt:
@@ -76,9 +76,9 @@ class FixMap(fixer_base.ConditionalFix):
             new.prefix = ""
             new = Call(Name("list"), [new])
         elif "map_lambda" in results:
-            new = ListComp(results["xp"].clone(),
-                           results["fp"].clone(),
-                           results["it"].clone())
+            new = ListComp(
+                results["xp"].clone(), results["fp"].clone(), results["it"].clone()
+            )
             new = Node(syms.power, [new] + trailers, prefix="")
 
         else:
@@ -88,13 +88,18 @@ class FixMap(fixer_base.ConditionalFix):
             else:
                 if "args" in results:
                     args = results["args"]
-                    if args.type == syms.trailer and \
-                       args.children[1].type == syms.arglist and \
-                       args.children[1].children[0].type == token.NAME and \
-                       args.children[1].children[0].value == "None":
-                        self.warning(node, "cannot convert map(None, ...) "
-                                     "with multiple arguments because map() "
-                                     "now truncates to the shortest sequence")
+                    if (
+                        args.type == syms.trailer
+                        and args.children[1].type == syms.arglist
+                        and args.children[1].children[0].type == token.NAME
+                        and args.children[1].children[0].value == "None"
+                    ):
+                        self.warning(
+                            node,
+                            "cannot convert map(None, ...) "
+                            "with multiple arguments because map() "
+                            "now truncates to the shortest sequence",
+                        )
                         return
 
                     new = Node(syms.power, [Name("map"), args.clone()])

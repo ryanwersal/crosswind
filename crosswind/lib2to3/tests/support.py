@@ -19,20 +19,23 @@ grammar_no_print_statement = pgen2_driver.load_grammar(grammar_path)
 del grammar_no_print_statement.keywords["print"]
 driver = pgen2_driver.Driver(grammar, convert=pytree.convert)
 driver_no_print_statement = pgen2_driver.Driver(
-    grammar_no_print_statement,
-    convert=pytree.convert
+    grammar_no_print_statement, convert=pytree.convert
 )
+
 
 def parse_string(string):
     return driver.parse_string(reformat(string), debug=True)
+
 
 def run_all_tests(test_mod=None, tests=None):
     if tests is None:
         tests = unittest.TestLoader().loadTestsFromModule(test_mod)
     unittest.TextTestRunner(verbosity=2).run(tests)
 
+
 def reformat(string):
     return dedent(string) + "\n\n"
+
 
 def get_refactorer(fixer_pkg="crosswind.lib2to3", fixers=None, options=None):
     """
@@ -49,10 +52,12 @@ def get_refactorer(fixer_pkg="crosswind.lib2to3", fixers=None, options=None):
     options = options or {}
     return refactor.RefactoringTool(fixers, options, explicit=True)
 
+
 def all_project_files():
     for dirpath, dirnames, filenames in os.walk(proj_dir):
         for filename in filenames:
             if filename.endswith(".py"):
                 yield os.path.join(dirpath, filename)
+
 
 TestCase = unittest.TestCase

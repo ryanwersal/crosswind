@@ -5,6 +5,7 @@ Fixer for unittest -> unittest2
 from crosswind.lib2to3 import fixer_base
 from crosswind.lib2to3.fixer_util import Name
 
+
 class FixUnittest(fixer_base.BaseFix):
 
     explicit = True
@@ -16,5 +17,5 @@ class FixUnittest(fixer_base.BaseFix):
     power< name='unittest' any* >"""
 
     def transform(self, node, results):
-        name = results['name']
+        name = results["name"]
         name.replace(Name("unittest2", prefix=name.prefix))

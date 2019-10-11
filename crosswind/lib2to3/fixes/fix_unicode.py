@@ -11,7 +11,8 @@ r"""Fixer for unicode.
 from ..pgen2 import token
 from .. import fixer_base
 
-_mapping = {"unichr" : "chr", "unicode" : "str"}
+_mapping = {"unichr": "chr", "unicode": "str"}
+
 
 class FixUnicode(fixer_base.BaseFix):
     BM_compatible = True
@@ -19,7 +20,7 @@ class FixUnicode(fixer_base.BaseFix):
 
     def start_tree(self, tree, filename):
         super(FixUnicode, self).start_tree(tree, filename)
-        self.unicode_literals = 'unicode_literals' in tree.future_features
+        self.unicode_literals = "unicode_literals" in tree.future_features
 
     def transform(self, node, results):
         if node.type == token.NAME:
@@ -28,12 +29,14 @@ class FixUnicode(fixer_base.BaseFix):
             return new
         elif node.type == token.STRING:
             val = node.value
-            if not self.unicode_literals and val[0] in '\'"' and '\\' in val:
-                val = r'\\'.join([
-                    v.replace('\\u', r'\\u').replace('\\U', r'\\U')
-                    for v in val.split(r'\\')
-                ])
-            if val[0] in 'uU':
+            if not self.unicode_literals and val[0] in "'\"" and "\\" in val:
+                val = r"\\".join(
+                    [
+                        v.replace("\\u", r"\\u").replace("\\U", r"\\U")
+                        for v in val.split(r"\\")
+                    ]
+                )
+            if val[0] in "uU":
                 val = val[1:]
             if val == node.value:
                 return node

@@ -30,7 +30,6 @@ from crosswind.lib2to3.pygram import python_symbols as syms
 
 
 class TestDriver(support.TestCase):
-
     def test_formfeed(self):
         s = """print 1\n\x0Cprint 2\n"""
         t = driver.parse_string(s)
@@ -47,8 +46,7 @@ class TestPgen2Caching(support.TestCase):
         # guaranteed to be able to write to.
         tmpdir = tempfile.mkdtemp()
         try:
-            grammar_copy = os.path.join(
-                    tmpdir, os.path.basename(support.grammar_path))
+            grammar_copy = os.path.join(tmpdir, os.path.basename(support.grammar_path))
             shutil.copy(support.grammar_path, grammar_copy)
             pickle_name = pgen2_driver._generate_pickle_name(grammar_copy)
 
@@ -60,10 +58,10 @@ class TestPgen2Caching(support.TestCase):
         finally:
             shutil.rmtree(tmpdir)
 
-    @unittest.skipIf(sys.executable is None, 'sys.executable required')
+    @unittest.skipIf(sys.executable is None, "sys.executable required")
     def test_load_grammar_from_subprocess(self):
         tmpdir = tempfile.mkdtemp()
-        tmpsubdir = os.path.join(tmpdir, 'subdir')
+        tmpsubdir = os.path.join(tmpdir, "subdir")
         try:
             os.mkdir(tmpsubdir)
             grammar_base = os.path.basename(support.grammar_path)
@@ -72,8 +70,7 @@ class TestPgen2Caching(support.TestCase):
             shutil.copy(support.grammar_path, grammar_copy)
             shutil.copy(support.grammar_path, grammar_sub_copy)
             pickle_name = pgen2_driver._generate_pickle_name(grammar_copy)
-            pickle_sub_name = pgen2_driver._generate_pickle_name(
-                     grammar_sub_copy)
+            pickle_sub_name = pgen2_driver._generate_pickle_name(grammar_sub_copy)
             self.assertNotEqual(pickle_name, pickle_sub_name)
 
             # Generate a pickle file from this process.
@@ -83,35 +80,47 @@ class TestPgen2Caching(support.TestCase):
             # Generate a new pickle file in a subprocess with a most likely
             # different hash randomization seed.
             sub_env = dict(os.environ)
-            sub_env['PYTHONHASHSEED'] = 'random'
+            sub_env["PYTHONHASHSEED"] = "random"
             subprocess.check_call(
-                    [sys.executable, '-c', """
+                [
+                    sys.executable,
+                    "-c",
+                    """
 from crosswind.lib2to3.pgen2 import driver as pgen2_driver
 pgen2_driver.load_grammar(%r, save=True, force=True)
-                    """ % (grammar_sub_copy,)],
-                    env=sub_env)
+                    """
+                    % (grammar_sub_copy,),
+                ],
+                env=sub_env,
+            )
             self.assertTrue(os.path.exists(pickle_sub_name))
 
-            with open(pickle_name, 'rb') as pickle_f_1, \
-                    open(pickle_sub_name, 'rb') as pickle_f_2:
+            with open(pickle_name, "rb") as pickle_f_1, open(
+                pickle_sub_name, "rb"
+            ) as pickle_f_2:
                 self.assertEqual(
-                    pickle_f_1.read(), pickle_f_2.read(),
-                    msg='Grammar caches generated using different hash seeds'
-                    ' were not identical.')
+                    pickle_f_1.read(),
+                    pickle_f_2.read(),
+                    msg="Grammar caches generated using different hash seeds"
+                    " were not identical.",
+                )
         finally:
             shutil.rmtree(tmpdir)
 
     def test_load_packaged_grammar(self):
-        modname = __name__ + '.load_test'
+        modname = __name__ + ".load_test"
+
         class MyLoader:
             def get_data(self, where):
-                return pickle.dumps({'elephant': 19})
+                return pickle.dumps({"elephant": 19})
+
         class MyModule:
-            __file__ = 'parsertestmodule'
+            __file__ = "parsertestmodule"
             __spec__ = importlib.util.spec_from_loader(modname, MyLoader())
+
         sys.modules[modname] = MyModule()
         self.addCleanup(operator.delitem, sys.modules, modname)
-        g = pgen2_driver.load_packaged_grammar(modname, 'Grammar.txt')
+        g = pgen2_driver.load_packaged_grammar(modname, "Grammar.txt")
         self.assertEqual(g.elephant, 19)
 
 
@@ -143,53 +152,71 @@ class TestYieldFrom(GrammarTest):
 
 class TestAsyncAwait(GrammarTest):
     def test_await_expr(self):
-        self.validate("""async def foo():
+        self.validate(
+            """async def foo():
                              await x
-                      """)
+                      """
+        )
 
-        self.validate("""async def foo():
+        self.validate(
+            """async def foo():
                              [i async for i in b]
-                      """)
+                      """
+        )
 
-        self.validate("""async def foo():
+        self.validate(
+            """async def foo():
                              {i for i in b
                                 async for i in a if await i
                                   for b in i}
-                      """)
+                      """
+        )
 
-        self.validate("""async def foo():
+        self.validate(
+            """async def foo():
                              [await i for i in b if await c]
-                      """)
+                      """
+        )
 
-        self.validate("""async def foo():
+        self.validate(
+            """async def foo():
                              [ i for i in b if c]
-                      """)
+                      """
+        )
 
-        self.validate("""async def foo():
+        self.validate(
+            """async def foo():
 
             def foo(): pass
 
             def foo(): pass
 
             await x
-        """)
+        """
+        )
 
         self.validate("""async def foo(): return await a""")
 
-        self.validate("""def foo():
+        self.validate(
+            """def foo():
             def foo(): pass
             async def foo(): await x
-        """)
+        """
+        )
 
         self.invalid_syntax("await x")
-        self.invalid_syntax("""def foo():
-                                   await x""")
+        self.invalid_syntax(
+            """def foo():
+                                   await x"""
+        )
 
-        self.invalid_syntax("""def foo():
+        self.invalid_syntax(
+            """def foo():
             def foo(): pass
             async def foo(): pass
             await x
-        """)
+        """
+        )
 
     def test_async_var(self):
         self.validate("""async = 1""")
@@ -197,18 +224,26 @@ class TestAsyncAwait(GrammarTest):
         self.validate("""def async(): pass""")
 
     def test_async_with(self):
-        self.validate("""async def foo():
-                             async for a in b: pass""")
+        self.validate(
+            """async def foo():
+                             async for a in b: pass"""
+        )
 
-        self.invalid_syntax("""def foo():
-                                   async for a in b: pass""")
+        self.invalid_syntax(
+            """def foo():
+                                   async for a in b: pass"""
+        )
 
     def test_async_for(self):
-        self.validate("""async def foo():
-                             async with a: pass""")
+        self.validate(
+            """async def foo():
+                             async with a: pass"""
+        )
 
-        self.invalid_syntax("""def foo():
-                                   async with a: pass""")
+        self.invalid_syntax(
+            """def foo():
+                                   async with a: pass"""
+        )
 
 
 class TestRaiseChanges(GrammarTest):
@@ -453,23 +488,25 @@ class TestVarAnnotations(GrammarTest):
         self.validate("var2: [int, str]")
 
     def test_3(self):
-        self.validate("def f():\n"
-                      "    st: str = 'Hello'\n"
-                      "    a.b: int = (1, 2)\n"
-                      "    return st\n")
+        self.validate(
+            "def f():\n"
+            "    st: str = 'Hello'\n"
+            "    a.b: int = (1, 2)\n"
+            "    return st\n"
+        )
 
     def test_4(self):
-        self.validate("def fbad():\n"
-                      "    x: int\n"
-                      "    print(x)\n")
+        self.validate("def fbad():\n" "    x: int\n" "    print(x)\n")
 
     def test_5(self):
-        self.validate("class C:\n"
-                      "    x: int\n"
-                      "    s: str = 'attr'\n"
-                      "    z = 2\n"
-                      "    def __init__(self, x):\n"
-                      "        self.x: int = x\n")
+        self.validate(
+            "class C:\n"
+            "    x: int\n"
+            "    s: str = 'attr'\n"
+            "    z = 2\n"
+            "    def __init__(self, x):\n"
+            "        self.x: int = x\n"
+        )
 
     def test_6(self):
         self.validate("lst: List[int] = []")
@@ -494,17 +531,50 @@ class TestExcept(GrammarTest):
 
 
 class TestStringLiterals(GrammarTest):
-    prefixes = ("'", '"',
-        "r'", 'r"', "R'", 'R"',
-        "u'", 'u"', "U'", 'U"',
-        "b'", 'b"', "B'", 'B"',
-        "f'", 'f"', "F'", 'F"',
-        "ur'", 'ur"', "Ur'", 'Ur"',
-        "uR'", 'uR"', "UR'", 'UR"',
-        "br'", 'br"', "Br'", 'Br"',
-        "bR'", 'bR"', "BR'", 'BR"',
-        "rb'", 'rb"', "Rb'", 'Rb"',
-        "rB'", 'rB"', "RB'", 'RB"',)
+    prefixes = (
+        "'",
+        '"',
+        "r'",
+        'r"',
+        "R'",
+        'R"',
+        "u'",
+        'u"',
+        "U'",
+        'U"',
+        "b'",
+        'b"',
+        "B'",
+        'B"',
+        "f'",
+        'f"',
+        "F'",
+        'F"',
+        "ur'",
+        'ur"',
+        "Ur'",
+        'Ur"',
+        "uR'",
+        'uR"',
+        "UR'",
+        'UR"',
+        "br'",
+        'br"',
+        "Br'",
+        'Br"',
+        "bR'",
+        'bR"',
+        "BR'",
+        'BR"',
+        "rb'",
+        'rb"',
+        "Rb'",
+        'Rb"',
+        "rB'",
+        'rB"',
+        "RB'",
+        'RB"',
+    )
 
     def test_lit(self):
         for pre in self.prefixes:
@@ -566,8 +636,7 @@ class TestParserIdempotency(support.TestCase):
         for filepath in support.all_project_files():
             with open(filepath, "rb") as fp:
                 encoding = tokenize.detect_encoding(fp.readline)[0]
-            self.assertIsNotNone(encoding,
-                                 "can't detect encoding for %s" % filepath)
+            self.assertIsNotNone(encoding, "can't detect encoding for %s" % filepath)
             with open(filepath, "r", encoding=encoding) as fp:
                 source = fp.read()
             try:
@@ -576,7 +645,7 @@ class TestParserIdempotency(support.TestCase):
                 try:
                     tree = driver_no_print_statement.parse_string(source)
                 except ParseError as err:
-                    self.fail('ParseError on file %s (%s)' % (filepath, err))
+                    self.fail("ParseError on file %s (%s)" % (filepath, err))
             new = str(tree)
             if new != source:
                 print(diff_texts(source, new, filepath))
@@ -590,7 +659,6 @@ class TestParserIdempotency(support.TestCase):
 
 
 class TestLiterals(GrammarTest):
-
     def validate(self, s):
         driver.parse_string(support.dedent(s) + "\n\n")
 
@@ -624,7 +692,7 @@ class TestLiterals(GrammarTest):
 
 class TestPickleableException(unittest.TestCase):
     def test_ParseError(self):
-        err = ParseError('msg', 2, None, (1, 'context'))
+        err = ParseError("msg", 2, None, (1, "context"))
         for proto in range(pickle.HIGHEST_PROTOCOL + 1):
             err2 = pickle.loads(pickle.dumps(err, protocol=proto))
             self.assertEqual(err.args, err2.args)
@@ -637,10 +705,10 @@ class TestPickleableException(unittest.TestCase):
 def diff_texts(a, b, filename):
     a = a.splitlines()
     b = b.splitlines()
-    return difflib.unified_diff(a, b, filename, filename,
-                                "(original)", "(reserialized)",
-                                lineterm="")
+    return difflib.unified_diff(
+        a, b, filename, filename, "(original)", "(reserialized)", lineterm=""
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

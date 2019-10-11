@@ -1,8 +1,9 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_raise(crosswindFixerTestCase):
 
-    fixer = 'raise'
+    fixer = "raise"
 
     def test_unchanged(self):
         """
@@ -35,12 +36,12 @@ class Test_raise(crosswindFixerTestCase):
         raise E
         """
 
-        #a = """
-        #E = BaseException(V)
-        #raise E, V, T
-        #"""
+        # a = """
+        # E = BaseException(V)
+        # raise E, V, T
+        # """
 
-        #self.check(b, a)
+        # self.check(b, a)
         self.unchanged(b)
 
         b = """
@@ -50,13 +51,12 @@ class Test_raise(crosswindFixerTestCase):
         raise E
         """
 
-        #a = """
-        #E = BaseException(V)
-        #raise E, V, T
+        # a = """
+        # E = BaseException(V)
+        # raise E, V, T
 
-        #self.check(b, a)
+        # self.check(b, a)
         self.unchanged(b)
-
 
     def test_traceback(self):
         """
@@ -87,4 +87,3 @@ class Test_raise(crosswindFixerTestCase):
         b = "raise eBob.exception from exc"
         a = "raise eBob.exception"
         self.check(b, a, ignore_warnings=True)
-

@@ -1,5 +1,6 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_range(crosswindFixerTestCase):
     fixer = "range"
 
@@ -65,4 +66,3 @@ class Test_range(crosswindFixerTestCase):
         b = """[i for i in range(10)]"""
         a = """[i for i in xrange(10)]"""
         self.check(b, a)
-

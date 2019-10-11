@@ -17,7 +17,6 @@ PY2_TEST_MODULE = os.path.join(TEST_DATA_DIR, "py2_test_grammar.py")
 
 
 class TestMain(unittest.TestCase):
-
     def setUp(self):
         self.temp_dir = None  # tearDown() will rmtree this directory if set.
 
@@ -50,8 +49,10 @@ class TestMain(unittest.TestCase):
         self.assertEqual(ret, 0)
         output = out.getvalue().decode("ascii")
         self.assertIn("-print 'nothing'", output)
-        self.assertIn("WARNING: couldn't encode <stdin>'s diff for "
-                      "your terminal", err.getvalue())
+        self.assertIn(
+            "WARNING: couldn't encode <stdin>'s diff for " "your terminal",
+            err.getvalue(),
+        )
 
     def setup_test_source_trees(self):
         """Setup a test source tree and output destination tree."""
@@ -79,10 +80,20 @@ class TestMain(unittest.TestCase):
         err = io.StringIO()
         suffix = "TEST"
         ret = self.run_2to3_capture(
-                ["-n", "--add-suffix", suffix, "--write-unchanged-files",
-                 "--no-diffs", "--output-dir",
-                 self.py3_dest_dir, self.py2_src_dir],
-                io.StringIO(""), out, err)
+            [
+                "-n",
+                "--add-suffix",
+                suffix,
+                "--write-unchanged-files",
+                "--no-diffs",
+                "--output-dir",
+                self.py3_dest_dir,
+                self.py2_src_dir,
+            ],
+            io.StringIO(""),
+            out,
+            err,
+        )
         self.assertEqual(ret, 0)
         stderr = err.getvalue()
         self.assertIn(" implies -w.", stderr)
@@ -90,8 +101,10 @@ class TestMain(unittest.TestCase):
         # self.assertIn(
         #         "Output in %r will mirror the input directory %r layout" % (
         #                 self.py3_dest_dir, self.py2_src_dir), stderr)
-        self.assertEqual(set(name+suffix for name in self.setup_files),
-                         set(os.listdir(self.py3_dest_dir)))
+        self.assertEqual(
+            set(name + suffix for name in self.setup_files),
+            set(os.listdir(self.py3_dest_dir)),
+        )
         # FIXME: Anything in logging will not reach stderr. Need to use capsys feature of pytest.
         # for name in self.setup_files:
         #     self.assertIn("Writing converted %s to %s" % (
@@ -111,9 +124,19 @@ class TestMain(unittest.TestCase):
         py2_files = [self.trivial_py2_file, self.init_py2_file]
         expected_files = set(os.path.basename(name) for name in py2_files)
         ret = self.run_2to3_capture(
-                ["-n", "-w", "--write-unchanged-files",
-                 "--no-diffs", "--output-dir", self.py3_dest_dir] + py2_files,
-                io.StringIO(""), io.StringIO(), err)
+            [
+                "-n",
+                "-w",
+                "--write-unchanged-files",
+                "--no-diffs",
+                "--output-dir",
+                self.py3_dest_dir,
+            ]
+            + py2_files,
+            io.StringIO(""),
+            io.StringIO(),
+            err,
+        )
         self.assertEqual(ret, 0)
         stderr = err.getvalue()
         # FIXME: Anything in logging will not reach stderr. Need to use capsys feature of pytest.
@@ -127,18 +150,29 @@ class TestMain(unittest.TestCase):
         self.setup_test_source_trees()
         err = io.StringIO()
         ret = self.run_2to3_capture(
-                ["-n", "-w", "--no-diffs", "--output-dir", self.py3_dest_dir,
-                 self.trivial_py2_file],
-                io.StringIO(""), io.StringIO(), err)
+            [
+                "-n",
+                "-w",
+                "--no-diffs",
+                "--output-dir",
+                self.py3_dest_dir,
+                self.trivial_py2_file,
+            ],
+            io.StringIO(""),
+            io.StringIO(),
+            err,
+        )
         self.assertEqual(ret, 0)
         stderr = err.getvalue()
         # FIXME: Anything in logging will not reach stderr. Need to use capsys feature of pytest.
         # self.assertIn(
         #         "Output in %r will mirror the input directory %r layout" % (
         #                 self.py3_dest_dir, self.py2_src_dir), stderr)
-        self.assertEqual(set([os.path.basename(self.trivial_py2_file)]),
-                         set(os.listdir(self.py3_dest_dir)))
+        self.assertEqual(
+            set([os.path.basename(self.trivial_py2_file)]),
+            set(os.listdir(self.py3_dest_dir)),
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -1,7 +1,8 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_unittest(crosswindFixerTestCase):
-    fixer = 'unittest'
+    fixer = "unittest"
 
     def test_imported(self):
         b = "import unittest"
@@ -25,4 +26,3 @@ class Test_unittest(crosswindFixerTestCase):
     def test_not_base(self):
         s = "not_unittest.unittest.stuff()"
         self.unchanged(s)
-

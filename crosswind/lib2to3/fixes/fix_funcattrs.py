@@ -17,5 +17,4 @@ class FixFuncattrs(fixer_base.BaseFix):
 
     def transform(self, node, results):
         attr = results["attr"][0]
-        attr.replace(Name(("__%s__" % attr.value[5:]),
-                          prefix=attr.prefix))
+        attr.replace(Name(("__%s__" % attr.value[5:]), prefix=attr.prefix))

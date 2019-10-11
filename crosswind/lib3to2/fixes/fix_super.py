@@ -15,6 +15,7 @@ from crosswind.lib2to3.fixer_util import Node, Leaf, token, syms, Name, Comma, D
 
 dot_class = Node(syms.trailer, [Dot(), Name("__class__")])
 
+
 def get_firstparam(super_node):
     parent = super_node.parent
     while parent.type != syms.funcdef and parent.parent:
@@ -61,7 +62,7 @@ def get_class_name(super_node):
 
 def insert_args(name, class_name, rparen):
     parent = rparen.parent
-    
+
     if class_name:
         class_node = Node(syms.power, [Name(class_name)])
     else:
@@ -80,7 +81,10 @@ class FixSuper(fixer_base.BaseFix):
     def transform(self, node, results):
         param = get_firstparam(node)
         if param is None:
-            self.cannot_convert(node, "super() with no arguments must be called inside a function that has at least one parameter")
+            self.cannot_convert(
+                node,
+                "super() with no arguments must be called inside a function that has at least one parameter",
+            )
             return
         class_name = get_class_name(node)
         rparen = results["rparen"]

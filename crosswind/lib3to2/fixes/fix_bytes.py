@@ -9,11 +9,14 @@ from crosswind.lib3to2.fixer_util import Name, token, syms, parse_args, Call, Co
 
 _literal_re = re.compile(r"[bB][rR]?[\'\"]")
 
+
 class FixBytes(fixer_base.BaseFix):
 
     order = "pre"
-    
-    PATTERN = "STRING | power< 'bytes' [trailer< '(' (args=arglist | any*) ')' >] > | 'bytes'"
+
+    PATTERN = (
+        "STRING | power< 'bytes' [trailer< '(' (args=arglist | any*) ')' >] > | 'bytes'"
+    )
 
     def transform(self, node, results):
         name = results.get("name")
@@ -29,11 +32,18 @@ class FixBytes(fixer_base.BaseFix):
             args = arglist.children
             parsed = parse_args(args, ("source", "encoding", "errors"))
 
-            source, encoding, errors = (parsed[v] for v in ("source", "encoding", "errors"))
+            source, encoding, errors = (
+                parsed[v] for v in ("source", "encoding", "errors")
+            )
             encoding.prefix = ""
             str_call = Call(Name("str"), ([source.clone()]))
             if errors is None:
                 node.replace(Call(Name(str(str_call) + ".encode"), (encoding.clone(),)))
             else:
                 errors.prefix = " "
-                node.replace(Call(Name(str(str_call) + ".encode"), (encoding.clone(), Comma(), errors.clone())))
+                node.replace(
+                    Call(
+                        Name(str(str_call) + ".encode"),
+                        (encoding.clone(), Comma(), errors.clone()),
+                    )
+                )

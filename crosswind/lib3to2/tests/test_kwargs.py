@@ -1,19 +1,18 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_kwargs(crosswindFixerTestCase):
-    fixer = 'kwargs'
+    fixer = "kwargs"
 
     def test_basic_unchanged(self):
         s = """
         def spam(ham, eggs): funky()"""
         self.unchanged(s)
 
-
     def test_args_kwargs_unchanged(self):
         s = """
         def spam(ham, *args, **kwargs): funky()"""
         self.unchanged(s)
-
 
     def test_args_named_pos(self):
         b = """
@@ -25,7 +24,6 @@ class Test_kwargs(crosswindFixerTestCase):
             funky()"""
         self.check(b, a)
 
-
     def test_args_named_pos_catchall(self):
         b = """
         def spam(ham, *args, eggs, monkeys, **stuff): funky()"""
@@ -35,7 +33,6 @@ class Test_kwargs(crosswindFixerTestCase):
             eggs = stuff['eggs']; del stuff['eggs']
             funky()"""
         self.check(b, a)
-
 
     def test_bare_star_named(self):
         b = """
@@ -47,7 +44,6 @@ class Test_kwargs(crosswindFixerTestCase):
             eggs = _crosswindkwargs['eggs']; del _crosswindkwargs['eggs']
             funky()"""
         self.check(b, a)
-
 
     def test_bare_star_named_simple_defaults(self):
         b = """
@@ -62,7 +58,6 @@ class Test_kwargs(crosswindFixerTestCase):
             dinosaurs = _crosswindkwargs['dinosaurs']; del _crosswindkwargs['dinosaurs']
             funky()"""
         self.check(b, a)
-
 
     def test_bare_star_named_simple_defaults_catchall(self):
         b = """
@@ -92,7 +87,6 @@ class Test_kwargs(crosswindFixerTestCase):
             funky()"""
         self.check(b, a)
 
-
     def test_bare_star_named_complicated_defaults_catchall(self):
         b = """
         def spam(ham, *, dinosaurs, eggs=call_fn(lambda a: b), monkeys=[i.split() for i in something(args)], **stuff):
@@ -106,4 +100,3 @@ class Test_kwargs(crosswindFixerTestCase):
             dinosaurs = stuff['dinosaurs']; del stuff['dinosaurs']
             funky()"""
         self.check(b, a)
-

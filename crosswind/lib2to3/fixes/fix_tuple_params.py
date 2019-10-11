@@ -24,13 +24,14 @@ from ..pgen2 import token
 from .. import fixer_base
 from ..fixer_util import Assign, Name, Newline, Number, Subscript, syms
 
+
 def is_docstring(stmt):
-    return isinstance(stmt, pytree.Node) and \
-           stmt.children[0].type == token.STRING
+    return isinstance(stmt, pytree.Node) and stmt.children[0].type == token.STRING
+
 
 class FixTupleParams(fixer_base.BaseFix):
-    run_order = 4 #use a lower order since lambda is part of other
-                  #patterns
+    run_order = 4  # use a lower order since lambda is part of other
+    # patterns
     BM_compatible = True
 
     PATTERN = """
@@ -72,8 +73,7 @@ class FixTupleParams(fixer_base.BaseFix):
             if add_prefix:
                 n.prefix = " "
             tuple_arg.replace(n)
-            new_lines.append(pytree.Node(syms.simple_stmt,
-                                         [stmt, end.clone()]))
+            new_lines.append(pytree.Node(syms.simple_stmt, [stmt, end.clone()]))
 
         if args.type == syms.tfpdef:
             handle_tuple(args)
@@ -103,7 +103,7 @@ class FixTupleParams(fixer_base.BaseFix):
         for line in new_lines:
             line.parent = suite[0]
         suite[0].children[after:after] = new_lines
-        for i in range(after+1, after+len(new_lines)+1):
+        for i in range(after + 1, after + len(new_lines) + 1):
             suite[0].children[i].prefix = indent
         suite[0].changed()
 
@@ -128,13 +128,13 @@ class FixTupleParams(fixer_base.BaseFix):
         for n in body.post_order():
             if n.type == token.NAME and n.value in to_index:
                 subscripts = [c.clone() for c in to_index[n.value]]
-                new = pytree.Node(syms.power,
-                                  [new_param.clone()] + subscripts)
+                new = pytree.Node(syms.power, [new_param.clone()] + subscripts)
                 new.prefix = n.prefix
                 n.replace(new)
 
 
 ### Helper functions for transform_lambda()
+
 
 def simplify_args(node):
     if node.type in (syms.vfplist, token.NAME):
@@ -147,12 +147,14 @@ def simplify_args(node):
         return node
     raise RuntimeError("Received unexpected node %s" % node)
 
+
 def find_params(node):
     if node.type == syms.vfpdef:
         return find_params(node.children[1])
     elif node.type == token.NAME:
         return node.value
     return [find_params(c) for c in node.children if c.type != token.COMMA]
+
 
 def map_to_index(param_list, prefix=[], d=None):
     if d is None:
@@ -164,6 +166,7 @@ def map_to_index(param_list, prefix=[], d=None):
         else:
             d[obj] = prefix + trailer
     return d
+
 
 def tuple_name(param_list):
     l = []

@@ -11,6 +11,7 @@
 from .. import fixer_base
 from ..fixer_util import Name
 
+
 class FixItertools(fixer_base.BaseFix):
     BM_compatible = True
     it_funcs = "('imap'|'ifilter'|'izip'|'izip_longest'|'ifilterfalse')"
@@ -20,17 +21,18 @@ class FixItertools(fixer_base.BaseFix):
                      dot='.' func=%(it_funcs)s > trailer< '(' [any] ')' > >
               |
               power< func=%(it_funcs)s trailer< '(' [any] ')' > >
-              """ %(locals())
+              """ % (
+        locals()
+    )
 
     # Needs to be run after fix_(map|zip|filter)
     run_order = 6
 
     def transform(self, node, results):
         prefix = None
-        func = results['func'][0]
-        if ('it' in results and
-            func.value not in ('ifilterfalse', 'izip_longest')):
-            dot, it = (results['dot'], results['it'])
+        func = results["func"][0]
+        if "it" in results and func.value not in ("ifilterfalse", "izip_longest"):
+            dot, it = (results["dot"], results["it"])
             # Remove the 'itertools'
             prefix = it.prefix
             it.remove()

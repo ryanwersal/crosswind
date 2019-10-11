@@ -27,11 +27,13 @@ from ..pgen2 import token
 from .. import fixer_base
 from ..fixer_util import Assign, Attr, Name, is_tuple, is_list, syms
 
+
 def find_excepts(nodes):
     for i, n in enumerate(nodes):
         if n.type == syms.except_clause:
-            if n.children[0].value == 'except':
-                yield (n, nodes[i+2])
+            if n.children[0].value == "except":
+                yield (n, nodes[i + 2])
+
 
 class FixExcept(fixer_base.BaseFix):
     BM_compatible = True
@@ -66,7 +68,7 @@ class FixExcept(fixer_base.BaseFix):
                     # Insert "old_N = new_N" as the first statement in
                     #  the except body. This loop skips leading whitespace
                     #  and indents
-                    #TODO(cwinter) suite-cleanup
+                    # TODO(cwinter) suite-cleanup
                     suite_stmts = e_suite.children
                     for i, stmt in enumerate(suite_stmts):
                         if isinstance(stmt, pytree.Node):
@@ -75,11 +77,11 @@ class FixExcept(fixer_base.BaseFix):
                     # The assignment is different if old_N is a tuple or list
                     # In that case, the assignment is old_N = new_N.args
                     if is_tuple(N) or is_list(N):
-                        assign = Assign(target, Attr(new_N, Name('args')))
+                        assign = Assign(target, Attr(new_N, Name("args")))
                     else:
                         assign = Assign(target, new_N)
 
-                    #TODO(cwinter) stopgap until children becomes a smart list
+                    # TODO(cwinter) stopgap until children becomes a smart list
                     for child in reversed(suite_stmts[:i]):
                         e_suite.insert_child(0, child)
                     e_suite.insert_child(i, assign)
@@ -88,6 +90,6 @@ class FixExcept(fixer_base.BaseFix):
                     # not so much.
                     N.prefix = " "
 
-        #TODO(cwinter) fix this when children becomes a smart list
+        # TODO(cwinter) fix this when children becomes a smart list
         children = [c.clone() for c in node.children[:3]] + try_cleanup + tail
         return pytree.Node(node.type, children)

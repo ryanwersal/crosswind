@@ -47,8 +47,7 @@ class FixerTestCase(unittest.TestCase):
         self.fixer_log = []
         self.filename = "<string>"
 
-        for fixer in chain(self.refactor.pre_order,
-                           self.refactor.post_order):
+        for fixer in chain(self.refactor.pre_order, self.refactor.post_order):
             fixer.log = self.fixer_log
 
     def _check(self, before, after):
@@ -90,8 +89,10 @@ class FixerTestCase(unittest.TestCase):
         if pre and pre[-1].__class__.__module__.endswith(n) and not post:
             # We're the last in pre and post is empty
             return
-        self.fail("Fixer run order (%s) is incorrect; %s should be last."\
-               %(", ".join([x.__class__.__module__ for x in (pre+post)]), n))
+        self.fail(
+            "Fixer run order (%s) is incorrect; %s should be last."
+            % (", ".join([x.__class__.__module__ for x in (pre + post)]), n)
+        )
 
 
 class crosswindFixerTestCase(FixerTestCase):

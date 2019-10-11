@@ -1,8 +1,9 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_metaclass(crosswindFixerTestCase):
 
-    fixer = 'metaclass'
+    fixer = "metaclass"
 
     def test_unchanged(self):
         self.unchanged("class X(): pass")

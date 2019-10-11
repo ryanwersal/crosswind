@@ -1,5 +1,6 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_imports2(crosswindFixerTestCase):
     fixer = "imports2"
 
@@ -154,10 +155,8 @@ class Test_imports2(crosswindFixerTestCase):
         a = "from urllib2 import urlopen"
         self.check(b, a)
 
-        b = "from urllib.request import urlopen\n"\
-            "from urllib.parse import urlencode"
-        a = "from urllib2 import urlopen\n"\
-            "from urllib import urlencode"
+        b = "from urllib.request import urlopen\n" "from urllib.parse import urlencode"
+        a = "from urllib2 import urlopen\n" "from urllib import urlencode"
         self.check(b, a)
 
         b = "from tkinter.simpledialog import SimpleDialog"
@@ -231,6 +230,7 @@ class Test_imports2(crosswindFixerTestCase):
             self.check(b, a, ignore_warnings=True)
 
     if False:
+
         def test_modulefrom(self):
 
             b = """

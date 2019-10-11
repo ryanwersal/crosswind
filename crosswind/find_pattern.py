@@ -53,10 +53,15 @@ from crosswind.lib2to3.pygram import python_symbols, python_grammar
 
 driver = driver.Driver(python_grammar, convert=pytree.convert)
 
+
 def main(args):
     parser = optparse.OptionParser(usage="find_pattern.py [options] [string]")
-    parser.add_option("-f", "--file", action="store",
-                      help="Read a code snippet from the specified file")
+    parser.add_option(
+        "-f",
+        "--file",
+        action="store",
+        help="Read a code snippet from the specified file",
+    )
 
     # Parse command line arguments
     options, args = parser.parse_args(args)
@@ -71,6 +76,7 @@ def main(args):
     examine_tree(tree)
     return 0
 
+
 def examine_tree(tree):
     for node in tree.post_order():
         if isinstance(node, pytree.Leaf):
@@ -81,17 +87,24 @@ def examine_tree(tree):
             print(find_pattern(node))
             return
 
+
 def find_pattern(node):
     if isinstance(node, pytree.Leaf):
         return repr(node.value)
 
-    return find_symbol(node.type) + \
-           "< " + " ".join(find_pattern(n) for n in node.children) + " >"
+    return (
+        find_symbol(node.type)
+        + "< "
+        + " ".join(find_pattern(n) for n in node.children)
+        + " >"
+    )
+
 
 def find_symbol(sym):
     for n, v in list(python_symbols.__dict__.items()):
         if v == sym:
             return n
+
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))

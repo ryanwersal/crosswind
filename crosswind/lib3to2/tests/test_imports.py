@@ -1,5 +1,6 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_imports(crosswindFixerTestCase):
     fixer = "imports"
 
@@ -196,13 +197,13 @@ class Test_imports(crosswindFixerTestCase):
         b = "from builtins import open"
         a = "from __builtin__ import open"
         self.check(b, a)
-        
+
         b = """from socketserver import (ThreadingUDPServer, DatagramRequestHandler,
                           ThreadingTCPServer, StreamRequestHandler)"""
         a = """from SocketServer import (ThreadingUDPServer, DatagramRequestHandler,
                           ThreadingTCPServer, StreamRequestHandler)"""
         self.check(b, a)
-        
+
     def test_dotted_names_quad(self):
 
         b = "import    html.parser as spam,  math,     tkinter.__init__,   dbm.gnu #comment!"

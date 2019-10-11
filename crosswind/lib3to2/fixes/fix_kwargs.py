@@ -6,12 +6,22 @@ This fixer is rather sensitive to incorrect py3k syntax.
 # Note: "relevant" parameters are parameters following the first STAR in the list.
 
 from crosswind.lib2to3 import fixer_base
-from crosswind.lib3to2.fixer_util import token, indentation, suitify, String, Newline, Comma, DoubleStar, Name
+from crosswind.lib3to2.fixer_util import (
+    token,
+    indentation,
+    suitify,
+    String,
+    Newline,
+    Comma,
+    DoubleStar,
+    Name,
+)
 
 _assign_template = "%(name)s = %(kwargs)s['%(name)s']; del %(kwargs)s['%(name)s']"
 _if_template = "if '%(name)s' in %(kwargs)s: %(assign)s"
 _else_template = "else: %(name)s = %(default)s"
 _kwargs_default_name = "_crosswindkwargs"
+
 
 def gen_params(raw_params):
     """
@@ -19,7 +29,7 @@ def gen_params(raw_params):
     If no default is given, then it is default_value is None (not Leaf(token.NAME, 'None'))
     """
     assert raw_params[0].type == token.STAR and len(raw_params) > 2
-    curr_idx = 2 # the first place a keyword-only parameter name can be is index 2
+    curr_idx = 2  # the first place a keyword-only parameter name can be is index 2
     max_idx = len(raw_params)
     while curr_idx < max_idx:
         curr_item = raw_params[curr_idx]
@@ -38,6 +48,7 @@ def gen_params(raw_params):
             default_value = None
         yield (name, default_value)
         curr_idx += 1
+
 
 def remove_params(raw_params, kwargs_default=_kwargs_default_name):
     """
@@ -60,7 +71,8 @@ def remove_params(raw_params, kwargs_default=_kwargs_default_name):
             return False
     else:
         return True
-    
+
+
 def needs_fixing(raw_params, kwargs_default=_kwargs_default_name):
     """
     Returns string with the name of the kwargs dict if the params after the first star need fixing
@@ -78,17 +90,18 @@ def needs_fixing(raw_params, kwargs_default=_kwargs_default_name):
             needs_fix = True
         elif t.type == token.NAME and found_kwargs:
             # Return 'foobar' of **foobar, if needed.
-            return t.value if needs_fix else ''
+            return t.value if needs_fix else ""
         elif t.type == token.DOUBLESTAR:
             # Found either '*' from **foobar.
             found_kwargs = True
     else:
         # Never found **foobar.  Return a synthetic name, if needed.
-        return kwargs_default if needs_fix else ''
+        return kwargs_default if needs_fix else ""
+
 
 class FixKwargs(fixer_base.BaseFix):
 
-    run_order = 7 # Run after function annotations are removed
+    run_order = 7  # Run after function annotations are removed
 
     PATTERN = "funcdef< 'def' NAME parameters< '(' arglist=typedargslist< params=any* > ')' > ':' suite=any >"
 
@@ -126,12 +139,36 @@ class FixKwargs(fixer_base.BaseFix):
         for name, default_value in gen_params(params_rawlist):
             if default_value is None:
                 suite.insert_child(2, Newline())
-                suite.insert_child(2, String(_assign_template %{'name':name, 'kwargs':new_kwargs}, prefix=ident))
+                suite.insert_child(
+                    2,
+                    String(
+                        _assign_template % {"name": name, "kwargs": new_kwargs},
+                        prefix=ident,
+                    ),
+                )
             else:
                 suite.insert_child(2, Newline())
-                suite.insert_child(2, String(_else_template %{'name':name, 'default':default_value}, prefix=ident))
+                suite.insert_child(
+                    2,
+                    String(
+                        _else_template % {"name": name, "default": default_value},
+                        prefix=ident,
+                    ),
+                )
                 suite.insert_child(2, Newline())
-                suite.insert_child(2, String(_if_template %{'assign':_assign_template %{'name':name, 'kwargs':new_kwargs}, 'name':name, 'kwargs':new_kwargs}, prefix=ident))
+                suite.insert_child(
+                    2,
+                    String(
+                        _if_template
+                        % {
+                            "assign": _assign_template
+                            % {"name": name, "kwargs": new_kwargs},
+                            "name": name,
+                            "kwargs": new_kwargs,
+                        },
+                        prefix=ident,
+                    ),
+                )
         first_stmt.prefix = ident
         suite.children[2].prefix = ""
 
@@ -139,9 +176,8 @@ class FixKwargs(fixer_base.BaseFix):
 
         must_add_kwargs = remove_params(params_rawlist)
         if must_add_kwargs:
-            arglist = results['arglist']
+            arglist = results["arglist"]
             if len(arglist.children) > 0 and arglist.children[-1].type != token.COMMA:
                 arglist.append_child(Comma())
             arglist.append_child(DoubleStar(prefix=" "))
             arglist.append_child(Name(new_kwargs))
-            

@@ -9,6 +9,7 @@ from crosswind.lib2to3.fixer_util import Call
 from crosswind.lib2to3.pytree import Node, Leaf
 from crosswind.lib2to3.pgen2 import token
 
+
 class FixReduce(fixer_base.BaseFix):
 
     PATTERN = """
@@ -43,8 +44,7 @@ class FixReduce(fixer_base.BaseFix):
         elif args:
             args = args.clone()
             prefix = node.prefix
-            return Node(syms.power, [Leaf(token.NAME, "reduce"), args],
-                                                                 prefix=prefix)
+            return Node(syms.power, [Leaf(token.NAME, "reduce"), args], prefix=prefix)
         elif in_list:
             next = in_list.next_sibling
             if next is not None:

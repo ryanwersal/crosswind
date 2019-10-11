@@ -8,6 +8,7 @@ from __future__ import foo is replaced with an empty line.
 from .. import fixer_base
 from ..fixer_util import BlankLine
 
+
 class FixFuture(fixer_base.BaseFix):
     BM_compatible = True
 

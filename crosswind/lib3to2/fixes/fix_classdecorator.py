@@ -6,17 +6,23 @@ from crosswind.lib2to3 import fixer_base
 from crosswind.lib2to3.fixer_util import Call, Assign, String, Newline
 from crosswind.lib3to2.fixer_util import Leaf, Node, token, syms, indentation
 
+
 class FixClassdecorator(fixer_base.BaseFix):
 
     PATTERN = """
               decorated < one_dec=decorator < any* > cls=classdef < 'class' name=any any* > > |
               decorated < decorators < decs=decorator+ > cls=classdef < 'class' name=any any* > >
               """
+
     def transform(self, node, results):
 
         singleton = results.get("one_dec")
         classdef = results["cls"]
-        decs = [results["one_dec"]] if results.get("one_dec") is not None else results["decs"]
+        decs = (
+            [results["one_dec"]]
+            if results.get("one_dec") is not None
+            else results["decs"]
+        )
         dec_strings = [str(dec).strip()[1:] for dec in decs]
         assign = ""
         for dec in dec_strings:
@@ -40,5 +46,3 @@ class FixClassdecorator(fixer_base.BaseFix):
         node.insert_child(pos, Leaf(token.INDENT, i))
         node.insert_child(pos, assign_statement)
         node.insert_child(pos, Leaf(token.INDENT, i))
-
-

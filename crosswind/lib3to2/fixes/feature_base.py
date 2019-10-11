@@ -7,9 +7,10 @@ features.add(Feature("py3k_feature", "power< 'py3k' any* >", "2.7"))
 PATTERN = features.PATTERN
 """
 
-pattern_unformatted = "%s=%s" # name=pattern, for dict lookups
+pattern_unformatted = "%s=%s"  # name=pattern, for dict lookups
 message_unformatted = """
 %s is only supported in Python %s and above."""
+
 
 class Feature(object):
     """
@@ -17,6 +18,7 @@ class Feature(object):
     required to use the feature (or 3.x if there is no backwards-compatible
     version of 2.x)
     """
+
     def __init__(self, name, PATTERN, version):
         self.name = name
         self._pattern = PATTERN
@@ -28,11 +30,13 @@ class Feature(object):
         """
         return message_unformatted % (self.name, self.version)
 
+
 class Features(set):
     """
     A set of features that generates a pattern for the features it contains.
     This set will act like a mapping in that we map names to patterns.
     """
+
     mapping = {}
 
     def update_mapping(self):
@@ -40,7 +44,7 @@ class Features(set):
         Called every time we care about the mapping of names to features.
         """
         self.mapping = dict([(f.name, f) for f in iter(self)])
-    
+
     @property
     def PATTERN(self):
         """
@@ -48,7 +52,9 @@ class Features(set):
         for using the lib2to3 patcomp.
         """
         self.update_mapping()
-        return " |\n".join([pattern_unformatted % (f.name, f._pattern) for f in iter(self)])
+        return " |\n".join(
+            [pattern_unformatted % (f.name, f._pattern) for f in iter(self)]
+        )
 
     def __getitem__(self, key):
         """

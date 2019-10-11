@@ -5,6 +5,7 @@ Fixer for input(s) -> raw_input(s).
 from crosswind.lib2to3 import fixer_base
 from crosswind.lib2to3.fixer_util import Name
 
+
 class FixInput(fixer_base.BaseFix):
 
     PATTERN = """

@@ -31,12 +31,12 @@ class FixZip(fixer_base.ConditionalFix):
         if in_special_context(node):
             return None
 
-        args = results['args'].clone()
+        args = results["args"].clone()
         args.prefix = ""
 
         trailers = []
-        if 'trailers' in results:
-            trailers = [n.clone() for n in results['trailers']]
+        if "trailers" in results:
+            trailers = [n.clone() for n in results["trailers"]]
             for n in trailers:
                 n.prefix = ""
 

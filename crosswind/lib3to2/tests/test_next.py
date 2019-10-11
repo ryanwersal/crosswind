@@ -1,5 +1,6 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_next(crosswindFixerTestCase):
     fixer = "next"
 
@@ -200,4 +201,3 @@ class Test_next(crosswindFixerTestCase):
         b = """f(g().__next__ + 5)"""
         a = """f(g().next + 5)"""
         self.check(b, a)
-

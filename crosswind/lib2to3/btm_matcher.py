@@ -14,14 +14,18 @@ from collections import defaultdict
 from . import pytree
 from .btm_utils import reduce_tree
 
+
 class BMNode(object):
     """Class for a node of the Aho-Corasick automaton used in matching"""
+
     count = itertools.count()
+
     def __init__(self):
         self.transition_table = {}
         self.fixers = []
         self.id = next(BMNode.count)
-        self.content = ''
+        self.content = ""
+
 
 class BottomMatcher(object):
     """The main matcher class. After instantiating the patterns should
@@ -48,30 +52,30 @@ class BottomMatcher(object):
 
     def add(self, pattern, start):
         "Recursively adds a linear pattern to the AC automaton"
-        #print("adding pattern", pattern, "to", start)
+        # print("adding pattern", pattern, "to", start)
         if not pattern:
-            #print("empty pattern")
+            # print("empty pattern")
             return [start]
         if isinstance(pattern[0], tuple):
-            #alternatives
-            #print("alternatives")
+            # alternatives
+            # print("alternatives")
             match_nodes = []
             for alternative in pattern[0]:
-                #add all alternatives, and add the rest of the pattern
-                #to each end node
+                # add all alternatives, and add the rest of the pattern
+                # to each end node
                 end_nodes = self.add(alternative, start=start)
                 for end in end_nodes:
                     match_nodes.extend(self.add(pattern[1:], end))
             return match_nodes
         else:
-            #single token
-            #not last
+            # single token
+            # not last
             if pattern[0] not in start.transition_table:
-                #transition did not exist, create new
+                # transition did not exist, create new
                 next_node = BMNode()
                 start.transition_table[pattern[0]] = next_node
             else:
-                #transition exists already, follow
+                # transition exists already, follow
                 next_node = start.transition_table[pattern[0]]
 
             if pattern[1:]:
@@ -108,27 +112,29 @@ class BottomMatcher(object):
                         current_ast_node.was_checked = False
                         break
                 if current_ast_node.type == 1:
-                    #name
+                    # name
                     node_token = current_ast_node.value
                 else:
                     node_token = current_ast_node.type
 
                 if node_token in current_ac_node.transition_table:
-                    #token matches
+                    # token matches
                     current_ac_node = current_ac_node.transition_table[node_token]
                     for fixer in current_ac_node.fixers:
                         results[fixer].append(current_ast_node)
                 else:
-                    #matching failed, reset automaton
+                    # matching failed, reset automaton
                     current_ac_node = self.root
-                    if (current_ast_node.parent is not None
-                        and current_ast_node.parent.was_checked):
-                        #the rest of the tree upwards has been checked, next leaf
+                    if (
+                        current_ast_node.parent is not None
+                        and current_ast_node.parent.was_checked
+                    ):
+                        # the rest of the tree upwards has been checked, next leaf
                         break
 
-                    #recheck the rejected node once from the root
+                    # recheck the rejected node once from the root
                     if node_token in current_ac_node.transition_table:
-                        #token matches
+                        # token matches
                         current_ac_node = current_ac_node.transition_table[node_token]
                         for fixer in current_ac_node.fixers:
                             results[fixer].append(current_ast_node)
@@ -139,25 +145,34 @@ class BottomMatcher(object):
     def print_ac(self):
         "Prints a graphviz diagram of the BM automaton(for debugging)"
         print("digraph g{")
+
         def print_node(node):
             for subnode_key in node.transition_table.keys():
                 subnode = node.transition_table[subnode_key]
-                print("%d -> %d [label=%s] //%s" %
-                      (node.id, subnode.id, type_repr(subnode_key), str(subnode.fixers)))
+                print(
+                    "%d -> %d [label=%s] //%s"
+                    % (node.id, subnode.id, type_repr(subnode_key), str(subnode.fixers))
+                )
                 if subnode_key == 1:
                     print(subnode.content)
                 print_node(subnode)
+
         print_node(self.root)
         print("}")
 
+
 # taken from pytree.py for debugging; only used by print_ac
 _type_reprs = {}
+
+
 def type_repr(type_num):
     global _type_reprs
     if not _type_reprs:
         from .pygram import python_symbols
+
         # printing tokens is possible but not as useful
         # from .pgen2 import token // token.__dict__.items():
         for name, val in python_symbols.__dict__.items():
-            if type(val) == int: _type_reprs[val] = name
+            if type(val) == int:
+                _type_reprs[val] = name
     return _type_reprs.setdefault(type_num, type_num)

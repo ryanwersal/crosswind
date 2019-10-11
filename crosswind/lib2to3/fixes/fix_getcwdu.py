@@ -7,6 +7,7 @@ Fixer that changes os.getcwdu() to os.getcwd().
 from .. import fixer_base
 from ..fixer_util import Name
 
+
 class FixGetcwdu(fixer_base.BaseFix):
     BM_compatible = True
 

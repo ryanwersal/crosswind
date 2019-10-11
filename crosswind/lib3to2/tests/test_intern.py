@@ -1,9 +1,10 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_intern(crosswindFixerTestCase):
     fixer = "intern"
 
-    #XXX: Does not remove unused "import sys" lines.
+    # XXX: Does not remove unused "import sys" lines.
     def test_prefix_preservation(self):
         b = """import sys\nx =   sys.intern(  a  )"""
         a = """import sys\nx =   intern(  a  )"""

@@ -1,5 +1,6 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_itertoools(crosswindFixerTestCase):
     fixer = "itertools"
 
@@ -31,8 +32,8 @@ class Test_itertoools(crosswindFixerTestCase):
     def test_filterfalse(self):
         b = """from itertools import function, filterfalse, other_function"""
         a = """from itertools import function, ifilterfalse, other_function"""
-        self.check( b, a)
+        self.check(b, a)
 
         b = """filterfalse(a, b)"""
         a = """ifilterfalse(a, b)"""
-        self.check(b, a )
+        self.check(b, a)

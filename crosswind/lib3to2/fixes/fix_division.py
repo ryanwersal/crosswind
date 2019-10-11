@@ -5,17 +5,21 @@ Fixer for division: from __future__ import division if needed
 from crosswind.lib2to3 import fixer_base
 from crosswind.lib3to2.fixer_util import token, future_import
 
+
 def match_division(node):
     """
     __future__.division redefines the meaning of a single slash for division,
     so we match that and only that.
     """
     slash = token.SLASH
-    return node.type == slash and not node.next_sibling.type == slash and \
-                                  not node.prev_sibling.type == slash
+    return (
+        node.type == slash
+        and not node.next_sibling.type == slash
+        and not node.prev_sibling.type == slash
+    )
+
 
 class FixDivision(fixer_base.BaseFix):
-
     def match(self, node):
         """
         Since the tree needs to be fixed once and only once if and only if it

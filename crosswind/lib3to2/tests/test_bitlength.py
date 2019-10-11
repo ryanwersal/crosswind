@@ -1,7 +1,8 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_bitlength(crosswindFixerTestCase):
-    fixer = 'bitlength'
+    fixer = "bitlength"
 
     def test_fixed(self):
         b = """a = something.bit_length()"""

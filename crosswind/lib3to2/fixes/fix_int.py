@@ -10,11 +10,12 @@ from crosswind.lib2to3 import fixer_base
 from crosswind.lib2to3.fixer_util import Name, is_probably_builtin, Number
 from crosswind.lib2to3.pgen2 import token
 
-baseMAPPING = {'b':2, 'o':8, 'x':16}
+baseMAPPING = {"b": 2, "o": 8, "x": 16}
+
 
 class FixInt(fixer_base.BaseFix):
 
-    explicit = True # In most cases, 3.x ints will work just like 2.x ints.
+    explicit = True  # In most cases, 3.x ints will work just like 2.x ints.
 
     PATTERN = "'int' | NUMBER"
 
@@ -23,7 +24,7 @@ class FixInt(fixer_base.BaseFix):
     def base(self, literal):
         """Returns the base of a valid py3k numeric literal."""
         literal = literal.strip()
-        if not literal.startswith("0") or re.match(r"0+$",literal):
+        if not literal.startswith("0") or re.match(r"0+$", literal):
             return 10
         elif literal[1] not in "box":
             return 0
@@ -32,11 +33,12 @@ class FixInt(fixer_base.BaseFix):
     def unmatch(self, node):
         """Don't match complex numbers, floats, or longs"""
         val = node.value
-        #For whatever reason, some ints are being matched after we fix them.
+        # For whatever reason, some ints are being matched after we fix them.
         if val.endswith("L"):
             return "L"
         for bad in "jJ+-.":
-            if bad in val: return bad
+            if bad in val:
+                return bad
 
     def match(self, node):
         return super(FixInt, self).match(node) and not self.unmatch(node)

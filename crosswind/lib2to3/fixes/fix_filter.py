@@ -60,29 +60,28 @@ class FixFilter(fixer_base.ConditionalFix):
             return
 
         trailers = []
-        if 'extra_trailers' in results:
-            for t in results['extra_trailers']:
+        if "extra_trailers" in results:
+            for t in results["extra_trailers"]:
                 trailers.append(t.clone())
 
         if "filter_lambda" in results:
-            new = ListComp(results.get("fp").clone(),
-                           results.get("fp").clone(),
-                           results.get("it").clone(),
-                           results.get("xp").clone())
+            new = ListComp(
+                results.get("fp").clone(),
+                results.get("fp").clone(),
+                results.get("it").clone(),
+                results.get("xp").clone(),
+            )
             new = Node(syms.power, [new] + trailers, prefix="")
 
         elif "none" in results:
-            new = ListComp(Name("_f"),
-                           Name("_f"),
-                           results["seq"].clone(),
-                           Name("_f"))
+            new = ListComp(Name("_f"), Name("_f"), results["seq"].clone(), Name("_f"))
             new = Node(syms.power, [new] + trailers, prefix="")
 
         else:
             if in_special_context(node):
                 return None
 
-            args = results['args'].clone()
+            args = results["args"].clone()
             new = Node(syms.power, [Name("filter"), args], prefix="")
             new = Node(syms.power, [Name("list"), ArgList([new])] + trailers)
             new.prefix = ""

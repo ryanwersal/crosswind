@@ -8,6 +8,7 @@ collections.UserString -> UserString.UserString
 from crosswind.lib2to3 import fixer_base
 from crosswind.lib2to3.fixer_util import Name, syms, touch_import
 
+
 class FixCollections(fixer_base.BaseFix):
 
     explicit = True

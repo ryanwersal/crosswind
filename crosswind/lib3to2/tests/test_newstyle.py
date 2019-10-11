@@ -1,5 +1,6 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_newstyle(crosswindFixerTestCase):
     fixer = "newstyle"
 
@@ -18,4 +19,3 @@ class Test_newstyle(crosswindFixerTestCase):
         class Foo(object):
             do_stuff()"""
         self.check(b, a)
-

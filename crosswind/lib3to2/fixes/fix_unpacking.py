@@ -6,7 +6,22 @@ for (a,)* *b (,c)* [,] in d: ...
 
 from crosswind.lib2to3 import fixer_base
 from itertools import count
-from crosswind.lib3to2.fixer_util import Assign, Comma, Call, Newline, Name, Number, indentation, suitify, commatize, token, syms, Node, Leaf
+from crosswind.lib3to2.fixer_util import (
+    Assign,
+    Comma,
+    Call,
+    Newline,
+    Name,
+    Number,
+    indentation,
+    suitify,
+    commatize,
+    token,
+    syms,
+    Node,
+    Leaf,
+)
+
 
 def assignment_source(num_pre, num_post, LISTNAME, ITERNAME):
     """
@@ -20,17 +35,76 @@ def assignment_source(num_pre, num_post, LISTNAME, ITERNAME):
     # This code builds the assignment source from crosswind.lib2to3 tree primitives.
     # It's not very readable, but it seems like the most correct way to do it.
     if num_pre > 0:
-        pre_part = Node(syms.power, [Name(LISTNAME), Node(syms.trailer, [Leaf(token.LSQB, "["), Node(syms.subscript, [Leaf(token.COLON, ":"), Number(pre)]), Leaf(token.RSQB, "]")])])
+        pre_part = Node(
+            syms.power,
+            [
+                Name(LISTNAME),
+                Node(
+                    syms.trailer,
+                    [
+                        Leaf(token.LSQB, "["),
+                        Node(syms.subscript, [Leaf(token.COLON, ":"), Number(pre)]),
+                        Leaf(token.RSQB, "]"),
+                    ],
+                ),
+            ],
+        )
         children.append(pre_part)
         children.append(Leaf(token.PLUS, "+", prefix=" "))
-    main_part = Node(syms.power, [Leaf(token.LSQB, "[", prefix=" "), Name(LISTNAME), Node(syms.trailer, [Leaf(token.LSQB, "["), Node(syms.subscript, [Number(pre) if num_pre > 0 else Leaf(1, ""), Leaf(token.COLON, ":"), Node(syms.factor, [Leaf(token.MINUS, "-"), Number(post)]) if num_post > 0 else Leaf(1, "")]), Leaf(token.RSQB, "]"), Leaf(token.RSQB, "]")])])
+    main_part = Node(
+        syms.power,
+        [
+            Leaf(token.LSQB, "[", prefix=" "),
+            Name(LISTNAME),
+            Node(
+                syms.trailer,
+                [
+                    Leaf(token.LSQB, "["),
+                    Node(
+                        syms.subscript,
+                        [
+                            Number(pre) if num_pre > 0 else Leaf(1, ""),
+                            Leaf(token.COLON, ":"),
+                            Node(syms.factor, [Leaf(token.MINUS, "-"), Number(post)])
+                            if num_post > 0
+                            else Leaf(1, ""),
+                        ],
+                    ),
+                    Leaf(token.RSQB, "]"),
+                    Leaf(token.RSQB, "]"),
+                ],
+            ),
+        ],
+    )
     children.append(main_part)
     if num_post > 0:
         children.append(Leaf(token.PLUS, "+", prefix=" "))
-        post_part = Node(syms.power, [Name(LISTNAME, prefix=" "), Node(syms.trailer, [Leaf(token.LSQB, "["), Node(syms.subscript, [Node(syms.factor, [Leaf(token.MINUS, "-"), Number(post)]), Leaf(token.COLON, ":")]), Leaf(token.RSQB, "]")])])
+        post_part = Node(
+            syms.power,
+            [
+                Name(LISTNAME, prefix=" "),
+                Node(
+                    syms.trailer,
+                    [
+                        Leaf(token.LSQB, "["),
+                        Node(
+                            syms.subscript,
+                            [
+                                Node(
+                                    syms.factor, [Leaf(token.MINUS, "-"), Number(post)]
+                                ),
+                                Leaf(token.COLON, ":"),
+                            ],
+                        ),
+                        Leaf(token.RSQB, "]"),
+                    ],
+                ),
+            ],
+        )
         children.append(post_part)
     source = Node(syms.arith_expr, children)
     return source
+
 
 class FixUnpacking(fixer_base.BaseFix):
 
@@ -45,7 +119,9 @@ class FixUnpacking(fixer_base.BaseFix):
         post=(',' any)* [','] > 'in' it=any ':' suite=any>"""
 
     def fix_explicit_context(self, node, results):
-        pre, name, post, source = (results.get(n) for n in ("pre", "name", "post", "source"))
+        pre, name, post, source = (
+            results.get(n) for n in ("pre", "name", "post", "source")
+        )
         pre = [n.clone() for n in pre if n.type == token.NAME]
         name.prefix = " "
         post = [n.clone() for n in post if n.type == token.NAME]
@@ -55,9 +131,11 @@ class FixUnpacking(fixer_base.BaseFix):
         target.append(Comma())
         source.prefix = ""
         setup_line = Assign(Name(self.LISTNAME), Call(Name("list"), [source.clone()]))
-        power_line = Assign(target, assignment_source(len(pre), len(post), self.LISTNAME, self.ITERNAME))
+        power_line = Assign(
+            target, assignment_source(len(pre), len(post), self.LISTNAME, self.ITERNAME)
+        )
         return setup_line, power_line
-        
+
     def fix_implicit_context(self, node, results):
         """
         Only example of the implicit context is
@@ -73,8 +151,12 @@ class FixUnpacking(fixer_base.BaseFix):
         target.append(Comma())
         source = it.clone()
         source.prefix = ""
-        setup_line = Assign(Name(self.LISTNAME), Call(Name("list"), [Name(self.ITERNAME)]))
-        power_line = Assign(target, assignment_source(len(pre), len(post), self.LISTNAME, self.ITERNAME))
+        setup_line = Assign(
+            Name(self.LISTNAME), Call(Name("list"), [Name(self.ITERNAME)])
+        )
+        power_line = Assign(
+            target, assignment_source(len(pre), len(post), self.LISTNAME, self.ITERNAME)
+        )
         return setup_line, power_line
 
     def transform(self, node, results):

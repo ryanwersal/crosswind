@@ -13,10 +13,11 @@ from crosswind.lib2to3.fixer_util import Name
 _mapping = {"chr": "unichr", "str": "unicode"}
 _literal_re = re.compile(r"[rR]?[\'\"]")
 
+
 class FixStr(fixer_base.BaseFix):
 
     order = "pre"
-    run_order = 4 # Run this before bytes objects are converted to str objects
+    run_order = 4  # Run this before bytes objects are converted to str objects
 
     PATTERN = "STRING | 'str' | 'chr'"
 

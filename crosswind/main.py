@@ -13,13 +13,14 @@ import optparse
 from crosswind.lib2to3 import refactor
 from crosswind.lib2to3 import pygram
 
+
 def diff_texts(a, b, filename):
     """Return a unified diff of two strings."""
     a = a.splitlines()
     b = b.splitlines()
-    return difflib.unified_diff(a, b, filename, filename,
-                                "(original)", "(refactored)",
-                                lineterm="")
+    return difflib.unified_diff(
+        a, b, filename, filename, "(original)", "(refactored)", lineterm=""
+    )
 
 
 class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
@@ -38,8 +39,7 @@ class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
         try:
             tree = self.driver.parse_string(data)
         except Exception as err:
-            self.log_error("Can't parse %s: %s: %s",
-                           name, err.__class__.__name__, err)
+            self.log_error("Can't parse %s: %s: %s", name, err.__class__.__name__, err)
             return
         self.log_debug("Refactoring %s", name)
         self.refactor_tree(tree, name)
@@ -75,7 +75,8 @@ class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
             self.log_message("Refactored %s", filename)
             if self.show_diffs:
                 for line in diff_texts(old, new, filename):
-                    print(line.encode('utf-8', 'ignore'))
+                    print(line.encode("utf-8", "ignore"))
+
 
 def warn(msg):
     print("WARNING: %s" % (msg,), file=sys.stderr)
@@ -93,24 +94,53 @@ def main(fixer_pkg, args=None):
     """
     # Set up option parser
     parser = optparse.OptionParser(usage="crosswind [options] file|dir ...")
-    parser.add_option("-d", "--doctests_only", action="store_true",
-                      help="Fix up doctests only")
-    parser.add_option("-f", "--fix", action="append", default=[],
-                      help="Each FIX specifies a transformation; default: all")
-    parser.add_option("-j", "--processes", action="store", default=1,
-                      type="int", help="Run crosswind concurrently")
-    parser.add_option("-x", "--nofix", action="append", default=[],
-                      help="Prevent a fixer from being run.")
-    parser.add_option("-l", "--list-fixes", action="store_true",
-                      help="List available transformations (fixes/fix_*.py)")
-    parser.add_option("-v", "--verbose", action="store_true",
-                      help="More verbose logging")
-    parser.add_option("-w", "--write", action="store_true",
-                      help="Write back modified files")
-    parser.add_option("-n", "--nobackups", action="store_true", default=False,
-                      help="Don't write backups for modified files.")
-    parser.add_option("--no-diffs", action="store_true",
-                      help="Don't show diffs of the refactoring")
+    parser.add_option(
+        "-d", "--doctests_only", action="store_true", help="Fix up doctests only"
+    )
+    parser.add_option(
+        "-f",
+        "--fix",
+        action="append",
+        default=[],
+        help="Each FIX specifies a transformation; default: all",
+    )
+    parser.add_option(
+        "-j",
+        "--processes",
+        action="store",
+        default=1,
+        type="int",
+        help="Run crosswind concurrently",
+    )
+    parser.add_option(
+        "-x",
+        "--nofix",
+        action="append",
+        default=[],
+        help="Prevent a fixer from being run.",
+    )
+    parser.add_option(
+        "-l",
+        "--list-fixes",
+        action="store_true",
+        help="List available transformations (fixes/fix_*.py)",
+    )
+    parser.add_option(
+        "-v", "--verbose", action="store_true", help="More verbose logging"
+    )
+    parser.add_option(
+        "-w", "--write", action="store_true", help="Write back modified files"
+    )
+    parser.add_option(
+        "-n",
+        "--nobackups",
+        action="store_true",
+        default=False,
+        help="Don't write backups for modified files.",
+    )
+    parser.add_option(
+        "--no-diffs", action="store_true", help="Don't show diffs of the refactoring"
+    )
 
     # Parse command line arguments
     refactor_stdin = False
@@ -137,7 +167,7 @@ def main(fixer_pkg, args=None):
 
     # Set up logging handler
     level = logging.DEBUG if options.verbose else logging.INFO
-    logging.basicConfig(format='%(name)s: %(message)s', level=level)
+    logging.basicConfig(format="%(name)s: %(message)s", level=level)
 
     # Initialize the refactoring tool
     avail_fixes = set(refactor.get_fixers_from_package(fixer_pkg))
@@ -154,8 +184,13 @@ def main(fixer_pkg, args=None):
     else:
         requested = avail_fixes.union(explicit)
     fixer_names = requested.difference(unwanted_fixes)
-    rt = StdoutRefactoringTool(sorted(fixer_names), None, sorted(explicit),
-                               options.nobackups, not options.no_diffs)
+    rt = StdoutRefactoringTool(
+        sorted(fixer_names),
+        None,
+        sorted(explicit),
+        options.nobackups,
+        not options.no_diffs,
+    )
 
     # Refactor all files and directories passed as arguments
     if not rt.errors:
@@ -163,8 +198,9 @@ def main(fixer_pkg, args=None):
             rt.refactor_stdin()
         else:
             try:
-                rt.refactor(args, options.write, options.doctests_only,
-                            options.processes)
+                rt.refactor(
+                    args, options.write, options.doctests_only, options.processes
+                )
             except refactor.MultiprocessingUnsupported:
                 assert options.processes > 1
                 print("Sorry, -j isn't supported on this platform.", file=sys.stderr)

@@ -1,5 +1,6 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_bool(crosswindFixerTestCase):
     fixer = "bool"
 
@@ -51,4 +52,3 @@ class Test_bool(crosswindFixerTestCase):
                 pass
             """
         self.unchanged(s)
-

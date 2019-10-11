@@ -11,8 +11,10 @@ from crosswind.lib2to3.fixer_util import parenthesize, Name, Call, LParen, RPare
 
 from crosswind.lib3to2.fixer_util import commatize
 
+
 def tup(args):
     return parenthesize(Node(syms.testlist_gexp, commatize(args)))
+
 
 class FixDctsetcomp(fixer_base.BaseFix):
 
@@ -23,7 +25,7 @@ class FixDctsetcomp(fixer_base.BaseFix):
 
     def transform(self, node, results):
         comp_for = results.get("comp_for").clone()
-        is_dict = bool(results.get("col")) # is it a dict?
+        is_dict = bool(results.get("col"))  # is it a dict?
         n1 = results.get("n1").clone()
         if is_dict:
             n2 = results.get("n2").clone()
@@ -31,12 +33,14 @@ class FixDctsetcomp(fixer_base.BaseFix):
             impl_assign = tup((n1, n2))
         else:
             impl_assign = n1
-        our_gencomp = Node(syms.listmaker, [(impl_assign),(comp_for)])
+        our_gencomp = Node(syms.listmaker, [(impl_assign), (comp_for)])
         if is_dict:
-            new_node = Node(syms.power, [Name("dict"),
-                       parenthesize(Node(syms.atom, [our_gencomp]))])
+            new_node = Node(
+                syms.power, [Name("dict"), parenthesize(Node(syms.atom, [our_gencomp]))]
+            )
         else:
-            new_node = Node(syms.power, [Name("set"),
-                       parenthesize(Node(syms.atom, [our_gencomp]))])
+            new_node = Node(
+                syms.power, [Name("set"), parenthesize(Node(syms.atom, [our_gencomp]))]
+            )
         new_node.prefix = node.prefix
         return new_node

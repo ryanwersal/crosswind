@@ -4,100 +4,233 @@ Fixer for complicated imports
 
 from crosswind.lib2to3 import fixer_base
 from crosswind.lib2to3.fixer_util import Name, String, FromImport, Newline, Comma
-from crosswind.lib3to2.fixer_util import token, syms, Leaf, Node, Star, indentation, ImportAsName
+from crosswind.lib3to2.fixer_util import (
+    token,
+    syms,
+    Leaf,
+    Node,
+    Star,
+    indentation,
+    ImportAsName,
+)
 
-TK_BASE_NAMES = ('ACTIVE', 'ALL', 'ANCHOR', 'ARC','BASELINE', 'BEVEL', 'BOTH',
-                 'BOTTOM', 'BROWSE', 'BUTT', 'CASCADE', 'CENTER', 'CHAR',
-                 'CHECKBUTTON', 'CHORD', 'COMMAND', 'CURRENT', 'DISABLED',
-                 'DOTBOX', 'E', 'END', 'EW', 'EXCEPTION', 'EXTENDED', 'FALSE',
-                 'FIRST', 'FLAT', 'GROOVE', 'HIDDEN', 'HORIZONTAL', 'INSERT',
-                 'INSIDE', 'LAST', 'LEFT', 'MITER', 'MOVETO', 'MULTIPLE', 'N',
-                 'NE', 'NO', 'NONE', 'NORMAL', 'NS', 'NSEW', 'NUMERIC', 'NW',
-                 'OFF', 'ON', 'OUTSIDE', 'PAGES', 'PIESLICE', 'PROJECTING',
-                 'RADIOBUTTON', 'RAISED', 'READABLE', 'RIDGE', 'RIGHT',
-                 'ROUND', 'S', 'SCROLL', 'SE', 'SEL', 'SEL_FIRST', 'SEL_LAST',
-                 'SEPARATOR', 'SINGLE', 'SOLID', 'SUNKEN', 'SW', 'StringTypes',
-                 'TOP', 'TRUE', 'TclVersion', 'TkVersion', 'UNDERLINE', 
-                 'UNITS', 'VERTICAL', 'W', 'WORD', 'WRITABLE', 'X', 'Y', 'YES',
-                 'wantobjects')
+TK_BASE_NAMES = (
+    "ACTIVE",
+    "ALL",
+    "ANCHOR",
+    "ARC",
+    "BASELINE",
+    "BEVEL",
+    "BOTH",
+    "BOTTOM",
+    "BROWSE",
+    "BUTT",
+    "CASCADE",
+    "CENTER",
+    "CHAR",
+    "CHECKBUTTON",
+    "CHORD",
+    "COMMAND",
+    "CURRENT",
+    "DISABLED",
+    "DOTBOX",
+    "E",
+    "END",
+    "EW",
+    "EXCEPTION",
+    "EXTENDED",
+    "FALSE",
+    "FIRST",
+    "FLAT",
+    "GROOVE",
+    "HIDDEN",
+    "HORIZONTAL",
+    "INSERT",
+    "INSIDE",
+    "LAST",
+    "LEFT",
+    "MITER",
+    "MOVETO",
+    "MULTIPLE",
+    "N",
+    "NE",
+    "NO",
+    "NONE",
+    "NORMAL",
+    "NS",
+    "NSEW",
+    "NUMERIC",
+    "NW",
+    "OFF",
+    "ON",
+    "OUTSIDE",
+    "PAGES",
+    "PIESLICE",
+    "PROJECTING",
+    "RADIOBUTTON",
+    "RAISED",
+    "READABLE",
+    "RIDGE",
+    "RIGHT",
+    "ROUND",
+    "S",
+    "SCROLL",
+    "SE",
+    "SEL",
+    "SEL_FIRST",
+    "SEL_LAST",
+    "SEPARATOR",
+    "SINGLE",
+    "SOLID",
+    "SUNKEN",
+    "SW",
+    "StringTypes",
+    "TOP",
+    "TRUE",
+    "TclVersion",
+    "TkVersion",
+    "UNDERLINE",
+    "UNITS",
+    "VERTICAL",
+    "W",
+    "WORD",
+    "WRITABLE",
+    "X",
+    "Y",
+    "YES",
+    "wantobjects",
+)
 
-PY2MODULES = { 
-              'urllib2' : (
-                  'AbstractBasicAuthHandler', 'AbstractDigestAuthHandler',
-                  'AbstractHTTPHandler', 'BaseHandler', 'CacheFTPHandler',
-                  'FTPHandler', 'FileHandler', 'HTTPBasicAuthHandler',
-                  'HTTPCookieProcessor', 'HTTPDefaultErrorHandler',
-                  'HTTPDigestAuthHandler', 'HTTPError', 'HTTPErrorProcessor',
-                  'HTTPHandler', 'HTTPPasswordMgr',
-                  'HTTPPasswordMgrWithDefaultRealm', 'HTTPRedirectHandler',
-                  'HTTPSHandler', 'OpenerDirector', 'ProxyBasicAuthHandler',
-                  'ProxyDigestAuthHandler', 'ProxyHandler', 'Request',
-                  'StringIO', 'URLError', 'UnknownHandler', 'addinfourl',
-                  'build_opener', 'install_opener', 'parse_http_list',
-                  'parse_keqv_list', 'randombytes', 'request_host', 'urlopen'),
-              'urllib' : (
-                  'ContentTooShortError', 'FancyURLopener','URLopener',
-                  'basejoin', 'ftperrors', 'getproxies',
-                  'getproxies_environment', 'localhost', 'pathname2url',
-                  'quote', 'quote_plus', 'splitattr', 'splithost',
-                  'splitnport', 'splitpasswd', 'splitport', 'splitquery',
-                  'splittag', 'splittype', 'splituser', 'splitvalue',
-                  'thishost', 'unquote', 'unquote_plus', 'unwrap',
-                  'url2pathname', 'urlcleanup', 'urlencode', 'urlopen',
-                  'urlretrieve',),
-              'urlparse' : (
-                  'parse_qs', 'parse_qsl', 'urldefrag', 'urljoin',
-                  'urlparse', 'urlsplit', 'urlunparse', 'urlunsplit'),
-              'dbm' : (
-                  'ndbm', 'gnu', 'dumb'),
-              'anydbm' : (
-                  'error', 'open'),
-              'whichdb' : (
-                  'whichdb',),
-              'BaseHTTPServer' : (
-                  'BaseHTTPRequestHandler', 'HTTPServer'),
-              'CGIHTTPServer' : (
-                  'CGIHTTPRequestHandler',),
-              'SimpleHTTPServer' : (
-                  'SimpleHTTPRequestHandler',),
-              'FileDialog' : TK_BASE_NAMES + (
-                  'FileDialog', 'LoadFileDialog', 'SaveFileDialog',
-                  'dialogstates', 'test'),
-              'tkFileDialog' : (
-                  'Directory', 'Open', 'SaveAs', '_Dialog', 'askdirectory',
-                  'askopenfile', 'askopenfilename', 'askopenfilenames',
-                  'askopenfiles', 'asksaveasfile', 'asksaveasfilename'),
-              'SimpleDialog' : TK_BASE_NAMES + (
-                  'SimpleDialog',),
-              'tkSimpleDialog' : TK_BASE_NAMES + (
-                  'askfloat', 'askinteger', 'askstring', 'Dialog'),
-              'SimpleXMLRPCServer' : (
-                  'CGIXMLRPCRequestHandler', 'SimpleXMLRPCDispatcher',
-                  'SimpleXMLRPCRequestHandler', 'SimpleXMLRPCServer',
-                  'list_public_methods', 'remove_duplicates',
-                  'resolve_dotted_attribute'),
-              'DocXMLRPCServer' : (
-                  'DocCGIXMLRPCRequestHandler', 'DocXMLRPCRequestHandler',
-                  'DocXMLRPCServer', 'ServerHTMLDoc','XMLRPCDocGenerator'),
-                }
+PY2MODULES = {
+    "urllib2": (
+        "AbstractBasicAuthHandler",
+        "AbstractDigestAuthHandler",
+        "AbstractHTTPHandler",
+        "BaseHandler",
+        "CacheFTPHandler",
+        "FTPHandler",
+        "FileHandler",
+        "HTTPBasicAuthHandler",
+        "HTTPCookieProcessor",
+        "HTTPDefaultErrorHandler",
+        "HTTPDigestAuthHandler",
+        "HTTPError",
+        "HTTPErrorProcessor",
+        "HTTPHandler",
+        "HTTPPasswordMgr",
+        "HTTPPasswordMgrWithDefaultRealm",
+        "HTTPRedirectHandler",
+        "HTTPSHandler",
+        "OpenerDirector",
+        "ProxyBasicAuthHandler",
+        "ProxyDigestAuthHandler",
+        "ProxyHandler",
+        "Request",
+        "StringIO",
+        "URLError",
+        "UnknownHandler",
+        "addinfourl",
+        "build_opener",
+        "install_opener",
+        "parse_http_list",
+        "parse_keqv_list",
+        "randombytes",
+        "request_host",
+        "urlopen",
+    ),
+    "urllib": (
+        "ContentTooShortError",
+        "FancyURLopener",
+        "URLopener",
+        "basejoin",
+        "ftperrors",
+        "getproxies",
+        "getproxies_environment",
+        "localhost",
+        "pathname2url",
+        "quote",
+        "quote_plus",
+        "splitattr",
+        "splithost",
+        "splitnport",
+        "splitpasswd",
+        "splitport",
+        "splitquery",
+        "splittag",
+        "splittype",
+        "splituser",
+        "splitvalue",
+        "thishost",
+        "unquote",
+        "unquote_plus",
+        "unwrap",
+        "url2pathname",
+        "urlcleanup",
+        "urlencode",
+        "urlopen",
+        "urlretrieve",
+    ),
+    "urlparse": (
+        "parse_qs",
+        "parse_qsl",
+        "urldefrag",
+        "urljoin",
+        "urlparse",
+        "urlsplit",
+        "urlunparse",
+        "urlunsplit",
+    ),
+    "dbm": ("ndbm", "gnu", "dumb"),
+    "anydbm": ("error", "open"),
+    "whichdb": ("whichdb",),
+    "BaseHTTPServer": ("BaseHTTPRequestHandler", "HTTPServer"),
+    "CGIHTTPServer": ("CGIHTTPRequestHandler",),
+    "SimpleHTTPServer": ("SimpleHTTPRequestHandler",),
+    "FileDialog": TK_BASE_NAMES
+    + ("FileDialog", "LoadFileDialog", "SaveFileDialog", "dialogstates", "test"),
+    "tkFileDialog": (
+        "Directory",
+        "Open",
+        "SaveAs",
+        "_Dialog",
+        "askdirectory",
+        "askopenfile",
+        "askopenfilename",
+        "askopenfilenames",
+        "askopenfiles",
+        "asksaveasfile",
+        "asksaveasfilename",
+    ),
+    "SimpleDialog": TK_BASE_NAMES + ("SimpleDialog",),
+    "tkSimpleDialog": TK_BASE_NAMES + ("askfloat", "askinteger", "askstring", "Dialog"),
+    "SimpleXMLRPCServer": (
+        "CGIXMLRPCRequestHandler",
+        "SimpleXMLRPCDispatcher",
+        "SimpleXMLRPCRequestHandler",
+        "SimpleXMLRPCServer",
+        "list_public_methods",
+        "remove_duplicates",
+        "resolve_dotted_attribute",
+    ),
+    "DocXMLRPCServer": (
+        "DocCGIXMLRPCRequestHandler",
+        "DocXMLRPCRequestHandler",
+        "DocXMLRPCServer",
+        "ServerHTMLDoc",
+        "XMLRPCDocGenerator",
+    ),
+}
 
-MAPPING = { 'urllib.request' :
-                ('urllib2', 'urllib'),
-            'urllib.error' :
-                ('urllib2', 'urllib'),
-            'urllib.parse' :
-                ('urllib2', 'urllib', 'urlparse'),
-            'dbm.__init__' :
-                ('anydbm', 'whichdb'),
-            'http.server' :
-                ('CGIHTTPServer', 'SimpleHTTPServer', 'BaseHTTPServer'),
-            'tkinter.filedialog' :
-                ('tkFileDialog', 'FileDialog'),
-            'tkinter.simpledialog' :
-                ('tkSimpleDialog', 'SimpleDialog'),
-            'xmlrpc.server' :
-                ('DocXMLRPCServer', 'SimpleXMLRPCServer'),
-            }
+MAPPING = {
+    "urllib.request": ("urllib2", "urllib"),
+    "urllib.error": ("urllib2", "urllib"),
+    "urllib.parse": ("urllib2", "urllib", "urlparse"),
+    "dbm.__init__": ("anydbm", "whichdb"),
+    "http.server": ("CGIHTTPServer", "SimpleHTTPServer", "BaseHTTPServer"),
+    "tkinter.filedialog": ("tkFileDialog", "FileDialog"),
+    "tkinter.simpledialog": ("tkSimpleDialog", "SimpleDialog"),
+    "xmlrpc.server": ("DocXMLRPCServer", "SimpleXMLRPCServer"),
+}
 
 # helps match 'http', as in 'from http.server import ...'
 simple_name = "name='{name}'"
@@ -108,7 +241,9 @@ simple_using = "using='{using}'"
 # helps match 'urllib.request', as in 'import urllib.request'
 dotted_name = "dotted_name=dotted_name< {fmt_name} '.' {fmt_attr} >"
 # helps match 'http.server', as in 'http.server.HTTPServer(...)'
-power_twoname = "pow=power< {fmt_name} trailer< '.' {fmt_attr} > trailer< '.' using=any > any* >"
+power_twoname = (
+    "pow=power< {fmt_name} trailer< '.' {fmt_attr} > trailer< '.' using=any > any* >"
+)
 # helps match 'dbm.whichdb', as in 'dbm.whichdb(...)'
 power_onename = "pow=power< {fmt_name} trailer< '.' using=any > any* >"
 # helps match 'from http.server import HTTPServer'
@@ -127,28 +262,47 @@ name_import_rename = "name_import_rename=dotted_as_name< {fmt_name} 'as' renamed
 # helps match 'from http import server'
 from_import_rename = "from_import_rename=import_from< 'from' {fmt_name} 'import' ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any > | in_list=import_as_names< any* ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any >) any* >) >"
 
+
 def all_modules_subpattern():
     """
     Builds a pattern for all toplevel names
     (urllib, http, etc)
     """
     names_dot_attrs = [mod.split(".") for mod in MAPPING]
-    ret =  "( " + " | ".join([dotted_name.format(fmt_name=simple_name.format(name=mod[0]),
-                                                 fmt_attr=simple_attr.format(attr=mod[1])) for mod in names_dot_attrs])
+    ret = "( " + " | ".join(
+        [
+            dotted_name.format(
+                fmt_name=simple_name.format(name=mod[0]),
+                fmt_attr=simple_attr.format(attr=mod[1]),
+            )
+            for mod in names_dot_attrs
+        ]
+    )
     ret += " | "
-    ret += " | ".join([simple_name.format(name=mod[0]) for mod in names_dot_attrs if mod[1] == "__init__"]) + " )"
+    ret += (
+        " | ".join(
+            [
+                simple_name.format(name=mod[0])
+                for mod in names_dot_attrs
+                if mod[1] == "__init__"
+            ]
+        )
+        + " )"
+    )
     return ret
+
 
 def all_candidates(name, attr, MAPPING=MAPPING):
     """
     Returns all candidate packages for the name.attr
     """
-    dotted = name + '.' + attr
+    dotted = name + "." + attr
     assert dotted in MAPPING, "No matching package found."
     ret = MAPPING[dotted]
-    if attr == '__init__':
+    if attr == "__init__":
         return ret + (name,)
     return ret
+
 
 def new_package(name, attr, using, MAPPING=MAPPING, PY2MODULES=PY2MODULES):
     """
@@ -162,6 +316,7 @@ def new_package(name, attr, using, MAPPING=MAPPING, PY2MODULES=PY2MODULES):
 
     return candidate
 
+
 def build_import_pattern(mapping1, mapping2):
     """
     mapping1: A dict mapping py3k modules to all possible py2k replacements
@@ -171,17 +326,18 @@ def build_import_pattern(mapping1, mapping2):
     # py3k: urllib.request, py2k: ('urllib2', 'urllib')
     yield from_import.format(modules=all_modules_subpattern())
     for py3k, py2k in mapping1.items():
-        name, attr = py3k.split('.')
+        name, attr = py3k.split(".")
         s_name = simple_name.format(name=name)
         s_attr = simple_attr.format(attr=attr)
         d_name = dotted_name.format(fmt_name=s_name, fmt_attr=s_attr)
         yield name_import.format(fmt_name=d_name)
         yield power_twoname.format(fmt_name=s_name, fmt_attr=s_attr)
-        if attr == '__init__':
+        if attr == "__init__":
             yield name_import.format(fmt_name=s_name)
             yield power_onename.format(fmt_name=s_name)
         yield name_import_rename.format(fmt_name=d_name)
         yield from_import_rename.format(fmt_name=s_name, fmt_attr=s_attr)
+
 
 def name_import_replacement(name, attr):
     children = [Name("import")]
@@ -217,8 +373,12 @@ class FixImports2(fixer_base.BaseFix):
         # The parent is useful for adding new import_stmts
         parent = simple_stmt.parent
         idx = parent.children.index(simple_stmt)
-        if any((results.get("from_import_rename") is not None,
-                results.get("name_import_rename") is not None)): 
+        if any(
+            (
+                results.get("from_import_rename") is not None,
+                results.get("name_import_rename") is not None,
+            )
+        ):
             self.cannot_convert(node, reason="ambiguity: import binds a single name")
 
         elif using is None and not in_list:
@@ -233,7 +393,9 @@ class FixImports2(fixer_base.BaseFix):
                 if d_name.type == syms.dotted_name:
                     name = d_name.children[0]
                     attr = d_name.children[2]
-                elif d_name.type == token.NAME and d_name.value + ".__init__" in MAPPING:
+                elif (
+                    d_name.type == token.NAME and d_name.value + ".__init__" in MAPPING
+                ):
                     name = d_name
                     attr = Name("__init__")
                 else:
@@ -248,9 +410,11 @@ class FixImports2(fixer_base.BaseFix):
                 children.pop()
                 # Put in the new statement.
                 indent = indentation(simple_stmt)
-                next_stmt = Node(syms.simple_stmt, [Node(syms.import_name, children), Newline()])
-                parent.insert_child(idx+1, next_stmt)
-                parent.insert_child(idx+1, Leaf(token.INDENT, indent))
+                next_stmt = Node(
+                    syms.simple_stmt, [Node(syms.import_name, children), Newline()]
+                )
+                parent.insert_child(idx + 1, next_stmt)
+                parent.insert_child(idx + 1, Leaf(token.INDENT, indent))
                 # Remove the old imported name
                 test_comma = d_name.next_sibling
                 if test_comma and test_comma.type == token.COMMA:
@@ -268,8 +432,7 @@ class FixImports2(fixer_base.BaseFix):
             # "from urllib.request import urlopen, urlretrieve, ..." #
             # Replace one import statement with potentially many.    #
             ##########################################################
-            packages = dict([(n,[]) for n in all_candidates(name.value,
-                                                            attr.value)])
+            packages = dict([(n, []) for n in all_candidates(name.value, attr.value)])
             # Figure out what names need to be imported from what
             # Add them to a dict to be parsed once we're completely done
             for imported in using:
@@ -311,21 +474,23 @@ class FixImports2(fixer_base.BaseFix):
             # Add the remainder of the imports as new statements.
             while imports:
                 next_stmt = Node(syms.simple_stmt, [imports.pop(), Newline()])
-                parent.insert_child(idx+1, next_stmt)
-                parent.insert_child(idx+1, Leaf(token.INDENT, indent))
+                parent.insert_child(idx + 1, next_stmt)
+                parent.insert_child(idx + 1, Leaf(token.INDENT, indent))
 
         elif using.type == token.STAR:
             # from urllib.request import *
-            nodes = [FromImport(pkg, [Star(prefix=" ")]) for pkg in
-                                        all_candidates(name.value, attr.value)]
+            nodes = [
+                FromImport(pkg, [Star(prefix=" ")])
+                for pkg in all_candidates(name.value, attr.value)
+            ]
             replacement = nodes.pop()
             replacement.prefix = node.prefix
             node.replace(replacement)
             indent = indentation(simple_stmt)
             while nodes:
                 next_stmt = Node(syms.simple_stmt, [nodes.pop(), Newline()])
-                parent.insert_child(idx+1, next_stmt)
-                parent.insert_child(idx+1, Leaf(token.INDENT, indent))
+                parent.insert_child(idx + 1, next_stmt)
+                parent.insert_child(idx + 1, Leaf(token.INDENT, indent))
         elif power is not None:
             # urllib.request.urlopen
             # Replace it with urllib2.urlopen

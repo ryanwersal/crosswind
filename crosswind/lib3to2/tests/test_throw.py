@@ -1,8 +1,9 @@
 from crosswind.lib3to2.tests.support import crosswindFixerTestCase
 
+
 class Test_throw(crosswindFixerTestCase):
 
-    fixer = 'throw'
+    fixer = "throw"
 
     def test_unchanged(self):
         """
@@ -32,12 +33,12 @@ class Test_throw(crosswindFixerTestCase):
         gen.throw(E)
         """
 
-        #a = """
-        #E = BaseException(V)
-        #gen.throw(E, V, T)
-        #"""
+        # a = """
+        # E = BaseException(V)
+        # gen.throw(E, V, T)
+        # """
 
-        #self.check(b, a)
+        # self.check(b, a)
         self.unchanged(b)
 
         b = """
@@ -47,13 +48,12 @@ class Test_throw(crosswindFixerTestCase):
         gen.throw(E)
         """
 
-        #a = """
-        #E = BaseException(V)
-        #gen.throw(E, V, T)
+        # a = """
+        # E = BaseException(V)
+        # gen.throw(E, V, T)
 
-        #self.check(b, a)
+        # self.check(b, a)
         self.unchanged(b)
-
 
     def test_traceback(self):
         """

@@ -2,14 +2,18 @@ from crosswind.lib2to3.pygram import token, python_symbols as syms
 from crosswind.lib2to3.pytree import Leaf, Node
 from crosswind.lib2to3.fixer_util import *
 
+
 def Star(prefix=None):
-    return Leaf(token.STAR, '*', prefix=prefix)
+    return Leaf(token.STAR, "*", prefix=prefix)
+
 
 def DoubleStar(prefix=None):
-    return Leaf(token.DOUBLESTAR, '**', prefix=prefix)
+    return Leaf(token.DOUBLESTAR, "**", prefix=prefix)
+
 
 def Minus(prefix=None):
-    return Leaf(token.MINUS, '-', prefix=prefix)
+    return Leaf(token.MINUS, "-", prefix=prefix)
+
 
 def commatize(leafs):
     """
@@ -22,6 +26,7 @@ def commatize(leafs):
         new_leafs.append(Comma())
     del new_leafs[-1]
     return new_leafs
+
 
 def indentation(node):
     """
@@ -44,6 +49,7 @@ def indentation(node):
     else:
         return node.prefix
 
+
 def indentation_step(node):
     """
     Dirty little trick to get the difference between each indentation level
@@ -56,9 +62,10 @@ def indentation_step(node):
     all_indents = set(i.value for i in r.pre_order() if i.type == token.INDENT)
     if not all_indents:
         # nothing is indented anywhere, so we get to pick what we want
-        return "    " # four spaces is a popular convention
+        return "    "  # four spaces is a popular convention
     else:
         return min(all_indents)
+
 
 def suitify(parent):
     """
@@ -77,12 +84,16 @@ def suitify(parent):
     else:
         raise ValueError("No class suite and no ':'!")
     # Move everything into a suite node
-    suite = Node(syms.suite, [Newline(), Leaf(token.INDENT, indentation(node) + indentation_step(node))])
-    one_node = parent.children[i+1]
+    suite = Node(
+        syms.suite,
+        [Newline(), Leaf(token.INDENT, indentation(node) + indentation_step(node))],
+    )
+    one_node = parent.children[i + 1]
     one_node.remove()
-    one_node.prefix = ''
+    one_node.prefix = ""
     suite.append_child(one_node)
     parent.append_child(suite)
+
 
 def NameImport(package, as_name=None, prefix=None):
     """
@@ -94,12 +105,20 @@ def NameImport(package, as_name=None, prefix=None):
         prefix = ""
     children = [Name("import", prefix=prefix), package]
     if as_name is not None:
-        children.extend([Name("as", prefix=" "),
-                         Name(as_name, prefix=" ")])
+        children.extend([Name("as", prefix=" "), Name(as_name, prefix=" ")])
     return Node(syms.import_name, children)
 
-_compound_stmts = (syms.if_stmt, syms.while_stmt, syms.for_stmt, syms.try_stmt, syms.with_stmt)
+
+_compound_stmts = (
+    syms.if_stmt,
+    syms.while_stmt,
+    syms.for_stmt,
+    syms.try_stmt,
+    syms.with_stmt,
+)
 _import_stmts = (syms.import_name, syms.import_from)
+
+
 def import_binding_scope(node):
     """
     Generator yields all nodes for which a node (an import_stmt) has scope
@@ -159,6 +178,7 @@ def import_binding_scope(node):
             if p is None:
                 break
 
+
 def ImportAsName(name, as_name, prefix=None):
     new_name = Name(name)
     new_as = Name("as", prefix=" ")
@@ -168,16 +188,20 @@ def ImportAsName(name, as_name, prefix=None):
         new_node.prefix = prefix
     return new_node
 
+
 def future_import(feature, node):
     root = find_root(node)
-    
+
     if does_tree_import("__future__", feature, node):
         return
 
     insert_pos = 0
     for idx, node in enumerate(root.children):
-        if node.type == syms.simple_stmt and node.children and \
-           node.children[0].type == token.STRING:
+        if (
+            node.type == syms.simple_stmt
+            and node.children
+            and node.children[0].type == token.STRING
+        ):
             insert_pos = idx + 1
             break
 
@@ -197,12 +221,13 @@ def future_import(feature, node):
     children = [import_, Newline()]
     root.insert_child(insert_pos, Node(syms.simple_stmt, children, prefix=prefix))
 
+
 def parse_args(arglist, scheme):
     """
     Parse a list of arguments into a dict
     """
     arglist = [i for i in arglist if i.type != token.COMMA]
-    
+
     ret_mapping = dict([(k, None) for k in scheme])
 
     for i, arg in enumerate(arglist):

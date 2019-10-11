@@ -9,6 +9,7 @@ from crosswind.lib2to3 import fixer_util
 from crosswind.lib2to3.fixer_util import Attr, Name, Call, Comma
 from crosswind.lib2to3.pgen2 import token
 
+
 def parse(code, strip_levels=0):
     # The topmost node is file_input, which we don't care about.
     # The next-topmost node is a *_stmt node, which we also don't care about
@@ -17,6 +18,7 @@ def parse(code, strip_levels=0):
         tree = tree.children[0]
     tree.parent = None
     return tree
+
 
 class MacroTestCase(support.TestCase):
     def assertStr(self, node, string):
@@ -87,13 +89,17 @@ class Test_Call(MacroTestCase):
         return Call(Name(name), children, prefix)
 
     def test(self):
-        kids = [None,
-                [Leaf(token.NUMBER, 1), Leaf(token.NUMBER, 2),
-                 Leaf(token.NUMBER, 3)],
-                [Leaf(token.NUMBER, 1), Leaf(token.NUMBER, 3),
-                 Leaf(token.NUMBER, 2), Leaf(token.NUMBER, 4)],
-                [Leaf(token.STRING, "b"), Leaf(token.STRING, "j", prefix=" ")]
-                ]
+        kids = [
+            None,
+            [Leaf(token.NUMBER, 1), Leaf(token.NUMBER, 2), Leaf(token.NUMBER, 3)],
+            [
+                Leaf(token.NUMBER, 1),
+                Leaf(token.NUMBER, 3),
+                Leaf(token.NUMBER, 2),
+                Leaf(token.NUMBER, 4),
+            ],
+            [Leaf(token.STRING, "b"), Leaf(token.STRING, "j", prefix=" ")],
+        ]
         self.assertStr(self._Call("A"), "A()")
         self.assertStr(self._Call("b", kids[1]), "b(1,2,3)")
         self.assertStr(self._Call("a.b().c", kids[2]), "a.b().c(1,3,2,4)")
@@ -105,36 +111,42 @@ class Test_does_tree_import(support.TestCase):
         # Search a tree for a binding -- used to find the starting
         # point for these tests.
         c = fixer_util.find_binding(name, node)
-        if c: return c
+        if c:
+            return c
         for child in node.children:
             c = self._find_bind_rec(name, child)
-            if c: return c
+            if c:
+                return c
 
     def does_tree_import(self, package, name, string):
         node = parse(string)
         # Find the binding of start -- that's what we'll go from
-        node = self._find_bind_rec('start', node)
+        node = self._find_bind_rec("start", node)
         return fixer_util.does_tree_import(package, name, node)
 
     def try_with(self, string):
-        failing_tests = (("a", "a", "from a import b"),
-                         ("a.d", "a", "from a.d import b"),
-                         ("d.a", "a", "from d.a import b"),
-                         (None, "a", "import b"),
-                         (None, "a", "import b, c, d"))
+        failing_tests = (
+            ("a", "a", "from a import b"),
+            ("a.d", "a", "from a.d import b"),
+            ("d.a", "a", "from d.a import b"),
+            (None, "a", "import b"),
+            (None, "a", "import b, c, d"),
+        )
         for package, name, import_ in failing_tests:
             n = self.does_tree_import(package, name, import_ + "\n" + string)
             self.assertFalse(n)
             n = self.does_tree_import(package, name, string + "\n" + import_)
             self.assertFalse(n)
 
-        passing_tests = (("a", "a", "from a import a"),
-                         ("x", "a", "from x import a"),
-                         ("x", "a", "from x import b, c, a, d"),
-                         ("x.b", "a", "from x.b import a"),
-                         ("x.b", "a", "from x.b import b, c, a, d"),
-                         (None, "a", "import a"),
-                         (None, "a", "import b, c, a, d"))
+        passing_tests = (
+            ("a", "a", "from a import a"),
+            ("x", "a", "from x import a"),
+            ("x", "a", "from x import b, c, a, d"),
+            ("x.b", "a", "from x.b import a"),
+            ("x.b", "a", "from x.b import b, c, a, d"),
+            (None, "a", "import a"),
+            (None, "a", "import b, c, a, d"),
+        )
         for package, name, import_ in passing_tests:
             n = self.does_tree_import(package, name, import_ + "\n" + string)
             self.assertTrue(n)
@@ -143,6 +155,7 @@ class Test_does_tree_import(support.TestCase):
 
     def test_in_function(self):
         self.try_with("def foo():\n\tbar.baz()\n\tstart=3")
+
 
 class Test_find_binding(support.TestCase):
     def find_binding(self, name, string, package=None):
@@ -546,8 +559,8 @@ class Test_find_binding(support.TestCase):
                     b = 7"""
         self.assertFalse(self.find_binding("a", s))
 
-class Test_touch_import(support.TestCase):
 
+class Test_touch_import(support.TestCase):
     def test_after_docstring(self):
         node = parse('"""foo"""\nbar()')
         fixer_util.touch_import(None, "foo", node)
@@ -559,22 +572,22 @@ class Test_touch_import(support.TestCase):
         self.assertEqual(str(node), '"""foo"""\nimport bar\nimport foo\nbar()\n\n')
 
     def test_beginning(self):
-        node = parse('bar()')
+        node = parse("bar()")
         fixer_util.touch_import(None, "foo", node)
-        self.assertEqual(str(node), 'import foo\nbar()\n\n')
+        self.assertEqual(str(node), "import foo\nbar()\n\n")
 
     def test_from_import(self):
-        node = parse('bar()')
+        node = parse("bar()")
         fixer_util.touch_import("html", "escape", node)
-        self.assertEqual(str(node), 'from html import escape\nbar()\n\n')
+        self.assertEqual(str(node), "from html import escape\nbar()\n\n")
 
     def test_name_import(self):
-        node = parse('bar()')
+        node = parse("bar()")
         fixer_util.touch_import(None, "cgi", node)
-        self.assertEqual(str(node), 'import cgi\nbar()\n\n')
+        self.assertEqual(str(node), "import cgi\nbar()\n\n")
+
 
 class Test_find_indentation(support.TestCase):
-
     def test_nothing(self):
         fi = fixer_util.find_indentation
         node = parse("node()")

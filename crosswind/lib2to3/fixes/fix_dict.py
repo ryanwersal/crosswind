@@ -53,7 +53,7 @@ class FixDict(fixer_base.BaseFix):
 
     def transform(self, node, results):
         head = results["head"]
-        method = results["method"][0] # Extract node for method name
+        method = results["method"][0]  # Extract node for method name
         tail = results["tail"]
         syms = self.syms
         method_name = method.value
@@ -65,11 +65,10 @@ class FixDict(fixer_base.BaseFix):
         head = [n.clone() for n in head]
         tail = [n.clone() for n in tail]
         special = not tail and self.in_special_context(node, isiter)
-        args = head + [pytree.Node(syms.trailer,
-                                   [Dot(),
-                                    Name(method_name,
-                                         prefix=method.prefix)]),
-                       results["parens"].clone()]
+        args = head + [
+            pytree.Node(syms.trailer, [Dot(), Name(method_name, prefix=method.prefix)]),
+            results["parens"].clone(),
+        ]
         new = pytree.Node(syms.power, args)
         if not (special or isview):
             new.prefix = ""
@@ -91,9 +90,11 @@ class FixDict(fixer_base.BaseFix):
         if node.parent is None:
             return False
         results = {}
-        if (node.parent.parent is not None and
-               self.p1.match(node.parent.parent, results) and
-               results["node"] is node):
+        if (
+            node.parent.parent is not None
+            and self.p1.match(node.parent.parent, results)
+            and results["node"] is node
+        ):
             if isiter:
                 # iter(d.iterkeys()) -> iter(d.keys()), etc.
                 return results["func"].value in iter_exempt

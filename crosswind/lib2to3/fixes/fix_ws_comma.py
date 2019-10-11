@@ -9,9 +9,10 @@ from .. import pytree
 from ..pgen2 import token
 from .. import fixer_base
 
+
 class FixWsComma(fixer_base.BaseFix):
 
-    explicit = True # The user must ask for this fixers
+    explicit = True  # The user must ask for this fixers
 
     PATTERN = """
     any<(not(',') any)+ ',' ((not(',') any)+ ',')* [not(',') any]>

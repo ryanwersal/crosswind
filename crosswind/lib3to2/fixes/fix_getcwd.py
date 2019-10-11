@@ -6,6 +6,7 @@ Also warns about "from os import getcwd", suggesting the above form.
 from crosswind.lib2to3 import fixer_base
 from crosswind.lib2to3.fixer_util import Name
 
+
 class FixGetcwd(fixer_base.BaseFix):
 
     PATTERN = """

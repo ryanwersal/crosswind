@@ -6,39 +6,85 @@
 
 # Local imports
 from crosswind.lib2to3.fixes.fix_imports import alternates, FixImports
-from crosswind.lib2to3.fixer_util import (Name, Comma, FromImport, Newline,
-                                find_indentation, Node, syms)
+from crosswind.lib2to3.fixer_util import (
+    Name,
+    Comma,
+    FromImport,
+    Newline,
+    find_indentation,
+    Node,
+    syms,
+)
 
-MAPPING = {"urllib":  [
-                ("urllib.request",
-                    ["URLopener", "FancyURLopener", "urlretrieve",
-                     "_urlopener", "urlopen", "urlcleanup",
-                     "pathname2url", "url2pathname"]),
-                ("urllib.parse",
-                    ["quote", "quote_plus", "unquote", "unquote_plus",
-                     "urlencode", "splitattr", "splithost", "splitnport",
-                     "splitpasswd", "splitport", "splitquery", "splittag",
-                     "splittype", "splituser", "splitvalue", ]),
-                ("urllib.error",
-                    ["ContentTooShortError"])],
-           "urllib2" : [
-                ("urllib.request",
-                    ["urlopen", "install_opener", "build_opener",
-                     "Request", "OpenerDirector", "BaseHandler",
-                     "HTTPDefaultErrorHandler", "HTTPRedirectHandler",
-                     "HTTPCookieProcessor", "ProxyHandler",
-                     "HTTPPasswordMgr",
-                     "HTTPPasswordMgrWithDefaultRealm",
-                     "AbstractBasicAuthHandler",
-                     "HTTPBasicAuthHandler", "ProxyBasicAuthHandler",
-                     "AbstractDigestAuthHandler",
-                     "HTTPDigestAuthHandler", "ProxyDigestAuthHandler",
-                     "HTTPHandler", "HTTPSHandler", "FileHandler",
-                     "FTPHandler", "CacheFTPHandler",
-                     "UnknownHandler"]),
-                ("urllib.error",
-                    ["URLError", "HTTPError"]),
-           ]
+MAPPING = {
+    "urllib": [
+        (
+            "urllib.request",
+            [
+                "URLopener",
+                "FancyURLopener",
+                "urlretrieve",
+                "_urlopener",
+                "urlopen",
+                "urlcleanup",
+                "pathname2url",
+                "url2pathname",
+            ],
+        ),
+        (
+            "urllib.parse",
+            [
+                "quote",
+                "quote_plus",
+                "unquote",
+                "unquote_plus",
+                "urlencode",
+                "splitattr",
+                "splithost",
+                "splitnport",
+                "splitpasswd",
+                "splitport",
+                "splitquery",
+                "splittag",
+                "splittype",
+                "splituser",
+                "splitvalue",
+            ],
+        ),
+        ("urllib.error", ["ContentTooShortError"]),
+    ],
+    "urllib2": [
+        (
+            "urllib.request",
+            [
+                "urlopen",
+                "install_opener",
+                "build_opener",
+                "Request",
+                "OpenerDirector",
+                "BaseHandler",
+                "HTTPDefaultErrorHandler",
+                "HTTPRedirectHandler",
+                "HTTPCookieProcessor",
+                "ProxyHandler",
+                "HTTPPasswordMgr",
+                "HTTPPasswordMgrWithDefaultRealm",
+                "AbstractBasicAuthHandler",
+                "HTTPBasicAuthHandler",
+                "ProxyBasicAuthHandler",
+                "AbstractDigestAuthHandler",
+                "HTTPDigestAuthHandler",
+                "ProxyDigestAuthHandler",
+                "HTTPHandler",
+                "HTTPSHandler",
+                "FileHandler",
+                "FTPHandler",
+                "CacheFTPHandler",
+                "UnknownHandler",
+            ],
+        ),
+        ("urllib.error", ["URLError", "HTTPError"]),
+    ],
 }
 
 # Duplicate the url parsing functions for urllib2.
@@ -53,11 +99,18 @@ def build_pattern():
             members = alternates(members)
             yield """import_name< 'import' (module=%r
                                   | dotted_as_names< any* module=%r any* >) >
-                  """ % (old_module, old_module)
+                  """ % (
+                old_module,
+                old_module,
+            )
             yield """import_from< 'from' mod_member=%r 'import'
                        ( member=%s | import_as_name< member=%s 'as' any > |
                          import_as_names< members=any*  >) >
-                  """ % (old_module, members, members)
+                  """ % (
+                old_module,
+                members,
+                members,
+            )
             yield """import_from< 'from' module_star=%r 'import' star='*' >
                   """ % old_module
             yield """import_name< 'import'
@@ -65,11 +118,13 @@ def build_pattern():
                   """ % old_module
             # bare_with_attr has a special significance for FixImports.match().
             yield """power< bare_with_attr=%r trailer< '.' member=%s > any* >
-                  """ % (old_module, members)
+                  """ % (
+                old_module,
+                members,
+            )
 
 
 class FixUrllib(FixImports):
-
     def build_pattern(self):
         return "|".join(build_pattern())
 
@@ -137,13 +192,17 @@ class FixUrllib(FixImports):
             new_nodes = []
             indentation = find_indentation(node)
             first = True
+
             def handle_name(name, prefix):
                 if name.type == syms.import_as_name:
-                    kids = [Name(name.children[0].value, prefix=prefix),
-                            name.children[1].clone(),
-                            name.children[2].clone()]
+                    kids = [
+                        Name(name.children[0].value, prefix=prefix),
+                        name.children[1].clone(),
+                        name.children[2].clone(),
+                    ]
                     return [Node(syms.import_as_name, kids)]
                 return [Name(name.value, prefix=prefix)]
+
             for module in modules:
                 elts = mod_dict[module]
                 names = []
@@ -177,8 +236,7 @@ class FixUrllib(FixImports):
                 new_name = change[0]
                 break
         if new_name:
-            module_dot.replace(Name(new_name,
-                                    prefix=module_dot.prefix))
+            module_dot.replace(Name(new_name, prefix=module_dot.prefix))
         else:
             self.cannot_convert(node, "This is an invalid module element")
 

@@ -8,8 +8,10 @@ from crosswind.lib2to3.fixer_util import syms
 
 warning_text = "Removing function annotations completely."
 
+
 def param_without_annotations(node):
     return node.children[0]
+
 
 class FixAnnotations(fixer_base.BaseFix):
 
@@ -19,7 +21,7 @@ class FixAnnotations(fixer_base.BaseFix):
         if not self.warned:
             self.warned = True
             self.warning(node, reason=reason)
-    
+
     PATTERN = """
               funcdef< 'def' any parameters< '(' [params=any] ')' > ['->' ret=any] ':' any* >
               """
@@ -35,7 +37,8 @@ class FixAnnotations(fixer_base.BaseFix):
             self.warn_once(node, reason=warning_text)
             ret.prev_sibling.remove()
             ret.remove()
-        if params is None: return
+        if params is None:
+            return
         if params.type == syms.typedargslist:
             # more than one param in a typedargslist
             for param in params.children:

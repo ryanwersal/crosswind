@@ -41,22 +41,18 @@ class FixIntern(fixer_base.BaseFix):
             elif not pre and post:
                 for ch in node.children:
                     if type(ch) == pytree.Node:
-                        assert ch.children[0].prefix + "intern" \
-                                                       == str(ch.children[0])
-                        ch.children[0].remove() # intern
-                        assert ch.children[0].prefix + "," \
-                                                       == str(ch.children[0])
-                        ch.children[0].remove() # ,
+                        assert ch.children[0].prefix + "intern" == str(ch.children[0])
+                        ch.children[0].remove()  # intern
+                        assert ch.children[0].prefix + "," == str(ch.children[0])
+                        ch.children[0].remove()  # ,
                 return
             elif not post and pre:
                 for ch in node.children:
                     if type(ch) == pytree.Node:
-                        assert ch.children[-1].prefix + "intern" \
-                                                       == str(ch.children[-1])
-                        ch.children[-1].remove() # intern
-                        assert ch.children[-1].prefix + "," \
-                                                       == str(ch.children[-1])
-                        ch.children[-1].remove() # ,
+                        assert ch.children[-1].prefix + "intern" == str(ch.children[-1])
+                        ch.children[-1].remove()  # intern
+                        assert ch.children[-1].prefix + "," == str(ch.children[-1])
+                        ch.children[-1].remove()  # ,
                 return
             elif post and pre:
                 for ch in node.children:
@@ -64,10 +60,9 @@ class FixIntern(fixer_base.BaseFix):
                         for ch_ in ch.children:
                             if ch_ and ch_.prefix + "intern" == str(ch_):
                                 last_ch_ = ch_.prev_sibling
-                                ch_.remove() # intern
-                                assert last_ch_.prefix + "," \
-                                                       == str(last_ch_)
-                                last_ch_.remove() # ,
+                                ch_.remove()  # intern
+                                assert last_ch_.prefix + "," == str(last_ch_)
+                                last_ch_.remove()  # ,
                 return
         syms = self.syms
         obj = results["obj"].clone()
@@ -79,11 +74,16 @@ class FixIntern(fixer_base.BaseFix):
         if after:
             after = [n.clone() for n in after]
 
-        new = pytree.Node(syms.power,
-                          [Name("intern")] +
-                          [pytree.Node(syms.trailer,
-                                       [results["lpar"].clone(),
-                                        newarglist,
-                                        results["rpar"].clone()] + after)])
+        new = pytree.Node(
+            syms.power,
+            [Name("intern")]
+            + [
+                pytree.Node(
+                    syms.trailer,
+                    [results["lpar"].clone(), newarglist, results["rpar"].clone()]
+                    + after,
+                )
+            ],
+        )
         new.prefix = node.prefix
         return new

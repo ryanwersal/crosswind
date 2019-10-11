@@ -8,8 +8,18 @@ exec() function.
 """
 
 from .. import fixer_base
-from ..fixer_util import (Comma, Name, Call, LParen, RParen, Dot, Node,
-                          ArgList, String, syms)
+from ..fixer_util import (
+    Comma,
+    Name,
+    Call,
+    LParen,
+    RParen,
+    Dot,
+    Node,
+    ArgList,
+    String,
+    syms,
+)
 
 
 class FixExecfile(fixer_base.BaseFix):
@@ -31,11 +41,14 @@ class FixExecfile(fixer_base.BaseFix):
         # call.
         execfile_paren = node.children[-1].children[-1].clone()
         # Construct open().read().
-        open_args = ArgList([filename.clone(), Comma(), String('"rb"', ' ')],
-                            rparen=execfile_paren)
+        open_args = ArgList(
+            [filename.clone(), Comma(), String('"rb"', " ")], rparen=execfile_paren
+        )
         open_call = Node(syms.power, [Name("open"), open_args])
-        read = [Node(syms.trailer, [Dot(), Name('read')]),
-                Node(syms.trailer, [LParen(), RParen()])]
+        read = [
+            Node(syms.trailer, [Dot(), Name("read")]),
+            Node(syms.trailer, [LParen(), RParen()]),
+        ]
         open_expr = [open_call] + read
         # Wrap the open call in a compile call. This is so the filename will be
         # preserved in the execed code.
