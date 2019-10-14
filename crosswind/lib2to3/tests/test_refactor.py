@@ -14,7 +14,6 @@ import unittest
 from crosswind.lib2to3 import refactor, pygram, fixer_base
 from crosswind.lib2to3.pgen2 import token
 
-
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 FIXER_DIR = os.path.join(TEST_DATA_DIR, "fixers")
 
@@ -37,7 +36,7 @@ class TestRefactoringTool(unittest.TestCase):
     def check_instances(self, instances, classes):
         for inst, cls in zip(instances, classes):
             if not isinstance(inst, cls):
-                self.fail("%s are not instances of %s" % instances, classes)
+                self.fail("%s are not instances of %s" % (instances, classes))
 
     def rt(self, options=None, fixers=_DEFAULT_FIXERS, explicit=None):
         return refactor.RefactoringTool(fixers, options, explicit)
@@ -150,13 +149,13 @@ from __future__ import print_function"""
 
     def test_refactor_string(self):
         rt = self.rt()
-        input = "def parrot(): pass\n\n"
-        tree = rt.refactor_string(input, "<test>")
-        self.assertNotEqual(str(tree), input)
+        input_string = "def parrot(): pass\n\n"
+        tree = rt.refactor_string(input_string, "<test>")
+        self.assertNotEqual(str(tree), input_string)
 
-        input = "def f(): pass\n\n"
-        tree = rt.refactor_string(input, "<test>")
-        self.assertEqual(str(tree), input)
+        input_string = "def f(): pass\n\n"
+        tree = rt.refactor_string(input_string, "<test>")
+        self.assertEqual(str(tree), input_string)
 
     def test_refactor_stdin(self):
         class MyRT(refactor.RefactoringTool):
@@ -255,7 +254,7 @@ from __future__ import print_function"""
 
     def test_refactor_dir(self):
         def check(structure, expected):
-            def mock_refactor_file(self, f, *args):
+            def mock_refactor_file(_, f, *args):
                 got.append(f)
 
             save_func = refactor.RefactoringTool.refactor_file

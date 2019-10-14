@@ -245,11 +245,10 @@ def attr_chain(obj, attr):
         yield next
         next = getattr(next, attr)
 
-
-p0 = """for_stmt< 'for' any 'in' node=any ':' any* >
+PATTERN0 = """for_stmt< 'for' any 'in' node=any ':' any* >
         | comp_for< 'for' any 'in' node=any any* >
      """
-p1 = """
+PATTERN1 = """
 power<
     ( 'iter' | 'list' | 'tuple' | 'sorted' | 'set' | 'sum' |
       'any' | 'all' | 'enumerate' | (any* trailer< '.' 'join' >) )
@@ -257,7 +256,7 @@ power<
     any*
 >
 """
-p2 = """
+PATTERN2 = """
 power<
     ( 'sorted' | 'enumerate' )
     trailer< '(' arglist<node=any any*> ')' >
@@ -273,13 +272,13 @@ def in_special_context(node):
         or an iterator).
         See test_map_nochange in test_fixers.py for some examples and tests.
         """
-    global p0, p1, p2, pats_built
+    global PATTERN0, PATTERN1, PATTERN2, pats_built
     if not pats_built:
-        p0 = patcomp.compile_pattern(p0)
-        p1 = patcomp.compile_pattern(p1)
-        p2 = patcomp.compile_pattern(p2)
+        PATTERN0 = patcomp.compile_pattern(PATTERN0)
+        PATTERN1 = patcomp.compile_pattern(PATTERN1)
+        PATTERN2 = patcomp.compile_pattern(PATTERN2)
         pats_built = True
-    patterns = [p0, p1, p2]
+    patterns = [PATTERN0, PATTERN1, PATTERN2]
     for pattern, parent in zip(patterns, attr_chain(node, "parent")):
         results = {}
         if pattern.match(parent, results) and results["node"] is node:

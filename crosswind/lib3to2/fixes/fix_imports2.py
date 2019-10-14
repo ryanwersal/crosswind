@@ -316,17 +316,15 @@ def new_package(name, attr, using, MAPPING=MAPPING, PY2MODULES=PY2MODULES):
 
     return candidate
 
-
-def build_import_pattern(mapping1, mapping2):
+def build_import_pattern(mappings):
     """
-    mapping1: A dict mapping py3k modules to all possible py2k replacements
-    mapping2: A dict mapping py2k modules to the things they do
+    mappings: A dict mapping py3k modules to all possible py2k replacements
     This builds a HUGE pattern to match all ways that things can be imported
     """
     # py3k: urllib.request, py2k: ('urllib2', 'urllib')
     yield from_import.format(modules=all_modules_subpattern())
-    for py3k, py2k in mapping1.items():
-        name, attr = py3k.split(".")
+    for py3k, _ in mappings.items():
+        name, attr = py3k.split('.')
         s_name = simple_name.format(name=name)
         s_attr = simple_attr.format(attr=attr)
         d_name = dotted_name.format(fmt_name=s_name, fmt_attr=s_attr)
@@ -353,7 +351,7 @@ class FixImports2(fixer_base.BaseFix):
 
     run_order = 4
 
-    PATTERN = " | \n".join(build_import_pattern(MAPPING, PY2MODULES))
+    PATTERN = " | \n".join(build_import_pattern(MAPPING))
 
     def transform(self, node, results):
         # The patterns dictate which of these names will be defined

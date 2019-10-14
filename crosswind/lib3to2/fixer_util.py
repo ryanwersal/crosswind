@@ -1,3 +1,5 @@
+"""Variety of utilities for authoring 3to2 fixers."""
+
 from crosswind.lib2to3.pygram import token, python_symbols as syms
 from crosswind.lib2to3.pytree import Leaf, Node
 from crosswind.lib2to3.fixer_util import *

@@ -101,9 +101,10 @@ def find_pattern(node):
 
 
 def find_symbol(sym):
-    for n, v in list(python_symbols.__dict__.items()):
-        if v == sym:
-            return n
+    for name, value in list(python_symbols.__dict__.items()):
+        if value == sym:
+            return name
+    return None
 
 
 if __name__ == "__main__":
