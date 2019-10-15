@@ -18,6 +18,12 @@ uninstall-local:
 install:
 	$(SETUP) install
 
+format:
+	black crosswind --exclude \data
+
+lint:
+	pylint crosswind
+
 test:
 	$(PYVERSION) test_all_fixers.py
 
