@@ -459,6 +459,21 @@ class BasePattern(object):
         """
         return self
 
+    def _submatch(self, node, results=None):
+        """
+        Match the pattern's content to the node's children.
+
+        This assumes the node type matches and self.content is not None.
+
+        Returns True if it matches, False if not.
+
+        If results is not None, it must be a dict which will be
+        updated with the nodes matching named subpatterns.
+
+        When returning False, the results dict may still be updated.
+        """
+        return False
+
     def match(self, node, results=None):
         """
         Does this pattern exactly match a node?

@@ -4,7 +4,7 @@ description = "An abstract syntax tree for Python with inference support."
 name = "astroid"
 optional = false
 python-versions = ">=3.5.*"
-version = "2.3.1"
+version = "2.3.2"
 
 [package.dependencies]
 lazy-object-proxy = ">=1.4.0,<1.5.0"
@@ -29,7 +29,7 @@ description = "Classes Without Boilerplate"
 name = "attrs"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "19.2.0"
+version = "19.3.0"
 
 [[package]]
 category = "dev"
@@ -123,7 +123,7 @@ description = "python code static checker"
 name = "pylint"
 optional = false
 python-versions = ">=3.5.*"
-version = "2.4.2"
+version = "2.4.3"
 
 [package.dependencies]
 astroid = ">=2.3.0,<2.4"
@@ -223,13 +223,13 @@ version = "0.6.0"
 more-itertools = "*"
 
 [metadata]
-content-hash = "ea8eaf2e444a71f8337629dca9e5da32ea113a34450f1b6301d55966bb3747bb"
-python-versions = "^3.7"
+content-hash = "eb0bd2177e324adcbc61c362f58e5694f7ce45a9123f1d234b983ed18e27c4ca"
+python-versions = ">=3.6"
 
 [metadata.hashes]
-astroid = ["98c665ad84d10b18318c5ab7c3d203fe11714cbad2a4aef4f44651f415392754", "b7546ffdedbf7abcfbff93cd1de9e9980b1ef744852689decc5aeada324238c6"]
+astroid = ["09a3fba616519311f1af8a461f804b68f0370e100c9264a035aa7846d7852e33", "5a79c9b4bd6c4be777424593f957c996e20beb5f74e0bc332f47713c6f675efe"]
 atomicwrites = ["03472c30eb2c5d1ba9227e4c2ca66ab8287fbfbbda3888aa93dc2e28fc6811b4", "75a9445bac02d8d058d5e1fe689654ba5a6556a1dfd8ce6ec55a0ed79866cfa6"]
-attrs = ["ec20e7a4825331c1b5ebf261d111e16fa9612c1f7a5e1f884f12bd53a664dfd2", "f913492e1663d3c36f502e5e9ba6cd13cf19d7fab50aa13239e420fef95e1396"]
+attrs = ["08a96c641c3a74e44eb59afb61a24f2cb9f4d7188748e76ba4bb5edfa3cb7d1c", "f7b7ce16570fe9965acd6d30101a28f62fb4a7f9e926b3bbc9b61f8b04247e72"]
 colorama = ["05eed71e2e327246ad6b38c540c4a3117230b19679b875190486ddd2d721422d", "f8ac84de7840f5b9c4e3347b3c1eaa50f7e49c2b07596221daec5edaabbd7c48"]
 importlib-metadata = ["aa18d7378b00b40847790e7c27e11673d7fed219354109d0e7b9e5b25dc3ad26", "d5f18a79777f3aa179c145737780282e27b508fc8fd688cb17c7a813e8bd39af"]
 isort = ["54da7e92468955c4fceacd0c86bd0ec997b0e1ee80d97f67c35a78b719dccab1", "6e811fcb295968434526407adb8796944f1988c5b65e8139058f2014cbe100fd"]
@@ -239,7 +239,7 @@ more-itertools = ["409cd48d4db7052af495b09dec721011634af3753ae1ef92d2b32f73a745f
 packaging = ["28b924174df7a2fa32c1953825ff29c61e2f5e082343165438812f00d3a7fc47", "d9551545c6d761f3def1677baf08ab2a3ca17c56879e70fecba2fc4dde4ed108"]
 pluggy = ["0db4b7601aae1d35b4a033282da476845aa19185c1e6964b25cf324b5e4ec3e6", "fa5fa1622fa6dd5c030e9cad086fa19ef6a0cf6d7a2d12318e10cb49d6d68f34"]
 py = ["64f65755aee5b381cea27766a3a147c3f15b9b6b9ac88676de66ba2ae36793fa", "dc639b046a6e2cff5bbe40194ad65936d6ba360b52b3c3fe1d08a82dd50b5e53"]
-pylint = ["7edbae11476c2182708063ac387a8f97c760d9cfe36a5ede0ca996f90cf346c8", "844ce067788028c1a35086a5c66bc5e599ddd851841c41d6ee1623b36774d9f2"]
+pylint = ["7b76045426c650d2b0f02fc47c14d7934d17898779da95288a74c2a7ec440702", "856476331f3e26598017290fd65bebe81c960e806776f324093a46b76fb2d1c0"]
 pyparsing = ["6f98a7b9397e206d78cc01df10131398f1c8b8510a2f4d97d9abd82e1aacdd80", "d9338df12903bbf5d65a0e4e87c2161968b10d2e489652bb47001d82a9b028b4"]
 pytest = ["7e4800063ccfc306a53c461442526c5571e1462f61583506ce97e4da6a1d88c8", "ca563435f4941d0cb34767301c27bc65c510cb82e90b9ecf9cb52dc2c63caaa0"]
 rope = ["6b728fdc3e98a83446c27a91fc5d56808a004f8beab7a31ab1d7224cecc7d969", "c5c5a6a87f7b1a2095fb311135e2a3d1f194f5ecb96900fdd0a9100881f48aaf", "f0dcf719b63200d492b85535ebe5ea9b29e0d0b8aebeb87fe03fc1a65924fdaf"]

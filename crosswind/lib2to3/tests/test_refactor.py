@@ -16,23 +16,11 @@ from crosswind.lib2to3.pgen2 import token
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 FIXER_DIR = os.path.join(TEST_DATA_DIR, "fixers")
-
-sys.path.append(FIXER_DIR)
-try:
-    _DEFAULT_FIXERS = refactor.get_fixers_from_package("myfixes")
-finally:
-    sys.path.pop()
-
+_DEFAULT_FIXERS = refactor.get_fixers_from_package("crosswind.lib2to3.tests.data.fixers.myfixes")
 _2TO3_FIXERS = refactor.get_fixers_from_package("crosswind.lib2to3.fixes")
 
 
 class TestRefactoringTool(unittest.TestCase):
-    def setUp(self):
-        sys.path.append(FIXER_DIR)
-
-    def tearDown(self):
-        sys.path.pop()
-
     def check_instances(self, instances, classes):
         for inst, cls in zip(instances, classes):
             if not isinstance(inst, cls):
@@ -54,12 +42,12 @@ class TestRefactoringTool(unittest.TestCase):
 
     def test_fixer_loading_helpers(self):
         contents = ["explicit", "first", "last", "parrot", "preorder"]
-        non_prefixed = refactor.get_all_fix_names("myfixes")
-        prefixed = refactor.get_all_fix_names("myfixes", False)
-        full_names = refactor.get_fixers_from_package("myfixes")
+        non_prefixed = refactor.get_all_fix_names("crosswind.lib2to3.tests.data.fixers.myfixes")
+        prefixed = refactor.get_all_fix_names("crosswind.lib2to3.tests.data.fixers.myfixes", False)
+        full_names = refactor.get_fixers_from_package("crosswind.lib2to3.tests.data.fixers.myfixes")
         self.assertEqual(prefixed, ["fix_" + name for name in contents])
         self.assertEqual(non_prefixed, contents)
-        self.assertEqual(full_names, ["myfixes.fix_" + name for name in contents])
+        self.assertEqual(full_names, ["crosswind.lib2to3.tests.data.fixers.myfixes.fix_" + name for name in contents])
 
     def test_detect_future_features(self):
         run = refactor._detect_future_features
@@ -131,10 +119,10 @@ from __future__ import print_function"""
             self.assertEqual(fixes, [no_head])
 
     def test_fixer_loading(self):
-        from myfixes.fix_first import FixFirst
-        from myfixes.fix_last import FixLast
-        from myfixes.fix_parrot import FixParrot
-        from myfixes.fix_preorder import FixPreorder
+        from crosswind.lib2to3.tests.data.fixers.myfixes.fix_first import FixFirst
+        from crosswind.lib2to3.tests.data.fixers.myfixes.fix_last import FixLast
+        from crosswind.lib2to3.tests.data.fixers.myfixes.fix_parrot import FixParrot
+        from crosswind.lib2to3.tests.data.fixers.myfixes.fix_preorder import FixPreorder
 
         rt = self.rt()
         pre, post = rt.get_fixers()
@@ -144,8 +132,8 @@ from __future__ import print_function"""
 
     def test_naughty_fixers(self):
         self.assertRaises(ImportError, self.rt, fixers=["not_here"])
-        self.assertRaises(refactor.FixerError, self.rt, fixers=["no_fixer_cls"])
-        self.assertRaises(refactor.FixerError, self.rt, fixers=["bad_order"])
+        self.assertRaises(refactor.FixerError, self.rt, fixers=["crosswind.lib2to3.tests.data.fixers.no_fixer_cls"])
+        self.assertRaises(refactor.FixerError, self.rt, fixers=["crosswind.lib2to3.tests.data.fixers.bad_order"])
 
     def test_refactor_string(self):
         rt = self.rt()
@@ -327,12 +315,12 @@ from __future__ import print_function"""
         self.assertNotEqual(out, doc)
 
     def test_explicit(self):
-        from myfixes.fix_explicit import FixExplicit
+        from crosswind.lib2to3.tests.data.fixers.myfixes.fix_explicit import FixExplicit
 
-        rt = self.rt(fixers=["myfixes.fix_explicit"])
+        rt = self.rt(fixers=["crosswind.lib2to3.tests.data.fixers.myfixes.fix_explicit"])
         self.assertEqual(len(rt.post_order), 0)
 
-        rt = self.rt(explicit=["myfixes.fix_explicit"])
+        rt = self.rt(explicit=["crosswind.lib2to3.tests.data.fixers.myfixes.fix_explicit"])
         for fix in rt.post_order:
             if isinstance(fix, FixExplicit):
                 break

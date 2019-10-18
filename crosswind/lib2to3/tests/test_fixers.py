@@ -11,11 +11,15 @@ from crosswind.lib2to3.tests import support
 
 
 class FixerTestCase(support.TestCase):
+    fixer = None
 
     # Other test cases can subclass this class and replace "fixer_pkg" with
     # their own.
     def setUp(self, fix_list=None, fixer_pkg="crosswind.lib2to3", options=None):
         if fix_list is None:
+            if self.fixer is None:
+                raise "'fixer' must be specified for each FixerTestCase"
+
             fix_list = [self.fixer]
         self.refactor = support.get_refactorer(fixer_pkg, fix_list, options)
         self.fixer_log = []
@@ -1709,6 +1713,13 @@ class Test_xreadlines(FixerTestCase):
 
 
 class ImportsFixerTests:
+    # Dummy fields that will be overridden in subclasses.
+    modules = None
+    def check(self, x, y):
+        pass
+    def unchanged(self, _):
+        pass
+
     def test_import_module(self):
         for old, new in self.modules.items():
             b = "import %s" % old

@@ -4,14 +4,26 @@ on: [push]
 
 jobs:
   build:
+    runs-on: ubuntu-18.04
 
-    runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v1
-    - name: Run a one-line script
-      run: echo Hello, world!
-    - name: Run a multi-line script
-      run: |
-        echo Add other actions to build,
-        echo test, and deploy your project.
+      - name: Install apt dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3-venv
+
+      - name: Install Poetry
+        run: |
+          sudo pip3 install --system setuptools
+          sudo pip3 install --system poetry
+
+      - uses: actions/checkout@v1
+
+      - name: Create venv
+        run: make install
+
+      - name: Lint
+        run: make lint-prod
+
+      - name: Test
+        run: make tests

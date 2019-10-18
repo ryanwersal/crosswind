@@ -1,53 +1,41 @@
-PYVERSION = python3.2
-SETUP = ./setup.py
-FIND = find
+.PHONY: install lock repl tests format lint lint-prod check-dead-code clean nuke
 
-.PHONY: dist install test install-local uninstall-local clean dangerously-clean
-
-dist:
-	$(SETUP) build sdist
-
-install-local:
-	$(SETUP) install --prefix=$(HOME)/.local
-
-uninstall-local:
-	rm -rf $(HOME)/.local/lib/$(PYVERSION)/site-packages/crosswind
-	rm -rf $(HOME)/.local/lib/$(PYVERSION)/site-packages/crosswind-*.egg-info
-	rm -rf $(HOME)/.local/bin/crosswind
-
+# Setup poetry virtual env
 install:
-	$(SETUP) install
+	poetry install
 
+# Lock poetry dependencies
+lock:
+	poetry lock
+
+# Invoke Python repl in venv
+repl:
+	poetry run python
+
+# Run all automated tests (unit, integration, etc)
+tests:
+	poetry run pytest
+
+# Run code through formatters
 format:
-	black crosswind --exclude \data
+	poetry run black crosswind --exclude \data
 
+# Lint all source code
 lint:
-	pylint crosswind
+	poetry run pylint --rcfile=.pylintrc crosswind
 
-test:
-	$(PYVERSION) test_all_fixers.py
+# Lint but only emit errors (for automated builds)
+lint-prod:
+	poetry run pylint --rcfile=.pylintrc --errors-only crosswind
 
+# Check for dead code
+check-dead-code:
+	poetry run vulture --min-confidence 80 crosswind
+
+# Typical (and default) clean that tries to avoid removing user created data that is gitignored
 clean:
-	rm -rf build dist MANIFEST
+	git clean -xdfe .vscode
 
-dangerously-clean: clean
-	$(FIND) . \
-	\( -name '*~' \
-	   -or -name '#*#' \
-	   -or -name '*.pyc' \
-	   -or -name '*.orig' \
-	\) -exec rm -fv {} \;
-
-python2: clean
-	cp -r crosswind crosswind_replace
-	$(PYVERSION) ./crosswind --no-diffs -n -j 10 -w crosswind_replace
-	rm -rf crosswind
-	mv crosswind_replace crosswind
-	patch -p0 < python2.patch
-	mv crosswind/fixes/imports_fix_alt_formatting.py __TEMPFILE__
-	mv crosswind/fixes/fix_imports.py crosswind/fixes/imports_fix_alt_formatting.py
-	mv __TEMPFILE__ crosswind/fixes/fix_imports.py
-	mv crosswind/fixes/imports2_fix_alt_formatting.py __TEMPFILE__
-	mv crosswind/fixes/fix_imports2.py crosswind/fixes/imports2_fix_alt_formatting.py
-	mv __TEMPFILE__ crosswind/fixes/fix_imports2.py
-	sed -i 's/u"/"/' crosswind/main.py
+# Clean everything that is unversioned or gitignored
+nuke:
+	git clean -xdf

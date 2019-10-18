@@ -258,7 +258,10 @@ class RefactoringTool(object):
 
     def log_error(self, msg, *args, **kwds):
         """Called when an error occurs."""
-        raise
+        if args:
+            msg = msg % args
+        self.logger.error(msg)
+        raise # pylint: disable=misplaced-bare-raise
 
     def log_message(self, msg, *args):
         """Hook to log a message."""

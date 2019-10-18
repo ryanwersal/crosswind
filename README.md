@@ -15,7 +15,7 @@ using [hg-fast-export](https://github.com/frej/fast-export).
 The following are the overarching objectives of crosswind. They are subject to change as
 the a game plan is established. For now, they are tentatively:
 
-- Support Python 2.7+ and Python 3.5+
+- Support Python 2.7+ and Python 3.6+
 - Tooling runs only in Python 3 interpreters
 - Both conversion directions are supported equally
 - Support latest versions of lib2to3
@@ -28,21 +28,28 @@ the a game plan is established. For now, they are tentatively:
 - Get build automation running (Azure Pipelines or GitHub Actions)
 - Investigate/resolve [open issues on lib3to2](https://bitbucket.org/amentajo/lib3to2/issues?status=new&status=open)
 
-## Usage
+## Development
 
-Run "./crosswind" to convert stdin ("-"), files or directories given as
-arguments.  By default, the tool outputs a unified diff-formatted patch on
-standard output and a "what was changed" summary on standard error, but the
-"-w" option can be given to write back converted files, creating
-".bak"-named backup files.
+Development uses the Poetry tool for managing dependencies and virtual environments. Common
+development tasks have aliases that have been collected in a Makefile at the root of the
+project.
 
-If you are root, you can also install with "./setup.py build" and
-"./setup.py install" ("make install" does this for you).
+To get started with crosswind development, run `make install`. This will use Poetry to create
+the virtualenv and install the dependencies (both runtime and dev-time).
 
-This branch of crosswind must be run with Python 3.
+Then you can lint the code and run the tests with `make lint` and `make tests` or combine them
+(since they're separate targets and make allows specifying many targets in a single invocation)
+with `make lint tests` and so on.
 
-To install locally (used for running tests as a non-privileged user), the
-scripts assume you are using python3.1.  Modify accordingly if you are not.
+Currently, running crosswind requires a manual invocation of poetry such as:
+
+```shell
+poetry run python crosswind/crosswind --help
+```
+
+This will show the help output containing the currently supported options. It should be noted that
+the current state of the crosswind tool is that it only has access to the 2to3 fixers. Further efforts
+are needed to allow it to combine arbitrary fixers and fixer suites.
 
 ## Thanks/Inspiration
 

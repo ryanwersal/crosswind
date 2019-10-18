@@ -396,6 +396,9 @@ def generate_tokens(readline):
     contline = None
     indents = [0]
 
+    strstart = None
+    endprog = None
+
     # 'stashed' and 'async_*' are used for async/await parsing
     stashed = None
     async_def = False
