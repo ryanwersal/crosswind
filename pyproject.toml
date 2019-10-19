@@ -47,6 +47,7 @@ exclude = '''
 | \.venv
 | \.vscode
 | \.pytest_cache
+| __pycache__
 | build
 | dist
 | data

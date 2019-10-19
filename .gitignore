@@ -1,7 +1,7 @@
 build/*
 *.pyc
 *~
-crosswind/lib*/*Grammar*pickle
+*.pickle
 __pycache__
 .pytest_cache
 .vscode

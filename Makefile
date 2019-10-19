@@ -1,4 +1,4 @@
-.PHONY: install update check repl tests format lint lint-prod check-dead-code clean nuke
+.PHONY: install update validate check repl tests format lint lint-prod check-dead-code clean nuke
 
 # Setup poetry virtual env
 install:
@@ -9,10 +9,14 @@ update:
 	poetry update
 	poetry lock
 
-# Validate attributes of the project
+# Useful standin for the build process that tries to be similar for dev purposes
+validate: check lint-prod tests
+
+# Check attributes of the project
 check:
 	poetry check
-	poetry run black --check crosswind
+	poetry run black --check crosswind fixer_suites
+	poetry run crosswind/crosswind --help
 
 # Invoke Python repl in venv
 repl:
@@ -24,19 +28,19 @@ tests:
 
 # Run code through formatters
 format:
-	poetry run black crosswind
+	poetry run black crosswind fixer_suites
 
 # Lint all source code
 lint:
-	poetry run pylint --rcfile=.pylintrc crosswind
+	poetry run pylint --rcfile=.pylintrc crosswind fixer_suites
 
 # Lint but only emit errors (for automated builds)
 lint-prod:
-	poetry run pylint --rcfile=.pylintrc --errors-only crosswind
+	poetry run pylint --rcfile=.pylintrc --errors-only crosswind fixer_suites
 
 # Check for dead code
 check-dead-code:
-	poetry run vulture --min-confidence 80 crosswind
+	poetry run vulture --min-confidence 80 crosswind fixer_suites
 
 # Typical (and default) clean that tries to avoid removing user created data that is gitignored
 clean:

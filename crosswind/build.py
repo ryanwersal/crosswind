@@ -7,8 +7,8 @@ Created on Sun Oct 13 18:53:41 2013
 import os
 from distutils import log
 from distutils.command.build_py import build_py
-from crosswind.lib2to3 import refactor
-from crosswind.lib2to3 import pygram
+from . import refactor
+from . import pygram
 
 
 class DistutilsRefactoringTool(refactor.RefactoringTool):
