@@ -316,6 +316,7 @@ def new_package(name, attr, using, MAPPING=MAPPING, PY2MODULES=PY2MODULES):
 
     return candidate
 
+
 def build_import_pattern(mappings):
     """
     mappings: A dict mapping py3k modules to all possible py2k replacements
@@ -324,7 +325,7 @@ def build_import_pattern(mappings):
     # py3k: urllib.request, py2k: ('urllib2', 'urllib')
     yield from_import.format(modules=all_modules_subpattern())
     for py3k, _ in mappings.items():
-        name, attr = py3k.split('.')
+        name, attr = py3k.split(".")
         s_name = simple_name.format(name=name)
         s_attr = simple_attr.format(attr=attr)
         d_name = dotted_name.format(fmt_name=s_name, fmt_attr=s_attr)

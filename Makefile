@@ -1,12 +1,18 @@
-.PHONY: install lock repl tests format lint lint-prod check-dead-code clean nuke
+.PHONY: install update check repl tests format lint lint-prod check-dead-code clean nuke
 
 # Setup poetry virtual env
 install:
 	poetry install
 
 # Lock poetry dependencies
-lock:
+update:
+	poetry update
 	poetry lock
+
+# Validate attributes of the project
+check:
+	poetry check
+	poetry run black --check crosswind
 
 # Invoke Python repl in venv
 repl:
@@ -18,7 +24,7 @@ tests:
 
 # Run code through formatters
 format:
-	poetry run black crosswind --exclude \data
+	poetry run black crosswind
 
 # Lint all source code
 lint:

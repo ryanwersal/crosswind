@@ -22,6 +22,9 @@ jobs:
       - name: Create venv
         run: make install
 
+      - name: Validate
+        run: make check
+
       - name: Lint
         run: make lint-prod
 

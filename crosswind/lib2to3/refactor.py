@@ -261,7 +261,7 @@ class RefactoringTool(object):
         if args:
             msg = msg % args
         self.logger.error(msg)
-        raise # pylint: disable=misplaced-bare-raise
+        raise  # pylint: disable=misplaced-bare-raise
 
     def log_message(self, msg, *args):
         """Hook to log a message."""

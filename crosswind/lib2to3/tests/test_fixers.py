@@ -1715,8 +1715,10 @@ class Test_xreadlines(FixerTestCase):
 class ImportsFixerTests:
     # Dummy fields that will be overridden in subclasses.
     modules = None
+
     def check(self, x, y):
         pass
+
     def unchanged(self, _):
         pass
 

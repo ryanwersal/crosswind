@@ -245,6 +245,7 @@ def attr_chain(obj, attr):
         yield next
         next = getattr(next, attr)
 
+
 PATTERN0 = """for_stmt< 'for' any 'in' node=any ':' any* >
         | comp_for< 'for' any 'in' node=any any* >
      """
