@@ -8,10 +8,6 @@ from .pytree import Leaf, Node
 from .pygram import python_symbols as syms
 from . import patcomp
 
-# Utility methods for constructing valid paths to Grammar files
-GRAMMAR_PATH = os.path.join(os.path.dirname(__file__), "Grammar.txt")
-PATTERN_GRAMMAR_PATH = os.path.join(os.path.dirname(__file__), "PatternGrammar.txt")
-
 ###########################################################
 ### Common node-construction "macros"
 ###########################################################

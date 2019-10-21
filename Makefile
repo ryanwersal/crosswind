@@ -16,7 +16,15 @@ validate: check lint-prod tests
 check:
 	poetry check
 	poetry run black --check crosswind fixer_suites
+
+	# Can we invoke crosswind at all?
 	poetry run crosswind/crosswind --help
+
+	# Can we invoke crosswind for 2to3?
+	poetry run crosswind/crosswind --fixer-suites "fixer_suites.two_to_three" crosswind/tests/acceptance/two.py
+
+	# Can we invoke crosswind for 3to2?
+	poetry run crosswind/crosswind --fixer-suites "fixer_suites.three_to_two" --print-function crosswind/tests/acceptance/three.py
 
 # Invoke Python repl in venv
 repl:
@@ -44,8 +52,8 @@ check-dead-code:
 
 # Typical (and default) clean that tries to avoid removing user created data that is gitignored
 clean:
-	git clean -xdfe .vscode
+	git clean -xd --force --exclude .vscode
 
 # Clean everything that is unversioned or gitignored
 nuke:
-	git clean -xdf
+	git clean -xd --force

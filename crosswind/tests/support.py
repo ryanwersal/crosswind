@@ -8,12 +8,12 @@ import os.path
 from textwrap import dedent
 
 # Local imports
-from crosswind import pytree, refactor, fixer_util
+from crosswind import pytree, refactor, pygram
 from crosswind.pgen2 import driver as pgen2_driver
 
 test_dir = os.path.dirname(__file__)
 proj_dir = os.path.normpath(os.path.join(test_dir, ".."))
-grammar_path = fixer_util.GRAMMAR_PATH
+grammar_path = pygram.GRAMMAR_FILE
 grammar = pgen2_driver.load_grammar(grammar_path)
 grammar_no_print_statement = pgen2_driver.load_grammar(grammar_path)
 del grammar_no_print_statement.keywords["print"]
