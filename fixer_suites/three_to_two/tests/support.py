@@ -1,9 +1,9 @@
 """Support code for test_*.py files"""
 import unittest
 from itertools import chain
-from crosswind import pygram
-from crosswind import refactor
 from textwrap import dedent
+
+from crosswind import pygram, refactor
 
 
 def run_all_tests(test_mod=None, tests=None):

@@ -2,23 +2,22 @@
 Unit tests for refactor.py.
 """
 
-import sys
-import os
 import codecs
 import io
+import os
 import re
-import tempfile
 import shutil
+import sys
+import tempfile
 import unittest
 
-from crosswind import refactor, pygram, fixer_base
+from crosswind import fixer_base, pygram, refactor
 from crosswind.pgen2 import token
+
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 FIXER_DIR = os.path.join(TEST_DATA_DIR, "fixers")
-_DEFAULT_FIXERS = refactor.get_fixers_from_package(
-    "crosswind.tests.data.fixers.myfixes"
-)
+_DEFAULT_FIXERS = refactor.get_fixers_from_package("crosswind.tests.data.fixers.myfixes")
 _2TO3_FIXERS = refactor.get_fixers_from_package("fixer_suites.two_to_three.fixes")
 
 
@@ -45,32 +44,20 @@ class TestRefactoringTool(unittest.TestCase):
     def test_fixer_loading_helpers(self):
         contents = ["explicit", "first", "last", "parrot", "preorder"]
         non_prefixed = refactor.get_all_fix_names("crosswind.tests.data.fixers.myfixes")
-        prefixed = refactor.get_all_fix_names(
-            "crosswind.tests.data.fixers.myfixes", False
-        )
-        full_names = refactor.get_fixers_from_package(
-            "crosswind.tests.data.fixers.myfixes"
-        )
+        prefixed = refactor.get_all_fix_names("crosswind.tests.data.fixers.myfixes", False)
+        full_names = refactor.get_fixers_from_package("crosswind.tests.data.fixers.myfixes")
         self.assertEqual(prefixed, ["fix_" + name for name in contents])
         self.assertEqual(non_prefixed, contents)
-        self.assertEqual(
-            full_names,
-            ["crosswind.tests.data.fixers.myfixes.fix_" + name for name in contents],
-        )
+        self.assertEqual(full_names, ["crosswind.tests.data.fixers.myfixes.fix_" + name for name in contents])
 
     def test_detect_future_features(self):
         run = refactor._detect_future_features
         fs = frozenset
         empty = fs()
         self.assertEqual(run(""), empty)
-        self.assertEqual(
-            run("from __future__ import print_function"), fs(("print_function",))
-        )
+        self.assertEqual(run("from __future__ import print_function"), fs(("print_function",)))
         self.assertEqual(run("from __future__ import generators"), fs(("generators",)))
-        self.assertEqual(
-            run("from __future__ import generators, feature"),
-            fs(("generators", "feature")),
-        )
+        self.assertEqual(run("from __future__ import generators, feature"), fs(("generators", "feature")))
         inp = "from __future__ import generators, print_function"
         self.assertEqual(run(inp), fs(("generators", "print_function")))
         inp = "from __future__ import print_function, generators"
@@ -84,15 +71,7 @@ class TestRefactoringTool(unittest.TestCase):
         inp = """from __future__ import generators
 from __future__ import print_function"""
         self.assertEqual(run(inp), fs(("generators", "print_function")))
-        invalid = (
-            "from",
-            "from 4",
-            "from x",
-            "from x 5",
-            "from x im",
-            "from x import",
-            "from x import 4",
-        )
+        invalid = ("from", "from 4", "from x", "from x 5", "from x im", "from x import", "from x import 4")
         for inp in invalid:
             self.assertEqual(run(inp), empty)
         inp = "'docstring'\nfrom __future__ import print_function"
@@ -141,16 +120,8 @@ from __future__ import print_function"""
 
     def test_naughty_fixers(self):
         self.assertRaises(ImportError, self.rt, fixers=["not_here"])
-        self.assertRaises(
-            refactor.FixerError,
-            self.rt,
-            fixers=["crosswind.tests.data.fixers.no_fixer_cls"],
-        )
-        self.assertRaises(
-            refactor.FixerError,
-            self.rt,
-            fixers=["crosswind.tests.data.fixers.bad_order"],
-        )
+        self.assertRaises(refactor.FixerError, self.rt, fixers=["crosswind.tests.data.fixers.no_fixer_cls"])
+        self.assertRaises(refactor.FixerError, self.rt, fixers=["crosswind.tests.data.fixers.bad_order"])
 
     def test_refactor_string(self):
         rt = self.rt()
@@ -175,21 +146,11 @@ from __future__ import print_function"""
             rt.refactor_stdin()
         finally:
             sys.stdin = save
-        expected = [
-            "def parrot(): pass\n\n",
-            "def cheese(): pass\n\n",
-            "<stdin>",
-            False,
-        ]
+        expected = ["def parrot(): pass\n\n", "def cheese(): pass\n\n", "<stdin>", False]
         self.assertEqual(results, expected)
 
     def check_file_refactoring(
-        self,
-        test_file,
-        fixers=_2TO3_FIXERS,
-        options=None,
-        mock_log_debug=None,
-        actually_write=True,
+        self, test_file, fixers=_2TO3_FIXERS, options=None, mock_log_debug=None, actually_write=True
     ):
         test_file = self.init_test_file(test_file)
         old_contents = self.read_file(test_file)
@@ -247,9 +208,7 @@ from __future__ import print_function"""
         )
         # Testing that it logged this message when write=False was passed is
         # sufficient to see that it did not bail early after "No changes".
-        message_regex = r"Not writing changes to .*%s" % re.escape(
-            os.sep + os.path.basename(test_file)
-        )
+        message_regex = r"Not writing changes to .*%s" % re.escape(os.sep + os.path.basename(test_file))
         for message in debug_messages:
             if "Not writing changes" in message:
                 self.assertRegex(message, message_regex)

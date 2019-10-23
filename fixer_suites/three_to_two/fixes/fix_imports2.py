@@ -3,16 +3,9 @@ Fixer for complicated imports
 """
 
 from crosswind import fixer_base
-from crosswind.fixer_util import Name, String, FromImport, Newline, Comma
-from crosswind.fixer_util_3to2 import (
-    token,
-    syms,
-    Leaf,
-    Node,
-    Star,
-    indentation,
-    ImportAsName,
-)
+from crosswind.fixer_util import Comma, FromImport, Name, Newline, String
+from crosswind.fixer_util_3to2 import ImportAsName, Leaf, Node, Star, indentation, syms, token
+
 
 TK_BASE_NAMES = (
     "ACTIVE",
@@ -170,24 +163,14 @@ PY2MODULES = {
         "urlopen",
         "urlretrieve",
     ),
-    "urlparse": (
-        "parse_qs",
-        "parse_qsl",
-        "urldefrag",
-        "urljoin",
-        "urlparse",
-        "urlsplit",
-        "urlunparse",
-        "urlunsplit",
-    ),
+    "urlparse": ("parse_qs", "parse_qsl", "urldefrag", "urljoin", "urlparse", "urlsplit", "urlunparse", "urlunsplit"),
     "dbm": ("ndbm", "gnu", "dumb"),
     "anydbm": ("error", "open"),
     "whichdb": ("whichdb",),
     "BaseHTTPServer": ("BaseHTTPRequestHandler", "HTTPServer"),
     "CGIHTTPServer": ("CGIHTTPRequestHandler",),
     "SimpleHTTPServer": ("SimpleHTTPRequestHandler",),
-    "FileDialog": TK_BASE_NAMES
-    + ("FileDialog", "LoadFileDialog", "SaveFileDialog", "dialogstates", "test"),
+    "FileDialog": TK_BASE_NAMES + ("FileDialog", "LoadFileDialog", "SaveFileDialog", "dialogstates", "test"),
     "tkFileDialog": (
         "Directory",
         "Open",
@@ -241,9 +224,7 @@ simple_using = "using='{using}'"
 # helps match 'urllib.request', as in 'import urllib.request'
 dotted_name = "dotted_name=dotted_name< {fmt_name} '.' {fmt_attr} >"
 # helps match 'http.server', as in 'http.server.HTTPServer(...)'
-power_twoname = (
-    "pow=power< {fmt_name} trailer< '.' {fmt_attr} > trailer< '.' using=any > any* >"
-)
+power_twoname = "pow=power< {fmt_name} trailer< '.' {fmt_attr} > trailer< '.' using=any > any* >"
 # helps match 'dbm.whichdb', as in 'dbm.whichdb(...)'
 power_onename = "pow=power< {fmt_name} trailer< '.' using=any > any* >"
 # helps match 'from http.server import HTTPServer'
@@ -271,24 +252,12 @@ def all_modules_subpattern():
     names_dot_attrs = [mod.split(".") for mod in MAPPING]
     ret = "( " + " | ".join(
         [
-            dotted_name.format(
-                fmt_name=simple_name.format(name=mod[0]),
-                fmt_attr=simple_attr.format(attr=mod[1]),
-            )
+            dotted_name.format(fmt_name=simple_name.format(name=mod[0]), fmt_attr=simple_attr.format(attr=mod[1]))
             for mod in names_dot_attrs
         ]
     )
     ret += " | "
-    ret += (
-        " | ".join(
-            [
-                simple_name.format(name=mod[0])
-                for mod in names_dot_attrs
-                if mod[1] == "__init__"
-            ]
-        )
-        + " )"
-    )
+    ret += " | ".join([simple_name.format(name=mod[0]) for mod in names_dot_attrs if mod[1] == "__init__"]) + " )"
     return ret
 
 
@@ -372,12 +341,7 @@ class FixImports2(fixer_base.BaseFix):
         # The parent is useful for adding new import_stmts
         parent = simple_stmt.parent
         idx = parent.children.index(simple_stmt)
-        if any(
-            (
-                results.get("from_import_rename") is not None,
-                results.get("name_import_rename") is not None,
-            )
-        ):
+        if any((results.get("from_import_rename") is not None, results.get("name_import_rename") is not None)):
             self.cannot_convert(node, reason="ambiguity: import binds a single name")
 
         elif using is None and not in_list:
@@ -392,9 +356,7 @@ class FixImports2(fixer_base.BaseFix):
                 if d_name.type == syms.dotted_name:
                     name = d_name.children[0]
                     attr = d_name.children[2]
-                elif (
-                    d_name.type == token.NAME and d_name.value + ".__init__" in MAPPING
-                ):
+                elif d_name.type == token.NAME and d_name.value + ".__init__" in MAPPING:
                     name = d_name
                     attr = Name("__init__")
                 else:
@@ -409,9 +371,7 @@ class FixImports2(fixer_base.BaseFix):
                 children.pop()
                 # Put in the new statement.
                 indent = indentation(simple_stmt)
-                next_stmt = Node(
-                    syms.simple_stmt, [Node(syms.import_name, children), Newline()]
-                )
+                next_stmt = Node(syms.simple_stmt, [Node(syms.import_name, children), Newline()])
                 parent.insert_child(idx + 1, next_stmt)
                 parent.insert_child(idx + 1, Leaf(token.INDENT, indent))
                 # Remove the old imported name
@@ -478,10 +438,7 @@ class FixImports2(fixer_base.BaseFix):
 
         elif using.type == token.STAR:
             # from urllib.request import *
-            nodes = [
-                FromImport(pkg, [Star(prefix=" ")])
-                for pkg in all_candidates(name.value, attr.value)
-            ]
+            nodes = [FromImport(pkg, [Star(prefix=" ")]) for pkg in all_candidates(name.value, attr.value)]
             replacement = nodes.pop()
             replacement.prefix = node.prefix
             node.replace(replacement)

@@ -8,10 +8,9 @@ g.throw("foo"[, V[, T]]) will warn about string exceptions."""
 # Author: Collin Winter
 
 # Local imports
-from crosswind import pytree
+from crosswind import fixer_base, pytree
+from crosswind.fixer_util import ArgList, Attr, Call, Name, is_tuple
 from crosswind.pgen2 import token
-from crosswind import fixer_base
-from crosswind.fixer_util import Name, Call, ArgList, Attr, is_tuple
 
 
 class FixThrow(fixer_base.BaseFix):

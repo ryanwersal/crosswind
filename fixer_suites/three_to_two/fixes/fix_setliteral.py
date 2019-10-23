@@ -1,9 +1,9 @@
 """Fixer for '{1, 2, 3}' -> 'set([1, 2, 3])'"""
 
 from crosswind import fixer_base
-from crosswind.pytree import Node, Leaf
+from crosswind.fixer_util import LParen, Name, RParen
 from crosswind.pgen2 import token
-from crosswind.fixer_util import Name, LParen, RParen
+from crosswind.pytree import Leaf, Node
 
 
 def found_dict(node):
@@ -31,24 +31,8 @@ class FixSetliteral(fixer_base.BaseFix):
         arg = results.get("arg")
         if args:
             args = [arg.clone() for arg in args]
-            args = Node(
-                syms.atom,
-                [
-                    Leaf(token.LSQB, "["),
-                    Node(syms.listmaker, args),
-                    Leaf(token.RSQB, "]"),
-                ],
-            )
+            args = Node(syms.atom, [Leaf(token.LSQB, "["), Node(syms.listmaker, args), Leaf(token.RSQB, "]")])
         elif arg:
             arg = arg.clone()
-            arg = Node(
-                syms.atom,
-                [
-                    Leaf(token.LSQB, "["),
-                    Node(syms.listmaker, [arg]),
-                    Leaf(token.RSQB, "]"),
-                ],
-            )
-        return Node(
-            syms.power, [Name("set"), LParen(), args or arg, RParen()], prefix=prefix
-        )
+            arg = Node(syms.atom, [Leaf(token.LSQB, "["), Node(syms.listmaker, [arg]), Leaf(token.RSQB, "]")])
+        return Node(syms.power, [Name("set"), LParen(), args or arg, RParen()], prefix=prefix)

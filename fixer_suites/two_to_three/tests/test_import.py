@@ -1,5 +1,6 @@
-from .util import FixerTestCase
 import os
+
+from .util import FixerTestCase
 
 
 class Test_import(FixerTestCase):

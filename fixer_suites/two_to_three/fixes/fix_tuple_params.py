@@ -19,10 +19,9 @@ It will also support lambdas:
 # Author: Collin Winter
 
 # Local imports
-from crosswind import pytree
-from crosswind.pgen2 import token
-from crosswind import fixer_base
+from crosswind import fixer_base, pytree
 from crosswind.fixer_util import Assign, Name, Newline, Number, Subscript, syms
+from crosswind.pgen2 import token
 
 
 def is_docstring(stmt):

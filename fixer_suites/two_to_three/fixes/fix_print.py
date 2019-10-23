@@ -14,11 +14,9 @@ No changes are applied if print_function is imported from __future__
 """
 
 # Local imports
-from crosswind import patcomp
-from crosswind import pytree
+from crosswind import fixer_base, patcomp, pytree
+from crosswind.fixer_util import Call, Comma, Name, String
 from crosswind.pgen2 import token
-from crosswind import fixer_base
-from crosswind.fixer_util import Name, Call, Comma, String
 
 
 parend_expr = patcomp.compile_pattern("""atom< '(' [atom|STRING|NAME] ')' >""")
@@ -74,9 +72,7 @@ class FixPrint(fixer_base.BaseFix):
     def add_kwarg(self, l_nodes, s_kwd, n_expr):
         # XXX All this prefix-setting may lose comments (though rarely)
         n_expr.prefix = ""
-        n_argument = pytree.Node(
-            self.syms.argument, (Name(s_kwd), pytree.Leaf(token.EQUAL, "="), n_expr)
-        )
+        n_argument = pytree.Node(self.syms.argument, (Name(s_kwd), pytree.Leaf(token.EQUAL, "="), n_expr))
         if l_nodes:
             l_nodes.append(Comma())
             n_argument.prefix = " "

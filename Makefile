@@ -14,7 +14,13 @@ validate: check lint-prod tests
 
 # Check attributes of the project
 check:
+	# Confirm lockfile is up to date
 	poetry check
+
+	# Confirm all imports are organized correctly
+	poetry run isort --recursive --check-only .
+
+	# Confirm no formatting changes are required
 	poetry run black --check crosswind fixer_suites
 
 	# Can we invoke crosswind at all?
@@ -35,7 +41,8 @@ tests:
 	poetry run pytest
 
 # Run code through formatters
-format:
+format: 
+	poetry run isort --recursive .
 	poetry run black crosswind fixer_suites
 
 # Lint all source code

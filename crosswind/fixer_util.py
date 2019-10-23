@@ -2,11 +2,11 @@
 # Author: Collin Winter
 import os
 
-# Local imports
-from .pgen2 import token
-from .pytree import Leaf, Node
-from .pygram import python_symbols as syms
 from . import patcomp
+from .pgen2 import token
+from .pygram import python_symbols as syms
+from .pytree import Leaf, Node
+
 
 ###########################################################
 ### Common node-construction "macros"
@@ -88,9 +88,7 @@ def Number(n, prefix=None):
 
 def Subscript(index_node):
     """A numeric or string subscript"""
-    return Node(
-        syms.trailer, [Leaf(token.LBRACE, "["), index_node, Leaf(token.RBRACE, "]")]
-    )
+    return Node(syms.trailer, [Leaf(token.LBRACE, "["), index_node, Leaf(token.RBRACE, "]")])
 
 
 def String(string, prefix=None):
@@ -159,12 +157,7 @@ def ImportAndCall(node, results, names):
     new = Node(
         syms.power,
         Attr(Name(names[0]), Name(names[1]))
-        + [
-            Node(
-                syms.trailer,
-                [results["lpar"].clone(), newarglist, results["rpar"].clone()],
-            )
-        ]
+        + [Node(syms.trailer, [results["lpar"].clone(), newarglist, results["rpar"].clone()])]
         + after,
     )
     new.prefix = node.prefix
@@ -212,18 +205,7 @@ def parenthesize(node):
     return Node(syms.atom, [LParen(), node, RParen()])
 
 
-consuming_calls = {
-    "sorted",
-    "list",
-    "set",
-    "any",
-    "all",
-    "tuple",
-    "sum",
-    "min",
-    "max",
-    "enumerate",
-}
+consuming_calls = {"sorted", "list", "set", "any", "all", "tuple", "sum", "min", "max", "enumerate"}
 
 
 def attr_chain(obj, attr):
@@ -303,10 +285,7 @@ def is_probably_builtin(node):
         return False
     if parent.type == syms.parameters or (
         parent.type == syms.typedargslist
-        and (
-            (prev is not None and prev.type == token.COMMA)
-            or parent.children[0] is node
-        )
+        and ((prev is not None and prev.type == token.COMMA) or parent.children[0] is node)
     ):
         # The name of an argument.
         return False
@@ -368,11 +347,7 @@ def touch_import(package, name, node):
         if it was not imported. """
 
     def is_import_stmt(node):
-        return (
-            node.type == syms.simple_stmt
-            and node.children
-            and is_import(node.children[0])
-        )
+        return node.type == syms.simple_stmt and node.children and is_import(node.children[0])
 
     root = find_root(node)
 
@@ -395,19 +370,12 @@ def touch_import(package, name, node):
     # if that also fails, we stick to the beginning of the file
     if insert_pos == 0:
         for idx, node in enumerate(root.children):
-            if (
-                node.type == syms.simple_stmt
-                and node.children
-                and node.children[0].type == token.STRING
-            ):
+            if node.type == syms.simple_stmt and node.children and node.children[0].type == token.STRING:
                 insert_pos = idx + 1
                 break
 
     if package is None:
-        import_ = Node(
-            syms.import_name,
-            [Leaf(token.NAME, "import"), Leaf(token.NAME, name, prefix=" ")],
-        )
+        import_ = Node(syms.import_name, [Leaf(token.NAME, "import"), Leaf(token.NAME, name, prefix=" ")])
     else:
         import_ = FromImport(package, [Leaf(token.NAME, name, prefix=" ")])
 
@@ -443,9 +411,7 @@ def find_binding(name, node, package=None):
                 for i, kid in enumerate(child.children[3:]):
                     if kid.type == token.COLON and kid.value == ":":
                         # i+3 is the colon, i+4 is the suite
-                        n = find_binding(
-                            name, make_suite(child.children[i + 4]), package
-                        )
+                        n = find_binding(name, make_suite(child.children[i + 4]), package)
                         if n:
                             ret = n
         elif child.type in _def_syms and child.children[1].value == name:

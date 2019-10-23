@@ -29,7 +29,8 @@ into
 
 # Local imports
 from crosswind import fixer_base
-from crosswind.fixer_util import Call, Comma, Name, Node, BlankLine, syms
+from crosswind.fixer_util import BlankLine, Call, Comma, Name, Node, syms
+
 
 CMP = "(n='!=' | '==' | 'is' | n=comp_op< 'is' 'not' >)"
 TYPE = "power< 'type' trailer< '(' x=any ')' > >"

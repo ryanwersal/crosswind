@@ -15,9 +15,9 @@ Python 2.6 figure it out.
 
 # Local imports
 from crosswind import fixer_base
-from crosswind.pytree import Node
+from crosswind.fixer_util import ArgList, ListComp, Name, in_special_context
 from crosswind.pygram import python_symbols as syms
-from crosswind.fixer_util import Name, ArgList, ListComp, in_special_context
+from crosswind.pytree import Node
 
 
 class FixFilter(fixer_base.ConditionalFix):

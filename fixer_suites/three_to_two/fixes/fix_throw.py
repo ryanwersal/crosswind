@@ -1,9 +1,9 @@
 """Fixer for 'g.throw(E(V).with_traceback(T))' -> 'g.throw(E, V, T)'"""
 
 from crosswind import fixer_base
-from crosswind.pytree import Node, Leaf
-from crosswind.pgen2 import token
 from crosswind.fixer_util import Comma
+from crosswind.pgen2 import token
+from crosswind.pytree import Leaf, Node
 
 
 class FixThrow(fixer_base.BaseFix):

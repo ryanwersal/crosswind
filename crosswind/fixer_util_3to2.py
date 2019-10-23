@@ -1,8 +1,9 @@
 """Variety of utilities for authoring 3to2 fixers."""
 
-from .pygram import token, python_symbols as syms
-from .pytree import Leaf, Node
 from .fixer_util import *
+from .pgen2 import token
+from .pygram import python_symbols as syms
+from .pytree import Leaf, Node
 
 
 def Star(prefix=None):
@@ -86,10 +87,7 @@ def suitify(parent):
     else:
         raise ValueError("No class suite and no ':'!")
     # Move everything into a suite node
-    suite = Node(
-        syms.suite,
-        [Newline(), Leaf(token.INDENT, indentation(node) + indentation_step(node))],
-    )
+    suite = Node(syms.suite, [Newline(), Leaf(token.INDENT, indentation(node) + indentation_step(node))])
     one_node = parent.children[i + 1]
     one_node.remove()
     one_node.prefix = ""
@@ -111,13 +109,7 @@ def NameImport(package, as_name=None, prefix=None):
     return Node(syms.import_name, children)
 
 
-_compound_stmts = (
-    syms.if_stmt,
-    syms.while_stmt,
-    syms.for_stmt,
-    syms.try_stmt,
-    syms.with_stmt,
-)
+_compound_stmts = (syms.if_stmt, syms.while_stmt, syms.for_stmt, syms.try_stmt, syms.with_stmt)
 _import_stmts = (syms.import_name, syms.import_from)
 
 
@@ -199,11 +191,7 @@ def future_import(feature, node):
 
     insert_pos = 0
     for idx, node in enumerate(root.children):
-        if (
-            node.type == syms.simple_stmt
-            and node.children
-            and node.children[0].type == token.STRING
-        ):
+        if node.type == syms.simple_stmt and node.children and node.children[0].type == token.STRING:
             insert_pos = idx + 1
             break
 

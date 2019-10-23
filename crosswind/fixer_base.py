@@ -3,13 +3,11 @@
 
 """Base class for fixers (optional, but recommended)."""
 
-# Python imports
 import itertools
 
-# Local imports
-from .patcomp import PatternCompiler
 from . import pygram
 from .fixer_util import does_tree_import
+from .patcomp import PatternCompiler
 
 
 class BaseFix(object):
@@ -65,9 +63,7 @@ class BaseFix(object):
         """
         if self.PATTERN is not None:
             PC = PatternCompiler()
-            self.pattern, self.pattern_tree = PC.compile_pattern(
-                self.PATTERN, with_tree=True
-            )
+            self.pattern, self.pattern_tree = PC.compile_pattern(self.PATTERN, with_tree=True)
 
     def set_filename(self, filename):
         """Set the filename.

@@ -11,21 +11,18 @@ provides infrastructure to write your own refactoring tool.
 __author__ = "Guido van Rossum <guido@python.org>"
 
 
-# Python imports
+import collections
 import io
+import logging
+import operator
 import os
 import pkgutil
 import sys
-import logging
-import operator
-import collections
 from itertools import chain
 
-# Local imports
-from .pgen2 import driver, tokenize, token
+from . import btm_matcher as bm, pygram, pytree
 from .fixer_util import find_root
-from . import pytree, pygram
-from . import btm_matcher as bm
+from .pgen2 import driver, token, tokenize
 
 
 def get_all_fixer_suites():
@@ -102,9 +99,7 @@ def _get_headnode_dict(fixer_list):
                 head_nodes[fixer._accept_type].append(fixer)
             else:
                 every.append(fixer)
-    for node_type in chain(
-        pygram.python_grammar.symbol2number.values(), pygram.python_grammar.tokens
-    ):
+    for node_type in chain(pygram.python_grammar.symbol2number.values(), pygram.python_grammar.tokens):
         head_nodes[node_type].extend(every)
     return dict(head_nodes)
 
@@ -113,9 +108,7 @@ def get_fixers_from_package(pkg_name):
     """
     Return the fully qualified names for fixers in the package pkg_name.
     """
-    return [
-        pkg_name + "." + fix_name for fix_name in get_all_fix_names(pkg_name, False)
-    ]
+    return [pkg_name + "." + fix_name for fix_name in get_all_fix_names(pkg_name, False)]
 
 
 def get_fixers_from_packages(pkg_names):
@@ -208,9 +201,7 @@ class RefactoringTool(object):
         self.logger = logging.getLogger("RefactoringTool")
         self.fixer_log = []
         self.wrote = False
-        self.driver = driver.Driver(
-            self.grammar, convert=pytree.convert, logger=self.logger
-        )
+        self.driver = driver.Driver(self.grammar, convert=pytree.convert, logger=self.logger)
         self.pre_order, self.post_order = self.get_fixers()
 
         self.files = []  # List of files that were or should be modified
@@ -254,11 +245,7 @@ class RefactoringTool(object):
             except AttributeError:
                 raise FixerError("Can't find %s.%s" % (fix_name, class_name)) from None
             fixer = fix_class(self.options, self.fixer_log)
-            if (
-                fixer.explicit
-                and self.explicit is not True
-                and fix_mod_path not in self.explicit
-            ):
+            if fixer.explicit and self.explicit is not True and fix_mod_path not in self.explicit:
                 self.log_message("Skipping optional fixer: %s", fix_name)
                 continue
 
@@ -360,9 +347,7 @@ class RefactoringTool(object):
             tree = self.refactor_string(input, filename)
             if self.write_unchanged_files or (tree and tree.was_changed):
                 # The [:-1] is to take off the \n we added earlier
-                self.processed_file(
-                    str(tree)[:-1], filename, write=write, encoding=encoding
-                )
+                self.processed_file(str(tree)[:-1], filename, write=write, encoding=encoding)
             else:
                 self.log_debug("No changes in %s", filename)
 
@@ -510,9 +495,7 @@ class RefactoringTool(object):
                         node.replace(new)
                         node = new
 
-    def processed_file(
-        self, new_text, filename, old_text=None, write=False, encoding=None
-    ):
+    def processed_file(self, new_text, filename, old_text=None, write=False, encoding=None):
         """
         Called when a file has been refactored and there may be changes.
         """
@@ -577,23 +560,18 @@ class RefactoringTool(object):
             lineno += 1
             if line.lstrip().startswith(self.PS1):
                 if block is not None:
-                    result.extend(
-                        self.refactor_doctest(block, block_lineno, indent, filename)
-                    )
+                    result.extend(self.refactor_doctest(block, block_lineno, indent, filename))
                 block_lineno = lineno
                 block = [line]
                 i = line.find(self.PS1)
                 indent = line[:i]
             elif indent is not None and (
-                line.startswith(indent + self.PS2)
-                or line == indent + self.PS2.rstrip() + "\n"
+                line.startswith(indent + self.PS2) or line == indent + self.PS2.rstrip() + "\n"
             ):
                 block.append(line)
             else:
                 if block is not None:
-                    result.extend(
-                        self.refactor_doctest(block, block_lineno, indent, filename)
-                    )
+                    result.extend(self.refactor_doctest(block, block_lineno, indent, filename))
                 block = None
                 indent = None
                 result.append(line)
@@ -615,13 +593,7 @@ class RefactoringTool(object):
             if self.logger.isEnabledFor(logging.DEBUG):
                 for line in block:
                     self.log_debug("Source: %s", line.rstrip("\n"))
-            self.log_error(
-                "Can't parse docstring in %s line %s: %s: %s",
-                filename,
-                lineno,
-                err.__class__.__name__,
-                err,
-            )
+            self.log_error("Can't parse docstring in %s line %s: %s: %s", filename, lineno, err.__class__.__name__, err)
             return block
         if self.refactor_tree(tree, filename):
             new = str(tree).splitlines(keepends=True)
@@ -713,9 +685,7 @@ class MultiprocessRefactoringTool(RefactoringTool):
 
     def refactor(self, items, write=False, doctests_only=False, num_processes=1):
         if num_processes == 1:
-            return super(MultiprocessRefactoringTool, self).refactor(
-                items, write, doctests_only
-            )
+            return super(MultiprocessRefactoringTool, self).refactor(items, write, doctests_only)
         try:
             import multiprocessing
         except ImportError:
@@ -724,15 +694,11 @@ class MultiprocessRefactoringTool(RefactoringTool):
             raise RuntimeError("already doing multiple processes")
         self.queue = multiprocessing.JoinableQueue()
         self.output_lock = multiprocessing.Lock()
-        processes = [
-            multiprocessing.Process(target=self._child) for i in range(num_processes)
-        ]
+        processes = [multiprocessing.Process(target=self._child) for i in range(num_processes)]
         try:
             for p in processes:
                 p.start()
-            super(MultiprocessRefactoringTool, self).refactor(
-                items, write, doctests_only
-            )
+            super(MultiprocessRefactoringTool, self).refactor(items, write, doctests_only)
         finally:
             self.queue.join()
             for i in range(num_processes):
@@ -756,6 +722,4 @@ class MultiprocessRefactoringTool(RefactoringTool):
         if self.queue is not None:
             self.queue.put((args, kwargs))
         else:
-            return super(MultiprocessRefactoringTool, self).refactor_file(
-                *args, **kwargs
-            )
+            return super(MultiprocessRefactoringTool, self).refactor_file(*args, **kwargs)

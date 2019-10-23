@@ -3,7 +3,7 @@ Fixer for division: from __future__ import division if needed
 """
 
 from crosswind import fixer_base
-from crosswind.fixer_util_3to2 import token, future_import
+from crosswind.fixer_util_3to2 import future_import, token
 
 
 def match_division(node):
@@ -12,11 +12,7 @@ def match_division(node):
     so we match that and only that.
     """
     slash = token.SLASH
-    return (
-        node.type == slash
-        and not node.next_sibling.type == slash
-        and not node.prev_sibling.type == slash
-    )
+    return node.type == slash and not node.next_sibling.type == slash and not node.prev_sibling.type == slash
 
 
 class FixDivision(fixer_base.BaseFix):

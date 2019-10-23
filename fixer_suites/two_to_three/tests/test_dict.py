@@ -1,5 +1,6 @@
-from .util import FixerTestCase
 from crosswind import fixer_util
+
+from .util import FixerTestCase
 
 
 class Test_dict(FixerTestCase):

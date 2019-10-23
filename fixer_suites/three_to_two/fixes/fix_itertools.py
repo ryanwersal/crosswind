@@ -7,8 +7,8 @@ itertools.filterfalse -> itertools.ifilterfalse
 """
 
 from crosswind import fixer_base
+from crosswind.fixer_util import is_probably_builtin, touch_import
 from crosswind.pytree import Node
-from crosswind.fixer_util import touch_import, is_probably_builtin
 
 
 class FixItertools(fixer_base.BaseFix):

@@ -7,8 +7,8 @@ matching. This reduces significantly the number of candidate nodes."""
 
 __author__ = "George Boutsioukis <gboutsioukis@gmail.com>"
 
-import logging
 import itertools
+import logging
 from collections import defaultdict
 
 from . import pytree
@@ -125,10 +125,7 @@ class BottomMatcher(object):
                 else:
                     # matching failed, reset automaton
                     current_ac_node = self.root
-                    if (
-                        current_ast_node.parent is not None
-                        and current_ast_node.parent.was_checked
-                    ):
+                    if current_ast_node.parent is not None and current_ast_node.parent.was_checked:
                         # the rest of the tree upwards has been checked, next leaf
                         break
 
@@ -149,10 +146,7 @@ class BottomMatcher(object):
         def print_node(node):
             for subnode_key in node.transition_table.keys():
                 subnode = node.transition_table[subnode_key]
-                print(
-                    "%d -> %d [label=%s] //%s"
-                    % (node.id, subnode.id, type_repr(subnode_key), str(subnode.fixers))
-                )
+                print("%d -> %d [label=%s] //%s" % (node.id, subnode.id, type_repr(subnode_key), str(subnode.fixers)))
                 if subnode_key == 1:
                     print(subnode.content)
                 print_node(subnode)

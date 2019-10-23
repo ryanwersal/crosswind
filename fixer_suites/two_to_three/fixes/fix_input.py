@@ -2,9 +2,8 @@
 # Author: Andre Roberge
 
 # Local imports
-from crosswind import fixer_base
+from crosswind import fixer_base, patcomp
 from crosswind.fixer_util import Call, Name
-from crosswind import patcomp
 
 
 context = patcomp.compile_pattern("power< 'eval' trailer< '(' any ')' > >")

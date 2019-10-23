@@ -5,6 +5,7 @@
 
 import re
 
+
 simple_escapes = {
     "a": "\a",
     "b": "\b",

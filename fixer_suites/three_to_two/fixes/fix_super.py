@@ -11,7 +11,8 @@ def something(self):
 """
 
 from crosswind import fixer_base
-from crosswind.fixer_util import Node, Leaf, token, syms, Name, Comma, Dot
+from crosswind.fixer_util import Comma, Dot, Leaf, Name, Node, syms, token
+
 
 dot_class = Node(syms.trailer, [Dot(), Name("__class__")])
 
@@ -82,8 +83,7 @@ class FixSuper(fixer_base.BaseFix):
         param = get_firstparam(node)
         if param is None:
             self.cannot_convert(
-                node,
-                "super() with no arguments must be called inside a function that has at least one parameter",
+                node, "super() with no arguments must be called inside a function that has at least one parameter"
             )
             return
         class_name = get_class_name(node)

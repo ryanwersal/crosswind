@@ -5,16 +5,10 @@
 # Author: Nick Edds
 
 # Local imports
-from crosswind.fixer_util import (
-    Name,
-    Comma,
-    FromImport,
-    Newline,
-    find_indentation,
-    Node,
-    syms,
-)
-from .fix_imports import alternates, FixImports
+from crosswind.fixer_util import Comma, FromImport, Name, Newline, Node, find_indentation, syms
+
+from .fix_imports import FixImports, alternates
+
 
 MAPPING = {
     "urllib": [

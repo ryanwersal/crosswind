@@ -1,7 +1,7 @@
 """Fixer for 'raise E(V).with_traceback(T)' -> 'raise E, V, T'"""
 
 from crosswind import fixer_base
-from crosswind.fixer_util import Comma, Node, Leaf, token, syms
+from crosswind.fixer_util import Comma, Leaf, Node, syms, token
 
 
 class FixRaise(fixer_base.BaseFix):
@@ -14,21 +14,12 @@ class FixRaise(fixer_base.BaseFix):
         name, val, trc = (results.get("name"), results.get("val"), results.get("trc"))
         chain = results.get("chain")
         if chain is not None:
-            self.warning(
-                node, "explicit exception chaining is not supported in Python 2"
-            )
+            self.warning(node, "explicit exception chaining is not supported in Python 2")
             chain.prev_sibling.remove()
             chain.remove()
         if trc is not None:
             val = val[0] if val else Leaf(token.NAME, "None")
             val.prefix = trc.prefix = " "
-            kids = [
-                Leaf(token.NAME, "raise"),
-                name.clone(),
-                Comma(),
-                val.clone(),
-                Comma(),
-                trc.clone(),
-            ]
+            kids = [Leaf(token.NAME, "raise"), name.clone(), Comma(), val.clone(), Comma(), trc.clone()]
             raise_stmt = Node(syms.raise_stmt, kids)
             node.replace(raise_stmt)

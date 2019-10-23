@@ -35,9 +35,7 @@ class FixItertoolsImports(fixer_base.BaseFix):
                 child.remove()
             elif member_name in ("ifilterfalse", "izip_longest"):
                 node.changed()
-                name_node.value = (
-                    "filterfalse" if member_name[1] == "f" else "zip_longest"
-                )
+                name_node.value = "filterfalse" if member_name[1] == "f" else "zip_longest"
 
         # Make sure the import statement is still sane
         children = imports.children[:] or [imports]
@@ -52,10 +50,7 @@ class FixItertoolsImports(fixer_base.BaseFix):
             children.pop().remove()
 
         # If there are no imports left, just get rid of the entire statement
-        if (
-            not (imports.children or getattr(imports, "value", None))
-            or imports.parent is None
-        ):
+        if not (imports.children or getattr(imports, "value", None)) or imports.parent is None:
             p = node.prefix
             node = BlankLine()
             node.prefix = p

@@ -5,6 +5,7 @@ Fixer for method.__X__ -> method.im_X
 from crosswind import fixer_base
 from crosswind.fixer_util import Name
 
+
 MAP = {
     "__func__": "im_func",
     "__self__": "im_self"

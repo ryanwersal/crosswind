@@ -6,10 +6,9 @@
 This converts apply(func, v, k) into (func)(*v, **k)."""
 
 # Local imports
-from crosswind import pytree
-from crosswind.pgen2 import token
-from crosswind import fixer_base
+from crosswind import fixer_base, pytree
 from crosswind.fixer_util import Call, Comma, parenthesize
+from crosswind.pgen2 import token
 
 
 class FixApply(fixer_base.BaseFix):
@@ -42,9 +41,7 @@ class FixApply(fixer_base.BaseFix):
                 return  # Make no change.
             if args.type == self.syms.argument and args.children[0].value == "**":
                 return  # Make no change.
-        if kwds and (
-            kwds.type == self.syms.argument and kwds.children[0].value == "**"
-        ):
+        if kwds and (kwds.type == self.syms.argument and kwds.children[0].value == "**"):
             return  # Make no change.
         prefix = node.prefix
         func = func.clone()

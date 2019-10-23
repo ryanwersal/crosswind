@@ -4,22 +4,23 @@ Fixer for:
 for (a,)* *b (,c)* [,] in d: ...
 """
 
-from crosswind import fixer_base
 from itertools import count
+
+from crosswind import fixer_base
 from crosswind.fixer_util_3to2 import (
     Assign,
-    Comma,
     Call,
-    Newline,
+    Comma,
+    Leaf,
     Name,
+    Newline,
+    Node,
     Number,
+    commatize,
     indentation,
     suitify,
-    commatize,
-    token,
     syms,
-    Node,
-    Leaf,
+    token,
 )
 
 
@@ -65,9 +66,7 @@ def assignment_source(num_pre, num_post, LISTNAME, ITERNAME):
                         [
                             Number(pre) if num_pre > 0 else Leaf(1, ""),
                             Leaf(token.COLON, ":"),
-                            Node(syms.factor, [Leaf(token.MINUS, "-"), Number(post)])
-                            if num_post > 0
-                            else Leaf(1, ""),
+                            Node(syms.factor, [Leaf(token.MINUS, "-"), Number(post)]) if num_post > 0 else Leaf(1, ""),
                         ],
                     ),
                     Leaf(token.RSQB, "]"),
@@ -89,12 +88,7 @@ def assignment_source(num_pre, num_post, LISTNAME, ITERNAME):
                         Leaf(token.LSQB, "["),
                         Node(
                             syms.subscript,
-                            [
-                                Node(
-                                    syms.factor, [Leaf(token.MINUS, "-"), Number(post)]
-                                ),
-                                Leaf(token.COLON, ":"),
-                            ],
+                            [Node(syms.factor, [Leaf(token.MINUS, "-"), Number(post)]), Leaf(token.COLON, ":")],
                         ),
                         Leaf(token.RSQB, "]"),
                     ],
@@ -119,9 +113,7 @@ class FixUnpacking(fixer_base.BaseFix):
         post=(',' any)* [','] > 'in' it=any ':' suite=any>"""
 
     def fix_explicit_context(self, node, results):
-        pre, name, post, source = (
-            results.get(n) for n in ("pre", "name", "post", "source")
-        )
+        pre, name, post, source = (results.get(n) for n in ("pre", "name", "post", "source"))
         pre = [n.clone() for n in pre if n.type == token.NAME]
         name.prefix = " "
         post = [n.clone() for n in post if n.type == token.NAME]
@@ -131,9 +123,7 @@ class FixUnpacking(fixer_base.BaseFix):
         target.append(Comma())
         source.prefix = ""
         setup_line = Assign(Name(self.LISTNAME), Call(Name("list"), [source.clone()]))
-        power_line = Assign(
-            target, assignment_source(len(pre), len(post), self.LISTNAME, self.ITERNAME)
-        )
+        power_line = Assign(target, assignment_source(len(pre), len(post), self.LISTNAME, self.ITERNAME))
         return setup_line, power_line
 
     def fix_implicit_context(self, node, results):
@@ -151,12 +141,8 @@ class FixUnpacking(fixer_base.BaseFix):
         target.append(Comma())
         source = it.clone()
         source.prefix = ""
-        setup_line = Assign(
-            Name(self.LISTNAME), Call(Name("list"), [Name(self.ITERNAME)])
-        )
-        power_line = Assign(
-            target, assignment_source(len(pre), len(post), self.LISTNAME, self.ITERNAME)
-        )
+        setup_line = Assign(Name(self.LISTNAME), Call(Name("list"), [Name(self.ITERNAME)]))
+        power_line = Assign(target, assignment_source(len(pre), len(post), self.LISTNAME, self.ITERNAME))
         return setup_line, power_line
 
     def transform(self, node, results):

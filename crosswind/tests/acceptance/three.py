@@ -49,7 +49,8 @@ from io import StringIO
 # Local imports
 from crosswind import pytree
 from crosswind.pgen2 import driver
-from crosswind.pygram import python_symbols, python_grammar
+from crosswind.pygram import python_grammar, python_symbols
+
 
 driver = driver.Driver(python_grammar, convert=pytree.convert)
 

@@ -9,10 +9,11 @@ more helpful than printing of (the first line of) the docstring,
 especially when debugging a test.
 """
 
+from crosswind import pytree
+
 # Testing imports
 from . import support
 
-from crosswind import pytree
 
 try:
     sorted
@@ -444,12 +445,7 @@ class TestPatterns(support.TestCase):
         pd = pytree.LeafPattern(1, "d", "pd")
         pe = pytree.LeafPattern(1, "e", "pe")
         pf = pytree.LeafPattern(1, "f", "pf")
-        pw = pytree.WildcardPattern(
-            [[pa, pb, pc], [pd, pe], [pa, pb], [pc, pd], [pe, pf]],
-            min=1,
-            max=4,
-            name="pw",
-        )
+        pw = pytree.WildcardPattern([[pa, pb, pc], [pd, pe], [pa, pb], [pc, pd], [pe, pf]], min=1, max=4, name="pw")
         self.assertEqual([x[0] for x in pw.generate_matches(leaves)], [3, 5, 2, 4, 6])
         pr = pytree.NodePattern(type=1000, content=[pw], name="pr")
         matches = list(pytree.generate_matches([pr], [root]))
@@ -463,12 +459,7 @@ class TestPatterns(support.TestCase):
 
     def test_has_key_example(self):
         pattern = pytree.NodePattern(
-            331,
-            (
-                pytree.LeafPattern(7),
-                pytree.WildcardPattern(name="args"),
-                pytree.LeafPattern(8),
-            ),
+            331, (pytree.LeafPattern(7), pytree.WildcardPattern(name="args"), pytree.LeafPattern(8))
         )
         l1 = pytree.Leaf(7, "(")
         l2 = pytree.Leaf(3, "x")

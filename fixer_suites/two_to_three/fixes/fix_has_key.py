@@ -30,8 +30,7 @@ CAVEATS:
 """
 
 # Local imports
-from crosswind import pytree
-from crosswind import fixer_base
+from crosswind import fixer_base, pytree
 from crosswind.fixer_util import Name, parenthesize
 
 

@@ -4,8 +4,8 @@ Convert use of sys.exitfunc to use the atexit module.
 
 # Author: Benjamin Peterson
 
-from crosswind import pytree, fixer_base
-from crosswind.fixer_util import Name, Attr, Call, Comma, Newline, syms
+from crosswind import fixer_base, pytree
+from crosswind.fixer_util import Attr, Call, Comma, Name, Newline, syms
 
 
 class FixExitfunc(fixer_base.BaseFix):
@@ -49,11 +49,7 @@ class FixExitfunc(fixer_base.BaseFix):
 
         if self.sys_import is None:
             # That's interesting.
-            self.warning(
-                node,
-                "Can't find sys import; Please add an atexit "
-                "import at the top of your file.",
-            )
+            self.warning(node, "Can't find sys import; Please add an atexit " "import at the top of your file.")
             return
 
         # Now add an atexit import after the sys import.
@@ -65,9 +61,7 @@ class FixExitfunc(fixer_base.BaseFix):
             containing_stmt = self.sys_import.parent
             position = containing_stmt.children.index(self.sys_import)
             stmt_container = containing_stmt.parent
-            new_import = pytree.Node(
-                syms.import_name, [Name("import"), Name("atexit", " ")]
-            )
+            new_import = pytree.Node(syms.import_name, [Name("import"), Name("atexit", " ")])
             new = pytree.Node(syms.simple_stmt, [new_import])
             containing_stmt.insert_child(position + 1, Newline())
             containing_stmt.insert_child(position + 2, new)

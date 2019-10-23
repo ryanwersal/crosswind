@@ -6,11 +6,12 @@ Fixer for:
 
 import re
 
-from crosswind.pgen2 import token
 from crosswind import fixer_base
+from crosswind.fixer_util import ArgList, Attr, Call, Comma, Name, Number, String
+from crosswind.pgen2 import token
 from crosswind.pygram import python_symbols as syms
 from crosswind.pytree import Node
-from crosswind.fixer_util import Number, Call, Attr, String, Name, ArgList, Comma
+
 
 baseMAPPING = {"b": 2, "o": 8, "x": 16}
 
@@ -50,22 +51,14 @@ class FixNumliterals(fixer_base.BaseFix):
         val = node.value
         base_ = base(val)
         if base_ == 8:
-            assert val.strip().startswith("0o") or val.strip().startswith(
-                "0O"
-            ), "Invalid format for octal literal"
+            assert val.strip().startswith("0o") or val.strip().startswith("0O"), "Invalid format for octal literal"
             node.changed()
             node.value = "".join(("0", val[2:]))
         elif base_ == 2:
-            assert (
-                val.startswith("0") and val[1] in "bB"
-            ), "Invalid format for binary literal"
+            assert val.startswith("0") and val[1] in "bB", "Invalid format for binary literal"
             # __builtins__.long
             func_name = Node(syms.power, Attr(Name("__builtins__"), Name("long")))
             # ("...", 2)
-            func_args = [
-                String("".join(('"', val.strip()[2:], '"'))),
-                Comma(),
-                Number(2, prefix=" "),
-            ]
+            func_args = [String("".join(('"', val.strip()[2:], '"'))), Comma(), Number(2, prefix=" ")]
             new_node = Call(func_name, func_args, node.prefix)
             return new_node

@@ -5,7 +5,7 @@ Optional fixer to transform set() calls to set literals.
 # Author: Benjamin Peterson
 
 from crosswind import fixer_base, pytree
-from crosswind.fixer_util import token, syms
+from crosswind.fixer_util import syms, token
 
 
 class FixSetLiteral(fixer_base.BaseFix):

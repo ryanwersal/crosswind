@@ -3,7 +3,7 @@ Fixer for "class Foo: ..." -> "class Foo(object): ..."
 """
 
 from crosswind import fixer_base
-from crosswind.fixer_util import Node, Leaf, token, syms, LParen, RParen, Name
+from crosswind.fixer_util import Leaf, LParen, Name, Node, RParen, syms, token
 
 
 def insert_object(node, idx):

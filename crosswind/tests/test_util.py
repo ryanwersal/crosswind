@@ -1,13 +1,11 @@
 """ Test suite for the code in fixer_util """
 
-# Testing imports
-from . import support
-
-# Local imports
-from crosswind.pytree import Node, Leaf
 from crosswind import fixer_util
-from crosswind.fixer_util import Attr, Name, Call, Comma
+from crosswind.fixer_util import Attr, Call, Comma, Name
 from crosswind.pgen2 import token
+from crosswind.pytree import Leaf, Node
+
+from . import support
 
 
 def parse(code, strip_levels=0):
@@ -92,12 +90,7 @@ class Test_Call(MacroTestCase):
         kids = [
             None,
             [Leaf(token.NUMBER, 1), Leaf(token.NUMBER, 2), Leaf(token.NUMBER, 3)],
-            [
-                Leaf(token.NUMBER, 1),
-                Leaf(token.NUMBER, 3),
-                Leaf(token.NUMBER, 2),
-                Leaf(token.NUMBER, 4),
-            ],
+            [Leaf(token.NUMBER, 1), Leaf(token.NUMBER, 3), Leaf(token.NUMBER, 2), Leaf(token.NUMBER, 4)],
             [Leaf(token.STRING, "b"), Leaf(token.STRING, "j", prefix=" ")],
         ]
         self.assertStr(self._Call("A"), "A()")

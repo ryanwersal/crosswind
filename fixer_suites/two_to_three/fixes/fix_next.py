@@ -5,11 +5,11 @@
 #   - listcomp "next" names aren't warned
 #   - "with" statement targets aren't checked
 
-# Local imports
+from crosswind import fixer_base
+from crosswind.fixer_util import Call, Name, find_binding
 from crosswind.pgen2 import token
 from crosswind.pygram import python_symbols as syms
-from crosswind import fixer_base
-from crosswind.fixer_util import Name, Call, find_binding
+
 
 bind_warning = "Calls to builtin next() possibly shadowed by global binding"
 

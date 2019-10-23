@@ -1,15 +1,14 @@
 """Support code for test_*.py files"""
 # Author: Collin Winter
 
-# Python imports
-import unittest
 import os
 import os.path
+import unittest
 from textwrap import dedent
 
-# Local imports
-from crosswind import pytree, refactor, pygram
+from crosswind import pygram, pytree, refactor
 from crosswind.pgen2 import driver as pgen2_driver
+
 
 test_dir = os.path.dirname(__file__)
 proj_dir = os.path.normpath(os.path.join(test_dir, ".."))
@@ -18,9 +17,7 @@ grammar = pgen2_driver.load_grammar(grammar_path)
 grammar_no_print_statement = pgen2_driver.load_grammar(grammar_path)
 del grammar_no_print_statement.keywords["print"]
 driver = pgen2_driver.Driver(grammar, convert=pytree.convert)
-driver_no_print_statement = pgen2_driver.Driver(
-    grammar_no_print_statement, convert=pytree.convert
-)
+driver_no_print_statement = pgen2_driver.Driver(grammar_no_print_statement, convert=pytree.convert)
 
 
 def parse_string(string):

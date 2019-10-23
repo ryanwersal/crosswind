@@ -4,6 +4,7 @@ from . import pytree
 from .pgen2 import grammar, token
 from .pygram import pattern_symbols, python_symbols
 
+
 syms = pattern_symbols
 pysyms = python_symbols
 tokens = grammar.opmap
@@ -150,12 +151,8 @@ def reduce_tree(node, parent=None):
         if isinstance(node.children[0], pytree.Leaf) and node.children[0].value == "(":
             # skip parentheses
             return reduce_tree(node.children[1], parent)
-        if (
-            isinstance(node.children[0], pytree.Leaf) and node.children[0].value == "["
-        ) or (
-            len(node.children) > 1
-            and hasattr(node.children[1], "value")
-            and node.children[1].value == "["
+        if (isinstance(node.children[0], pytree.Leaf) and node.children[0].value == "[") or (
+            len(node.children) > 1 and hasattr(node.children[1], "value") and node.children[1].value == "["
         ):
             # skip whole unit if its optional
             return None
@@ -253,13 +250,9 @@ def get_characteristic_subpattern(subpatterns):
     common_chars = "[]().,:"
     for subpattern in subpatterns:
         if any(rec_test(subpattern, lambda x: type(x) is str)):
-            if any(
-                rec_test(subpattern, lambda x: isinstance(x, str) and x in common_chars)
-            ):
+            if any(rec_test(subpattern, lambda x: isinstance(x, str) and x in common_chars)):
                 subpatterns_with_common_chars.append(subpattern)
-            elif any(
-                rec_test(subpattern, lambda x: isinstance(x, str) and x in common_names)
-            ):
+            elif any(rec_test(subpattern, lambda x: isinstance(x, str) and x in common_names)):
                 subpatterns_with_common_names.append(subpattern)
 
             else:

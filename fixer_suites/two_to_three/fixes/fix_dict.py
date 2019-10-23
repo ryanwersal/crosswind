@@ -28,11 +28,8 @@ as an argument to a function that introspects the argument).
 """
 
 # Local imports
-from crosswind import pytree
-from crosswind import patcomp
-from crosswind import fixer_base
-from crosswind.fixer_util import Name, Call, Dot
-from crosswind import fixer_util
+from crosswind import fixer_base, fixer_util, patcomp, pytree
+from crosswind.fixer_util import Call, Dot, Name
 
 
 iter_exempt = fixer_util.consuming_calls | {"iter"}
@@ -90,11 +87,7 @@ class FixDict(fixer_base.BaseFix):
         if node.parent is None:
             return False
         results = {}
-        if (
-            node.parent.parent is not None
-            and self.p1.match(node.parent.parent, results)
-            and results["node"] is node
-        ):
+        if node.parent.parent is not None and self.p1.match(node.parent.parent, results) and results["node"] is node:
             if isiter:
                 # iter(d.iterkeys()) -> iter(d.keys()), etc.
                 return results["func"].value in iter_exempt

@@ -4,10 +4,11 @@ it.__next__() -> it.next().
 next(it) -> it.next().
 """
 
+from crosswind import fixer_base
+from crosswind.fixer_util import Attr, Call, Name, find_binding
 from crosswind.pgen2 import token
 from crosswind.pygram import python_symbols as syms
-from crosswind import fixer_base
-from crosswind.fixer_util import Name, Call, find_binding, Attr
+
 
 bind_warning = "Calls to builtin next() possibly shadowed by global binding"
 

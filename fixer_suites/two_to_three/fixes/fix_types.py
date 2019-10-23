@@ -23,6 +23,7 @@ There should be another fixer that handles at least the following constants:
 from crosswind import fixer_base
 from crosswind.fixer_util import Name
 
+
 _TYPE_MAPPING = {
     "BooleanType": "bool",
     "BufferType": "memoryview",

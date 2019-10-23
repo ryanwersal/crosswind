@@ -6,16 +6,8 @@ This fixer is rather sensitive to incorrect py3k syntax.
 # Note: "relevant" parameters are parameters following the first STAR in the list.
 
 from crosswind import fixer_base
-from crosswind.fixer_util_3to2 import (
-    token,
-    indentation,
-    suitify,
-    String,
-    Newline,
-    Comma,
-    DoubleStar,
-    Name,
-)
+from crosswind.fixer_util_3to2 import Comma, DoubleStar, Name, Newline, String, indentation, suitify, token
+
 
 _assign_template = "%(name)s = %(kwargs)s['%(name)s']; del %(kwargs)s['%(name)s']"
 _if_template = "if '%(name)s' in %(kwargs)s: %(assign)s"
@@ -139,30 +131,17 @@ class FixKwargs(fixer_base.BaseFix):
         for name, default_value in gen_params(params_rawlist):
             if default_value is None:
                 suite.insert_child(2, Newline())
-                suite.insert_child(
-                    2,
-                    String(
-                        _assign_template % {"name": name, "kwargs": new_kwargs},
-                        prefix=ident,
-                    ),
-                )
+                suite.insert_child(2, String(_assign_template % {"name": name, "kwargs": new_kwargs}, prefix=ident))
             else:
                 suite.insert_child(2, Newline())
-                suite.insert_child(
-                    2,
-                    String(
-                        _else_template % {"name": name, "default": default_value},
-                        prefix=ident,
-                    ),
-                )
+                suite.insert_child(2, String(_else_template % {"name": name, "default": default_value}, prefix=ident))
                 suite.insert_child(2, Newline())
                 suite.insert_child(
                     2,
                     String(
                         _if_template
                         % {
-                            "assign": _assign_template
-                            % {"name": name, "kwargs": new_kwargs},
+                            "assign": _assign_template % {"name": name, "kwargs": new_kwargs},
                             "name": name,
                             "kwargs": new_kwargs,
                         },

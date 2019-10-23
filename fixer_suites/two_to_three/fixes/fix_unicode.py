@@ -8,8 +8,9 @@ r"""Fixer for unicode.
 
 """
 
-from crosswind.pgen2 import token
 from crosswind import fixer_base
+from crosswind.pgen2 import token
+
 
 _mapping = {"unichr": "chr", "unicode": "str"}
 
@@ -30,12 +31,7 @@ class FixUnicode(fixer_base.BaseFix):
         elif node.type == token.STRING:
             val = node.value
             if not self.unicode_literals and val[0] in "'\"" and "\\" in val:
-                val = r"\\".join(
-                    [
-                        v.replace("\\u", r"\\u").replace("\\U", r"\\U")
-                        for v in val.split(r"\\")
-                    ]
-                )
+                val = r"\\".join([v.replace("\\u", r"\\u").replace("\\U", r"\\U") for v in val.split(r"\\")])
             if val[0] in "uU":
                 val = val[1:]
             if val == node.value:

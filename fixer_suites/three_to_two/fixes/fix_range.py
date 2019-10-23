@@ -4,10 +4,11 @@ range(s) -> xrange(s)
 list(range(s)) -> range(s)
 """
 
+import token
+
 from crosswind import fixer_base
 from crosswind.fixer_util import Name, is_probably_builtin
 from crosswind.pygram import python_symbols as syms
-import token
 
 
 def list_called(node):
@@ -18,12 +19,7 @@ def list_called(node):
     parent = node.parent
     if parent is not None and parent.type == syms.trailer:
         prev = parent.prev_sibling
-        if (
-            prev is not None
-            and prev.type == token.NAME
-            and prev.value == "list"
-            and is_probably_builtin(prev)
-        ):
+        if prev is not None and prev.type == token.NAME and prev.value == "list" and is_probably_builtin(prev):
             return prev.parent
     return False
 

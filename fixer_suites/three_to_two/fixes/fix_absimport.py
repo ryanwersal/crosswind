@@ -3,8 +3,8 @@ Add 'from __future__ import absolute_import' to any file
 that uses imports.
 """
 from crosswind import fixer_base
-from crosswind.pygram import python_symbols as syms
 from crosswind.fixer_util_3to2 import future_import
+from crosswind.pygram import python_symbols as syms
 
 
 class FixAbsimport(fixer_base.BaseFix):
@@ -20,9 +20,7 @@ class FixAbsimport(fixer_base.BaseFix):
         self.__abs_added = False
 
     def match(self, node):
-        return (
-            node.type in (syms.import_name, syms.import_from) and not self.__abs_added
-        )
+        return node.type in (syms.import_name, syms.import_from) and not self.__abs_added
 
     def transform(self, node, results):
         try:

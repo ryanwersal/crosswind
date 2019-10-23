@@ -16,22 +16,14 @@ print(1,2,3,sep=" ",end="\n") -> print 1,2,3
 
 from __future__ import with_statement  # Aiming for 2.5-compatible code
 
-from crosswind import fixer_base
-from crosswind.pytree import Node, Leaf
-from crosswind.pygram import python_symbols as syms, token
-from crosswind.fixer_util import (
-    Name,
-    FromImport,
-    Newline,
-    Call,
-    Comma,
-    Dot,
-    LParen,
-    RParen,
-    touch_import,
-)
-import warnings
 import sys
+import warnings
+
+from crosswind import fixer_base
+from crosswind.fixer_util import Call, Comma, Dot, LParen, Name, RParen, touch_import
+from crosswind.pgen2 import token
+from crosswind.pygram import python_symbols as syms
+from crosswind.pytree import Leaf, Node
 
 
 def gen_printargs(lst):
@@ -87,11 +79,7 @@ def add_file_part(file, lst):
 
 
 def add_sep_part(sep, pos, lst):
-    if (
-        sep is not None
-        and not isNone(sep)
-        and not (sep.type == token.STRING and sep.value in ("' '", '" "'))
-    ):
+    if sep is not None and not isNone(sep) and not (sep.type == token.STRING and sep.value in ("' '", '" "')):
         temp = []
         for arg in pos:
             temp.append(_unicode(arg.clone()))
@@ -119,27 +107,13 @@ def add_sep_part(sep, pos, lst):
 def add_end_part(end, file, parent, loc):
     if isNone(end):
         return
-    if end.type == token.STRING and end.value in (
-        "' '",
-        '" "',
-        "u' '",
-        'u" "',
-        "b' '",
-        'b" "',
-    ):
+    if end.type == token.STRING and end.value in ("' '", '" "', "u' '", 'u" "', "b' '", 'b" "'):
         return
     if file is None:
         touch_import(None, "sys", parent)
-        file = Node(
-            syms.power, [Name("sys"), Node(syms.trailer, [Dot(), Name("stdout")])]
-        )
+        file = Node(syms.power, [Name("sys"), Node(syms.trailer, [Dot(), Name("stdout")])])
     end_part = Node(
-        syms.power,
-        [
-            file,
-            Node(syms.trailer, [Dot(), Name("write")]),
-            Node(syms.trailer, [LParen(), end, RParen()]),
-        ],
+        syms.power, [file, Node(syms.trailer, [Dot(), Name("write")]), Node(syms.trailer, [LParen(), end, RParen()])]
     )
     end_part.prefix = " "
     parent.insert_child(loc, Leaf(token.SEMI, ";"))
@@ -161,9 +135,7 @@ def replace_print(pos, opts, old_node=None):
         parent = old_node.parent
         i = old_node.remove()
     parent.insert_child(i, new_node)
-    if end is not None and not (
-        end.type == token.STRING and end.value in ("'\\n'", '"\\n"')
-    ):
+    if end is not None and not (end.type == token.STRING and end.value in ("'\\n'", '"\\n"')):
         add_end_part(end, file, parent, i + 1)
     return new_node
 
@@ -250,14 +222,9 @@ class FixPrint(fixer_base.BaseFix):
             with warnings.catch_warnings(record=True) as w:
                 new_node = replace_print(pos, opts, old_node=node)
                 if len(w) > 0:
-                    self.warning(
-                        node,
-                        "coercing to unicode even though this may be a bytes object",
-                    )
+                    self.warning(node, "coercing to unicode even though this may be a bytes object")
         except AttributeError:
             # Python 2.5 doesn't have warnings.catch_warnings, so we're in Python 2.5 code here...
-            new_node = replace_print(
-                pos, dict([(bytes(k), opts[k]) for k in opts]), old_node=node
-            )
+            new_node = replace_print(pos, dict([(bytes(k), opts[k]) for k in opts]), old_node=node)
 
         new_node.prefix = node.prefix

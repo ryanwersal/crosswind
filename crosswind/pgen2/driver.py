@@ -17,13 +17,13 @@ __all__ = ["Driver", "load_grammar"]
 
 # Python imports
 import io
-import os
 import logging
+import os
 import pkgutil
 import sys
 
 # Pgen imports
-from . import grammar, parse, token, tokenize, pgen
+from . import grammar, parse, pgen, token, tokenize
 
 
 class Driver(object):
@@ -65,9 +65,7 @@ class Driver(object):
             if type == token.OP:
                 type = grammar.opmap[value]
             if debug:
-                self.logger.debug(
-                    "%s %r (prefix=%r)", token.tok_name[type], value, prefix
-                )
+                self.logger.debug("%s %r (prefix=%r)", token.tok_name[type], value, prefix)
             if p.addtoken(type, value, (prefix, start)):
                 if debug:
                     self.logger.debug("Stop.")

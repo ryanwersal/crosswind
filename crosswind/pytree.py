@@ -15,6 +15,7 @@ __author__ = "Guido van Rossum <guido@python.org>"
 import sys
 from io import StringIO
 
+
 HUGE = 0x7FFFFFFF  # maximum repeat count, default max
 
 _type_reprs = {}
@@ -239,11 +240,7 @@ class Node(Base):
 
     def __repr__(self):
         """Return a canonical string representation."""
-        return "%s(%s, %r)" % (
-            self.__class__.__name__,
-            type_repr(self.type),
-            self.children,
-        )
+        return "%s(%s, %r)" % (self.__class__.__name__, type_repr(self.type), self.children)
 
     def __unicode__(self):
         """
@@ -262,11 +259,7 @@ class Node(Base):
 
     def clone(self):
         """Return a cloned (deep) copy of self."""
-        return Node(
-            self.type,
-            [ch.clone() for ch in self.children],
-            fixers_applied=self.fixers_applied,
-        )
+        return Node(self.type, [ch.clone() for ch in self.children], fixers_applied=self.fixers_applied)
 
     def post_order(self):
         """Return a post-order iterator for the tree."""
@@ -370,10 +363,7 @@ class Leaf(Base):
     def clone(self):
         """Return a cloned (deep) copy of self."""
         return Leaf(
-            self.type,
-            self.value,
-            (self.prefix, (self.lineno, self.column)),
-            fixers_applied=self.fixers_applied,
+            self.type, self.value, (self.prefix, (self.lineno, self.column)), fixers_applied=self.fixers_applied
         )
 
     def leaves(self):
@@ -676,11 +666,7 @@ class WildcardPattern(BasePattern):
     def optimize(self):
         """Optimize certain stacked wildcard patterns."""
         subpattern = None
-        if (
-            self.content is not None
-            and len(self.content) == 1
-            and len(self.content[0]) == 1
-        ):
+        if self.content is not None and len(self.content) == 1 and len(self.content[0]) == 1:
             subpattern = self.content[0][0]
         if self.min == 1 and self.max == 1:
             if self.content is None:
@@ -694,10 +680,7 @@ class WildcardPattern(BasePattern):
             and self.name == subpattern.name
         ):
             return WildcardPattern(
-                subpattern.content,
-                self.min * subpattern.min,
-                self.max * subpattern.max,
-                subpattern.name,
+                subpattern.content, self.min * subpattern.min, self.max * subpattern.max, subpattern.name
             )
         return self
 

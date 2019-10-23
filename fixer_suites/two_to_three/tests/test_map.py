@@ -37,9 +37,7 @@ class Test_map(FixerTestCase):
 
     def test_None_with_multiple_arguments(self):
         s = """x = map(None, a, b, c)"""
-        self.warns_unchanged(
-            s, "cannot convert map(None, ...) with " "multiple arguments"
-        )
+        self.warns_unchanged(s, "cannot convert map(None, ...) with " "multiple arguments")
 
     def test_map_basic(self):
         b = """x = map(f, 'abc')"""

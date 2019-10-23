@@ -1,5 +1,6 @@
-from .support import crosswindFixerTestCase
 from itertools import count
+
+from .support import crosswindFixerTestCase
 
 
 class Test_division(crosswindFixerTestCase):

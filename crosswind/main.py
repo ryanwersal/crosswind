@@ -2,14 +2,14 @@
 Main program for 2to3.
 """
 
-from __future__ import with_statement, print_function
+from __future__ import print_function, with_statement
 
-import sys
-import os
 import difflib
 import logging
-import shutil
 import optparse
+import os
+import shutil
+import sys
 
 from . import refactor
 
@@ -18,9 +18,7 @@ def diff_texts(a, b, filename):
     """Return a unified diff of two strings."""
     a = a.splitlines()
     b = b.splitlines()
-    return difflib.unified_diff(
-        a, b, filename, filename, "(original)", "(refactored)", lineterm=""
-    )
+    return difflib.unified_diff(a, b, filename, filename, "(original)", "(refactored)", lineterm="")
 
 
 class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
@@ -34,15 +32,7 @@ class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
     """
 
     def __init__(
-        self,
-        fixers,
-        options,
-        explicit,
-        nobackups,
-        show_diffs,
-        input_base_dir="",
-        output_dir="",
-        append_suffix="",
+        self, fixers, options, explicit, nobackups, show_diffs, input_base_dir="", output_dir="", append_suffix=""
     ):
         """
         Args:
@@ -79,13 +69,10 @@ class StdoutRefactoringTool(refactor.MultiprocessRefactoringTool):
         orig_filename = filename
         if self._output_dir:
             if filename.startswith(self._input_base_dir):
-                filename = os.path.join(
-                    self._output_dir, filename[len(self._input_base_dir) :]
-                )
+                filename = os.path.join(self._output_dir, filename[len(self._input_base_dir) :])
             else:
                 raise ValueError(
-                    "filename %s does not start with the "
-                    "input_base_dir %s" % (filename, self._input_base_dir)
+                    "filename %s does not start with the " "input_base_dir %s" % (filename, self._input_base_dir)
                 )
         if self._append_suffix:
             filename += self._append_suffix
@@ -153,64 +140,23 @@ def main(args=None):
 
     # Set up option parser
     parser = optparse.OptionParser(usage="crosswind [options] file|dir ...")
+    parser.add_option("-d", "--doctests_only", action="store_true", help="Fix up doctests only")
     parser.add_option(
-        "-d", "--doctests_only", action="store_true", help="Fix up doctests only"
+        "-f", "--fix", action="append", default=[], help="Each FIX specifies a transformation; default: all"
     )
+    parser.add_option("-j", "--processes", action="store", default=1, type="int", help="Run 2to3 concurrently")
+    parser.add_option("-x", "--nofix", action="append", default=[], help="Prevent a transformation from being run")
+    parser.add_option("-L", "--list-fixer-suites", action="store_true", help="List available fixer suites")
+    parser.add_option("-s", "--fixer-suites", action="append", default=[], help="Enabled fixer suites")
+    parser.add_option("-l", "--list-fixes", action="store_true", help="List available transformations")
     parser.add_option(
-        "-f",
-        "--fix",
-        action="append",
-        default=[],
-        help="Each FIX specifies a transformation; default: all",
+        "-p", "--print-function", action="store_true", help="Modify the grammar so that print() is a function"
     )
+    parser.add_option("-v", "--verbose", action="store_true", help="More verbose logging")
+    parser.add_option("--no-diffs", action="store_true", help="Don't show diffs of the refactoring")
+    parser.add_option("-w", "--write", action="store_true", help="Write back modified files")
     parser.add_option(
-        "-j",
-        "--processes",
-        action="store",
-        default=1,
-        type="int",
-        help="Run 2to3 concurrently",
-    )
-    parser.add_option(
-        "-x",
-        "--nofix",
-        action="append",
-        default=[],
-        help="Prevent a transformation from being run",
-    )
-    parser.add_option(
-        "-L",
-        "--list-fixer-suites",
-        action="store_true",
-        help="List available fixer suites",
-    )
-    parser.add_option(
-        "-s", "--fixer-suites", action="append", default=[], help="Enabled fixer suites"
-    )
-    parser.add_option(
-        "-l", "--list-fixes", action="store_true", help="List available transformations"
-    )
-    parser.add_option(
-        "-p",
-        "--print-function",
-        action="store_true",
-        help="Modify the grammar so that print() is a function",
-    )
-    parser.add_option(
-        "-v", "--verbose", action="store_true", help="More verbose logging"
-    )
-    parser.add_option(
-        "--no-diffs", action="store_true", help="Don't show diffs of the refactoring"
-    )
-    parser.add_option(
-        "-w", "--write", action="store_true", help="Write back modified files"
-    )
-    parser.add_option(
-        "-n",
-        "--nobackups",
-        action="store_true",
-        default=False,
-        help="Don't write backups for modified files",
+        "-n", "--nobackups", action="store_true", default=False, help="Don't write backups for modified files"
     )
     parser.add_option(
         "-o",
@@ -218,15 +164,13 @@ def main(args=None):
         action="store",
         type="str",
         default="",
-        help="Put output files in this directory "
-        "instead of overwriting the input files.  Requires -n.",
+        help="Put output files in this directory " "instead of overwriting the input files.  Requires -n.",
     )
     parser.add_option(
         "-W",
         "--write-unchanged-files",
         action="store_true",
-        help="Also write files even if no changes were required"
-        " (useful with --output-dir); implies -w.",
+        help="Also write files even if no changes were required" " (useful with --output-dir); implies -w.",
     )
     parser.add_option(
         "--add-suffix",
@@ -310,22 +254,14 @@ def main(args=None):
         requested = avail_fixes.union(explicit)
     fixer_names = requested  # .difference(unwanted_fixes)
     input_base_dir = os.path.commonprefix(args)
-    if (
-        input_base_dir
-        and not input_base_dir.endswith(os.sep)
-        and not os.path.isdir(input_base_dir)
-    ):
+    if input_base_dir and not input_base_dir.endswith(os.sep) and not os.path.isdir(input_base_dir):
         # One or more similar names were passed, their directory is the base.
         # os.path.commonprefix() is ignorant of path elements, this corrects
         # for that weird API.
         input_base_dir = os.path.dirname(input_base_dir)
     if options.output_dir:
         input_base_dir = input_base_dir.rstrip(os.sep)
-        logger.info(
-            "Output in %r will mirror the input directory %r layout.",
-            options.output_dir,
-            input_base_dir,
-        )
+        logger.info("Output in %r will mirror the input directory %r layout.", options.output_dir, input_base_dir)
     rt = StdoutRefactoringTool(
         sorted(fixer_names),
         flags,
@@ -343,9 +279,7 @@ def main(args=None):
             rt.refactor_stdin()
         else:
             try:
-                rt.refactor(
-                    args, options.write, options.doctests_only, options.processes
-                )
+                rt.refactor(args, options.write, options.doctests_only, options.processes)
             except refactor.MultiprocessingUnsupported:
                 assert options.processes > 1
                 print("Sorry, -j isn't supported on this platform.", file=sys.stderr)

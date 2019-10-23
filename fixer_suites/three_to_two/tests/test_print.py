@@ -21,14 +21,8 @@ class Test_print(crosswindFixerTestCase):
     # XXX: Quoting this differently than triple-quotes, because with newline
     # XXX: setting, I can't quite get the triple-quoted versions to line up.
     def test_arbitrary_printing(self):
-        b = (
-            "import dinosaur.skull\nimport sys\nprint"
-            "(skull.jaw, skull.jaw.biteforce, file=sys.stderr)"
-        )
-        a = (
-            "import dinosaur.skull\nimport sys\nprint "
-            ">>sys.stderr, skull.jaw, skull.jaw.biteforce"
-        )
+        b = "import dinosaur.skull\nimport sys\nprint" "(skull.jaw, skull.jaw.biteforce, file=sys.stderr)"
+        a = "import dinosaur.skull\nimport sys\nprint " ">>sys.stderr, skull.jaw, skull.jaw.biteforce"
         self.check(b, a)
 
     def test_long_arglist(self):

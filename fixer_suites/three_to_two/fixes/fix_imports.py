@@ -3,12 +3,12 @@ Fixer for standard library imports renamed in Python 3
 """
 
 from crosswind import fixer_base
-from crosswind.fixer_util import Name, is_probably_builtin, Newline, does_tree_import
-from crosswind.pygram import python_symbols as syms
-from crosswind.pgen2 import token
-from crosswind.pytree import Node, Leaf
-
+from crosswind.fixer_util import Name, Newline, does_tree_import, is_probably_builtin
 from crosswind.fixer_util_3to2 import NameImport
+from crosswind.pgen2 import token
+from crosswind.pygram import python_symbols as syms
+from crosswind.pytree import Leaf, Node
+
 
 # used in simple_mapping_to_pattern()
 MAPPING = {
@@ -67,17 +67,13 @@ power_twoname_match = "power< {fmt_name} trailer< '.' {fmt_attr} > any* >"
 # helps match 'client.HTTPConnection', if 'client' has been imported from http
 power_subname_match = "power< {fmt_attr} any* >"
 # helps match 'from http.client import HTTPConnection'
-from_import_match = (
-    "from_import=import_from< 'from' {fmt_name} 'import' ['('] imported=any [')'] >"
-)
+from_import_match = "from_import=import_from< 'from' {fmt_name} 'import' ['('] imported=any [')'] >"
 # helps match 'from http import client'
 from_import_submod_match = "from_import_submod=import_from< 'from' {fmt_name} 'import' ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any > | import_as_names< any* ({fmt_attr} | import_as_name< {fmt_attr} 'as' renamed=any >) any* > ) >"
 # helps match 'import urllib.request'
 name_import_match = "name_import=import_name< 'import' {fmt_name} > | name_import=import_name< 'import' dotted_as_name< {fmt_name} 'as' renamed=any > >"
 # helps match 'import http.client, winreg'
-multiple_name_import_match = (
-    "name_import=import_name< 'import' dotted_as_names< names=any* > >"
-)
+multiple_name_import_match = "name_import=import_name< 'import' dotted_as_names< names=any* > >"
 
 
 def all_patterns(name):
@@ -92,13 +88,9 @@ def all_patterns(name):
         name, attr = name.split(".", 1)
         simple_name = simple_name_match.format(name=name)
         simple_attr = subname_match.format(attr=attr)
-        dotted_name = dotted_name_match.format(
-            fmt_name=simple_name, fmt_attr=simple_attr
-        )
+        dotted_name = dotted_name_match.format(fmt_name=simple_name, fmt_attr=simple_attr)
         i_from = from_import_match.format(fmt_name=dotted_name)
-        i_from_submod = from_import_submod_match.format(
-            fmt_name=simple_name, fmt_attr=simple_attr
-        )
+        i_from_submod = from_import_submod_match.format(fmt_name=simple_name, fmt_attr=simple_attr)
         i_name = name_import_match.format(fmt_name=dotted_name)
         u_name = power_twoname_match.format(fmt_name=simple_name, fmt_attr=simple_attr)
         u_subname = power_subname_match.format(fmt_attr=simple_attr)
@@ -207,9 +199,7 @@ class FixImports(fixer_base.BaseFix):
             parent.append_child(Newline())
             parent.append_child(orig_stripped)
 
-    def get_dotted_import_replacement(
-        self, name_node, attr_node, mapping=MAPPING, renamed=None
-    ):
+    def get_dotted_import_replacement(self, name_node, attr_node, mapping=MAPPING, renamed=None):
         """
         For (http, client) given and httplib being the correct replacement,
         returns (httplib as client, None)
@@ -225,18 +215,11 @@ class FixImports(fixer_base.BaseFix):
                     Name(new_name, prefix=name_node.prefix),
                     Node(
                         syms.dotted_as_name,
-                        [
-                            Name(new_attr, prefix=attr_node.prefix),
-                            Name("as", prefix=" "),
-                            attr_node.clone(),
-                        ],
+                        [Name(new_attr, prefix=attr_node.prefix), Name("as", prefix=" "), attr_node.clone()],
                     ),
                 )
             else:
-                return (
-                    Name(new_name, prefix=name_node.prefix),
-                    Name(new_attr, prefix=attr_node.prefix),
-                )
+                return (Name(new_name, prefix=name_node.prefix), Name(new_attr, prefix=attr_node.prefix))
         else:
             return (
                 Node(
@@ -271,9 +254,7 @@ class FixImports(fixer_base.BaseFix):
                     self.fix_dotted_name(name)
         elif from_import_submod:
             renamed = results.get("renamed")
-            new_name, new_attr = self.get_dotted_import_replacement(
-                name, attr, renamed=renamed
-            )
+            new_name, new_attr = self.get_dotted_import_replacement(name, attr, renamed=renamed)
             if new_attr is not None:
                 name.replace(new_name)
                 attr.replace(new_attr)
@@ -285,14 +266,10 @@ class FixImports(fixer_base.BaseFix):
         elif name_import or from_import:
             self.fix_simple_name(name)
         elif name and not attr:
-            if does_tree_import(
-                None, MAPPING[name.value], node
-            ) and is_probably_builtin(name):
+            if does_tree_import(None, MAPPING[name.value], node) and is_probably_builtin(name):
                 self.fix_simple_name(name)
         elif name and attr:
             # Note that this will fix a dotted name that was never imported.  This will probably not matter.
             self.fix_dotted_name(node)
         elif imported and imported.type == syms.import_as_names:
-            self.fix_submod_import(
-                imported=imported.children, node=node, name=name.value
-            )
+            self.fix_submod_import(imported=imported.children, node=node, name=name.value)

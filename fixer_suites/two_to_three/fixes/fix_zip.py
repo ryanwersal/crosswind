@@ -9,9 +9,9 @@ iter(<>), list(<>), tuple(<>), sorted(<>), ...join(<>), or for V in <>:.
 
 # Local imports
 from crosswind import fixer_base
-from crosswind.pytree import Node
+from crosswind.fixer_util import ArgList, Name, in_special_context
 from crosswind.pygram import python_symbols as syms
-from crosswind.fixer_util import Name, ArgList, in_special_context
+from crosswind.pytree import Node
 
 
 class FixZip(fixer_base.ConditionalFix):

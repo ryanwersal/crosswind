@@ -19,10 +19,9 @@ substituting None for missing values -- like zip(), it now stops as
 soon as the shortest argument is exhausted.
 """
 
-# Local imports
-from crosswind.pgen2 import token
 from crosswind import fixer_base
-from crosswind.fixer_util import Name, ArgList, Call, ListComp, in_special_context
+from crosswind.fixer_util import ArgList, Call, ListComp, Name, in_special_context
+from crosswind.pgen2 import token
 from crosswind.pygram import python_symbols as syms
 from crosswind.pytree import Node
 
@@ -76,9 +75,7 @@ class FixMap(fixer_base.ConditionalFix):
             new.prefix = ""
             new = Call(Name("list"), [new])
         elif "map_lambda" in results:
-            new = ListComp(
-                results["xp"].clone(), results["fp"].clone(), results["it"].clone()
-            )
+            new = ListComp(results["xp"].clone(), results["fp"].clone(), results["it"].clone())
             new = Node(syms.power, [new] + trailers, prefix="")
 
         else:

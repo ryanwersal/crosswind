@@ -23,10 +23,9 @@ CAVEATS:
 # Author: Collin Winter
 
 # Local imports
-from crosswind import pytree
+from crosswind import fixer_base, pytree
+from crosswind.fixer_util import ArgList, Attr, Call, Name, is_tuple
 from crosswind.pgen2 import token
-from crosswind import fixer_base
-from crosswind.fixer_util import Name, Call, Attr, ArgList, is_tuple
 
 
 class FixRaise(fixer_base.BaseFix):
@@ -86,6 +85,4 @@ class FixRaise(fixer_base.BaseFix):
             new.prefix = node.prefix
             return new
         else:
-            return pytree.Node(
-                syms.raise_stmt, [Name("raise"), Call(exc, args)], prefix=node.prefix
-            )
+            return pytree.Node(syms.raise_stmt, [Name("raise"), Call(exc, args)], prefix=node.prefix)

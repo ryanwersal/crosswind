@@ -3,8 +3,8 @@ Fixer to remove class decorators
 """
 
 from crosswind import fixer_base
-from crosswind.fixer_util import Call, Assign, String, Newline
-from crosswind.fixer_util_3to2 import Leaf, Node, token, syms, indentation
+from crosswind.fixer_util import Assign, Call, Newline, String
+from crosswind.fixer_util_3to2 import Leaf, Node, indentation, syms, token
 
 
 class FixClassdecorator(fixer_base.BaseFix):
@@ -18,11 +18,7 @@ class FixClassdecorator(fixer_base.BaseFix):
 
         singleton = results.get("one_dec")
         classdef = results["cls"]
-        decs = (
-            [results["one_dec"]]
-            if results.get("one_dec") is not None
-            else results["decs"]
-        )
+        decs = [results["one_dec"]] if results.get("one_dec") is not None else results["decs"]
         dec_strings = [str(dec).strip()[1:] for dec in decs]
         assign = ""
         for dec in dec_strings:

@@ -6,8 +6,8 @@ from functools import reduce -> (remove this line)
 
 from crosswind import fixer_base
 from crosswind.fixer_util import Call
-from crosswind.pytree import Node, Leaf
 from crosswind.pgen2 import token
+from crosswind.pytree import Leaf, Node
 
 
 class FixReduce(fixer_base.BaseFix):

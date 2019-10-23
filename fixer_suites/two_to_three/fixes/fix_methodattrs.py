@@ -6,6 +6,7 @@
 from crosswind import fixer_base
 from crosswind.fixer_util import Name
 
+
 MAP = {"im_func": "__func__", "im_self": "__self__", "im_class": "__self__.__class__"}
 
 

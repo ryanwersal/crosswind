@@ -19,8 +19,8 @@
 
 # Local imports
 from crosswind import fixer_base
-from crosswind.pygram import token
-from crosswind.fixer_util import syms, Node, Leaf
+from crosswind.fixer_util import Leaf, Node, syms
+from crosswind.pgen2 import token
 
 
 def has_metaclass(parent):
@@ -218,8 +218,7 @@ class FixMetaclass(fixer_base.BaseFix):
             node.append_child(Leaf(token.NEWLINE, "\n"))
 
         elif len(suite.children) > 1 and (
-            suite.children[-2].type == token.INDENT
-            and suite.children[-1].type == token.DEDENT
+            suite.children[-2].type == token.INDENT and suite.children[-1].type == token.DEDENT
         ):
             # there was only one line in the class body and it was __metaclass__
             pass_leaf = Leaf(text_type, "pass")

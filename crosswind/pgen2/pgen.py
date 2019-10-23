@@ -139,8 +139,7 @@ class ParserGenerator(object):
                 if symbol in inverse:
                     raise ValueError(
                         "rule %s is ambiguous; %s is in the"
-                        " first sets of %s as well as %s"
-                        % (name, symbol, label, inverse[symbol])
+                        " first sets of %s as well as %s" % (name, symbol, label, inverse[symbol])
                     )
                 inverse[symbol] = label
         self.first[name] = totalset
@@ -312,15 +311,11 @@ class ParserGenerator(object):
             self.gettoken()
             return a, z
         else:
-            self.raise_error(
-                "expected (...) or NAME or STRING, got %s/%s", self.type, self.value
-            )
+            self.raise_error("expected (...) or NAME or STRING, got %s/%s", self.type, self.value)
 
     def expect(self, type, value=None):
         if self.type != type or (value is not None and self.value != value):
-            self.raise_error(
-                "expected %s/%s, got %s/%s", type, value, self.type, self.value
-            )
+            self.raise_error("expected %s/%s, got %s/%s", type, value, self.type, self.value)
         value = self.value
         self.gettoken()
         return value

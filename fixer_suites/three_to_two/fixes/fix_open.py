@@ -3,7 +3,7 @@ Fixer for open(...) -> io.open(...)
 """
 
 from crosswind import fixer_base
-from crosswind.fixer_util import touch_import, is_probably_builtin
+from crosswind.fixer_util import is_probably_builtin, touch_import
 
 
 class FixOpen(fixer_base.BaseFix):

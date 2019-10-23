@@ -6,20 +6,18 @@
 
 from __future__ import print_function
 
-__author__ = "Guido van Rossum <guido@python.org>"
-
-# Support imports (need to be imported first)
-from . import support
-
-# Python imports
+import logging
 import os
 import sys
-import logging
 
-# Local imports
-from crosswind import pytree
-from crosswind import pgen2
+from crosswind import pgen2, pytree
 from crosswind.pgen2 import driver
+
+from . import support
+
+
+__author__ = "Guido van Rossum <guido@python.org>"
+
 
 logging.basicConfig()
 

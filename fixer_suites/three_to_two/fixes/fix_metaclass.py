@@ -3,17 +3,8 @@ Fixer for (metaclass=X) -> __metaclass__ = X
 Some semantics (see PEP 3115) may be altered in the translation."""
 
 from crosswind import fixer_base
-from crosswind.fixer_util_3to2 import (
-    Name,
-    syms,
-    Node,
-    Leaf,
-    Newline,
-    find_root,
-    indentation,
-    suitify,
-)
-from crosswind.pygram import token
+from crosswind.fixer_util_3to2 import Leaf, Name, Newline, Node, find_root, indentation, suitify, syms
+from crosswind.pgen2 import token
 
 
 def has_metaclass(parent):
@@ -21,11 +12,7 @@ def has_metaclass(parent):
     for node in parent.children:
         kids = node.children
         if node.type == syms.argument:
-            if (
-                kids[0] == Leaf(token.NAME, "metaclass")
-                and kids[1] == Leaf(token.EQUAL, "=")
-                and kids[2]
-            ):
+            if kids[0] == Leaf(token.NAME, "metaclass") and kids[1] == Leaf(token.EQUAL, "=") and kids[2]:
                 # Hack to avoid "class X(=):" with this case.
                 results = [node] + kids
                 break

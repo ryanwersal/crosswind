@@ -3,10 +3,9 @@
 # Copyright 2007 Georg Brandl.
 # Licensed to PSF under a Contributor Agreement.
 
-# Local imports
-from crosswind.pgen2 import token
 from crosswind import fixer_base
 from crosswind.fixer_util import Number
+from crosswind.pgen2 import token
 
 
 class FixNumliterals(fixer_base.BaseFix):

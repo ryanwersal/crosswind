@@ -6,10 +6,6 @@ parts of the grammar we've changed, we also make sure we can parse the
 test_grammar.py files from both Python 2 and Python 3.
 """
 
-# Testing imports
-from . import support
-from .support import driver, driver_no_print_statement
-
 # Python imports
 import difflib
 import importlib
@@ -23,10 +19,13 @@ import tempfile
 import unittest
 
 # Local imports
-from crosswind.pgen2 import driver as pgen2_driver
-from crosswind.pgen2 import tokenize
+from crosswind.pgen2 import driver as pgen2_driver, tokenize
 from crosswind.pgen2.parse import ParseError
 from crosswind.pygram import python_symbols as syms
+
+# Testing imports
+from . import support
+from .support import driver, driver_no_print_statement
 
 
 class TestDriver(support.TestCase):
@@ -95,14 +94,11 @@ pgen2_driver.load_grammar(%r, save=True, force=True)
             )
             self.assertTrue(os.path.exists(pickle_sub_name))
 
-            with open(pickle_name, "rb") as pickle_f_1, open(
-                pickle_sub_name, "rb"
-            ) as pickle_f_2:
+            with open(pickle_name, "rb") as pickle_f_1, open(pickle_sub_name, "rb") as pickle_f_2:
                 self.assertEqual(
                     pickle_f_1.read(),
                     pickle_f_2.read(),
-                    msg="Grammar caches generated using different hash seeds"
-                    " were not identical.",
+                    msg="Grammar caches generated using different hash seeds" " were not identical.",
                 )
         finally:
             shutil.rmtree(tmpdir)
@@ -488,12 +484,7 @@ class TestVarAnnotations(GrammarTest):
         self.validate("var2: [int, str]")
 
     def test_3(self):
-        self.validate(
-            "def f():\n"
-            "    st: str = 'Hello'\n"
-            "    a.b: int = (1, 2)\n"
-            "    return st\n"
-        )
+        self.validate("def f():\n" "    st: str = 'Hello'\n" "    a.b: int = (1, 2)\n" "    return st\n")
 
     def test_4(self):
         self.validate("def fbad():\n" "    x: int\n" "    print(x)\n")
@@ -705,9 +696,7 @@ class TestPickleableException(unittest.TestCase):
 def diff_texts(a, b, filename):
     a = a.splitlines()
     b = b.splitlines()
-    return difflib.unified_diff(
-        a, b, filename, filename, "(original)", "(reserialized)", lineterm=""
-    )
+    return difflib.unified_diff(a, b, filename, filename, "(original)", "(reserialized)", lineterm="")
 
 
 if __name__ == "__main__":

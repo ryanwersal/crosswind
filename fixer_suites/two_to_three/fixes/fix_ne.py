@@ -4,9 +4,8 @@
 """Fixer that turns <> into !=."""
 
 # Local imports
-from crosswind import pytree
+from crosswind import fixer_base, pytree
 from crosswind.pgen2 import token
-from crosswind import fixer_base
 
 
 class FixNe(fixer_base.BaseFix):

@@ -79,10 +79,7 @@ class Test_exitfunc(FixerTestCase):
     def test_no_sys_import(self):
         b = """sys.exitfunc = f"""
         a = """atexit.register(f)"""
-        msg = (
-            "Can't find sys import; Please add an atexit import at the "
-            "top of your file."
-        )
+        msg = "Can't find sys import; Please add an atexit import at the " "top of your file."
         self.warns(b, a, msg)
 
     def test_unchanged(self):

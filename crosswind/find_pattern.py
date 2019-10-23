@@ -49,19 +49,15 @@ from io import StringIO
 # Local imports
 from crosswind import pytree
 from crosswind.pgen2 import driver
-from crosswind.pygram import python_symbols, python_grammar
+from crosswind.pygram import python_grammar, python_symbols
+
 
 driver = driver.Driver(python_grammar, convert=pytree.convert)
 
 
 def main(args):
     parser = optparse.OptionParser(usage="find_pattern.py [options] [string]")
-    parser.add_option(
-        "-f",
-        "--file",
-        action="store",
-        help="Read a code snippet from the specified file",
-    )
+    parser.add_option("-f", "--file", action="store", help="Read a code snippet from the specified file")
 
     # Parse command line arguments
     options, args = parser.parse_args(args)
@@ -92,12 +88,7 @@ def find_pattern(node):
     if isinstance(node, pytree.Leaf):
         return repr(node.value)
 
-    return (
-        find_symbol(node.type)
-        + "< "
-        + " ".join(find_pattern(n) for n in node.children)
-        + " >"
-    )
+    return find_symbol(node.type) + "< " + " ".join(find_pattern(n) for n in node.children) + " >"
 
 
 def find_symbol(sym):

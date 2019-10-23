@@ -4,12 +4,11 @@ Fixer for dictcomp and setcomp:
 {foo:bar comp_for} -> dict(((foo, bar) comp_for))"""
 
 from crosswind import fixer_base
-from crosswind.pytree import Node, Leaf
-from crosswind.pygram import python_symbols as syms
-from crosswind.pgen2 import token
-from crosswind.fixer_util import parenthesize, Name, Call, LParen, RParen
-
+from crosswind.fixer_util import Call, LParen, Name, RParen, parenthesize
 from crosswind.fixer_util_3to2 import commatize
+from crosswind.pgen2 import token
+from crosswind.pygram import python_symbols as syms
+from crosswind.pytree import Leaf, Node
 
 
 def tup(args):
@@ -35,12 +34,8 @@ class FixDctsetcomp(fixer_base.BaseFix):
             impl_assign = n1
         our_gencomp = Node(syms.listmaker, [(impl_assign), (comp_for)])
         if is_dict:
-            new_node = Node(
-                syms.power, [Name("dict"), parenthesize(Node(syms.atom, [our_gencomp]))]
-            )
+            new_node = Node(syms.power, [Name("dict"), parenthesize(Node(syms.atom, [our_gencomp]))])
         else:
-            new_node = Node(
-                syms.power, [Name("set"), parenthesize(Node(syms.atom, [our_gencomp]))]
-            )
+            new_node = Node(syms.power, [Name("set"), parenthesize(Node(syms.atom, [our_gencomp]))])
         new_node.prefix = node.prefix
         return new_node

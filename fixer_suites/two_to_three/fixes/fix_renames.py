@@ -10,6 +10,7 @@ Fixes:
 from crosswind import fixer_base
 from crosswind.fixer_util import Name, attr_chain
 
+
 MAPPING = {"sys": {"maxint": "maxsize"}}
 LOOKUP = {}
 

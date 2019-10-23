@@ -7,8 +7,9 @@ int -> long
 import re
 
 from crosswind import fixer_base
-from crosswind.fixer_util import Name, is_probably_builtin, Number
+from crosswind.fixer_util import Name, Number, is_probably_builtin
 from crosswind.pgen2 import token
+
 
 baseMAPPING = {"b": 2, "o": 8, "x": 16}
 

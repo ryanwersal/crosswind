@@ -1,5 +1,6 @@
-from .util import FixerTestCase
 from operator import itemgetter
+
+from .util import FixerTestCase
 
 
 class Test_urllib(FixerTestCase):
@@ -34,12 +35,7 @@ class Test_urllib(FixerTestCase):
 
             # test the breaking of a module into multiple replacements
             b = "from %s import %s" % (old, ", ".join(all_members))
-            a = "\n".join(
-                [
-                    "from %s import %s" % (new, ", ".join(members))
-                    for (new, members) in changes
-                ]
-            )
+            a = "\n".join(["from %s import %s" % (new, ", ".join(members)) for (new, members) in changes])
             self.check(b, a)
 
     def test_import_module_as(self):

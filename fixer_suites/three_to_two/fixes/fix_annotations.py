@@ -3,8 +3,9 @@ Fixer to remove function annotations
 """
 
 from crosswind import fixer_base
-from crosswind.pgen2 import token
 from crosswind.fixer_util import syms
+from crosswind.pgen2 import token
+
 
 warning_text = "Removing function annotations completely."
 

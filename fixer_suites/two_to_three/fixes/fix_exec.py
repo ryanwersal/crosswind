@@ -11,7 +11,7 @@ exec code in ns1, ns2 -> exec(code, ns1, ns2)
 
 # Local imports
 from crosswind import fixer_base
-from crosswind.fixer_util import Comma, Name, Call
+from crosswind.fixer_util import Call, Comma, Name
 
 
 class FixExec(fixer_base.BaseFix):

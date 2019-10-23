@@ -22,10 +22,9 @@ The following cases will be converted:
 # Author: Collin Winter
 
 # Local imports
-from crosswind import pytree
+from crosswind import fixer_base, pytree
+from crosswind.fixer_util import Assign, Attr, Name, is_list, is_tuple, syms
 from crosswind.pgen2 import token
-from crosswind import fixer_base
-from crosswind.fixer_util import Assign, Attr, Name, is_tuple, is_list, syms
 
 
 def find_excepts(nodes):

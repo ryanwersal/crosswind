@@ -5,6 +5,7 @@
 from crosswind.fixer_base import BaseFix
 from crosswind.fixer_util import Name
 
+
 NAMES = dict(
     assert_="assertTrue",
     assertEquals="assertEqual",

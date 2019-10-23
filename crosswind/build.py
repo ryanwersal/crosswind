@@ -7,8 +7,8 @@ Created on Sun Oct 13 18:53:41 2013
 import os
 from distutils import log
 from distutils.command.build_py import build_py
-from . import refactor
-from . import pygram
+
+from . import pygram, refactor
 
 
 class DistutilsRefactoringTool(refactor.RefactoringTool):

@@ -2,9 +2,8 @@
 Fixer for sys.intern(s) -> intern(s).
 """
 
-from crosswind import pytree
-from crosswind import fixer_base
-from crosswind.fixer_util import Name, BlankLine, find_binding, find_root
+from crosswind import fixer_base, pytree
+from crosswind.fixer_util import BlankLine, Name, find_binding, find_root
 
 
 class FixIntern(fixer_base.BaseFix):
@@ -77,13 +76,7 @@ class FixIntern(fixer_base.BaseFix):
         new = pytree.Node(
             syms.power,
             [Name("intern")]
-            + [
-                pytree.Node(
-                    syms.trailer,
-                    [results["lpar"].clone(), newarglist, results["rpar"].clone()]
-                    + after,
-                )
-            ],
+            + [pytree.Node(syms.trailer, [results["lpar"].clone(), newarglist, results["rpar"].clone()] + after)],
         )
         new.prefix = node.prefix
         return new
