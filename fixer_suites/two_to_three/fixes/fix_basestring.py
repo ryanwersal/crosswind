@@ -3,16 +3,19 @@
 
 # Local imports
 from crosswind import fixer_base
-from crosswind.fixer_util import Call, Comma, Name, ArgList
+from crosswind.fixer_util import Name, _find
 
 
 class FixBasestring(fixer_base.BaseFix):
     BM_compatible = True
 
-    PATTERN = "power< 'isinstance' trailer< '(' args=arglist< any ',' basestring='basestring' > ')' > >"
+    PATTERN = """
+        power< 'isinstance' trailer< '(' args=arglist< any* > ')' > >
+    """
 
     def transform(self, node, results):
-        args = results["args"]
-        args.children[-1].replace(Name("str", prefix=results["basestring"].prefix))
-        args = [a.clone() for a in args.children]
-        return Call(Name("isinstance"), args=args, prefix=node.prefix)
+        basestring_node = _find("basestring", results["args"])
+        if basestring_node is None:
+            return
+
+        basestring_node.replace(Name("str", prefix=basestring_node.prefix))
