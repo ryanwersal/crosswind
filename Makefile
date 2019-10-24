@@ -27,10 +27,10 @@ check:
 	poetry run crosswind/crosswind --help
 
 	# Can we invoke crosswind for 2to3?
-	poetry run crosswind/crosswind --fixer-suites "fixer_suites.two_to_three" crosswind/tests/acceptance/two.py
+	poetry run crosswind/crosswind --use-preset 2to3 crosswind/tests/acceptance/two.py
 
 	# Can we invoke crosswind for 3to2?
-	poetry run crosswind/crosswind --fixer-suites "fixer_suites.three_to_two" --print-function crosswind/tests/acceptance/three.py
+	poetry run crosswind/crosswind --use-preset 3to2 crosswind/tests/acceptance/three.py
 
 # Invoke Python repl in venv
 repl:

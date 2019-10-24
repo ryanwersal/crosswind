@@ -51,6 +51,27 @@ This will show the help output containing the currently supported options. It sh
 the current state of the crosswind tool is that it only has access to the 2to3 fixers. Further efforts
 are needed to allow it to combine arbitrary fixers and fixer suites.
 
+## Configuration
+
+In addition to passing flags at the command line (issue `--help` to crosswind for available flags) you can
+configure crosswind by defining such configuration in `pyproject.toml` under a `tool.crosswind` heading such
+as:
+
+```toml
+[tool.croswind]
+output_dir = "path/to/output
+```
+
+Additionally, presets can be defined by adding `.preset.<name>` as an additional heading like:
+
+```toml
+[tool.crosswind.preset.foo]
+output_dir = "foo/specific/path
+```
+
+If a preset is specified it will exclusively use that preset's configuration and _will not_ merge it with the default
+configuration. Command line flags are still merged into the preset configuration however.
+
 ## Thanks/Inspiration
 
 Thanks to Joseph Amenta for developing lib3to2 and making it open source. This effort

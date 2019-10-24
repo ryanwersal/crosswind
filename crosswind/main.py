@@ -11,6 +11,8 @@ import os
 import shutil
 import sys
 
+import toml
+
 from . import refactor
 
 
@@ -127,20 +129,16 @@ def warn(msg):
     print("WARNING: %s" % (msg,), file=sys.stderr)
 
 
-def main(args=None):
-    """Main program.
-
-    Args:
-        args: optional; a list of command line arguments. If omitted,
-              sys.argv[1:] is used.
-
-    Returns a suggested exit status (0, 1, 2).
+def parse_args(args=None):
     """
-    all_fixer_suites = refactor.get_all_fixer_suites()
-
+    Process arguments including those that come from TOML.
+    """
     # Set up option parser
     parser = optparse.OptionParser(usage="crosswind [options] file|dir ...")
-    parser.add_option("-d", "--doctests_only", action="store_true", help="Fix up doctests only")
+    parser.add_option("-c", "--config-file", default="pyproject.toml", help="Specify path to toml configuration file")
+    parser.add_option("-P", "--list-presets", action="store_true", help="List available presets")
+    parser.add_option("-u", "--use-preset", help="Specify preset configuration to use")
+    parser.add_option("-d", "--doctests-only", action="store_true", help="Fix up doctests only")
     parser.add_option(
         "-f", "--fix", action="append", default=[], help="Each FIX specifies a transformation; default: all"
     )
@@ -183,9 +181,56 @@ def main(args=None):
     )
 
     # Parse command line arguments
+    opts, args = parser.parse_args(args)
+
+    # Load pyproject.toml if it exists
+    config_path = "pyproject.toml"
+    if opts.config_file:
+        config_path = os.path.abspath(opts.config_file)
+        if not os.path.exists(config_path):
+            parser.error(f"Failed to find specified configuration file at {config_path:!r}")
+
+    pyproject_toml = toml.load(config_path)
+    toml_config = pyproject_toml.get("tool", {}).get("crosswind", {})
+
+    if opts.list_presets:
+        for preset in toml_config["preset"]:
+            print(preset)
+        return
+
+    if opts.use_preset:
+        presets = toml_config["preset"]
+        if opts.use_preset not in presets:
+            parser.error(f"Failed to find preset named {opts.use_preset}")
+            return
+        toml_config = toml_config["preset"][opts.use_preset]
+
+    options = parser.defaults
+    options.update({k: v for k, v in toml_config.items()})
+    options.update({k: v for k, v in opts.__dict__.items() if v})
+    options = optparse.Values(options)
+
+    return parser, options, args
+
+
+def main(args=None):
+    """Main program.
+
+    Args:
+        args: optional; a list of command line arguments. If omitted,
+              sys.argv[1:] is used.
+
+    Returns a suggested exit status (0, 1, 2).
+    """
+    all_fixer_suites = refactor.get_all_fixer_suites()
+
     refactor_stdin = False
     flags = {}
-    options, args = parser.parse_args(args)
+
+    result = parse_args(args)
+    if result is None:
+        return
+    parser, options, args = result
 
     # Default to all fixer suites and fix up names
     if not options.fixer_suites:
@@ -240,7 +285,7 @@ def main(args=None):
 
     # Initialize the refactoring tool
     avail_fixes = set(refactor.get_fixers_from_packages(options.fixer_suites))
-    # unwanted_fixes = set(fixer_pkg + ".fix_" + fix for fix in options.nofix)
+    unwanted_fixes = set(options.nofix)
     explicit = set()
     if options.fix:
         all_present = False
@@ -248,11 +293,11 @@ def main(args=None):
             if fix == "all":
                 all_present = True
             else:
-                pass  # explicit.add(fixer_pkg + ".fix_" + fix)
+                explicit.add(fix)
         requested = avail_fixes.union(explicit) if all_present else explicit
     else:
         requested = avail_fixes.union(explicit)
-    fixer_names = requested  # .difference(unwanted_fixes)
+    fixer_names = requested.difference(unwanted_fixes)
     input_base_dir = os.path.commonprefix(args)
     if input_base_dir and not input_base_dir.endswith(os.sep) and not os.path.isdir(input_base_dir):
         # One or more similar names were passed, their directory is the base.

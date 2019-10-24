@@ -25,6 +25,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.6"
+toml = "^0.10.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -71,6 +72,17 @@ skip_glob = [
 	'acceptance'
 ]
 atomic = true
+
+[tool.crosswind.preset.2to3]
+fixer_suites = [
+	"fixer_suites.two_to_three",
+]
+
+[tool.crosswind.preset.3to2]
+fixer_suites = [
+	"fixer_suites.three_to_two",
+]
+print_function = true
 
 [build-system]
 requires = ["poetry>=0.12"]
