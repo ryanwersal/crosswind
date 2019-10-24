@@ -49,7 +49,7 @@ class FixExitfunc(fixer_base.BaseFix):
 
         if self.sys_import is None:
             # That's interesting.
-            self.warning(node, "Can't find sys import; Please add an atexit " "import at the top of your file.")
+            self.warning(node, "Can't find sys import; Please add an atexit import at the top of your file.")
             return
 
         # Now add an atexit import after the sys import.

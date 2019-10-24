@@ -170,7 +170,7 @@ def main(args=None):
         "-W",
         "--write-unchanged-files",
         action="store_true",
-        help="Also write files even if no changes were required" " (useful with --output-dir); implies -w.",
+        help="Also write files even if no changes were required (useful with --output-dir); implies -w.",
     )
     parser.add_option(
         "--add-suffix",
