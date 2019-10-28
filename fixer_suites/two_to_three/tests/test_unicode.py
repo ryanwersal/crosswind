@@ -22,6 +22,11 @@ class Test_unicode(FixerTestCase):
         a = """str(x, y, z)"""
         self.check(b, a)
 
+    def test_chained_unicode_call(self):
+        b = """return unicode(x).lower()"""
+        a = """return str(x).lower()"""
+        self.check(b, a)
+
     def test_unichr(self):
         b = """unichr(u'h')"""
         a = """chr('h')"""
