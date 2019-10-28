@@ -59,14 +59,14 @@ as:
 
 ```toml
 [tool.croswind]
-output_dir = "path/to/output
+output_dir = "path/to/output"
 ```
 
 Additionally, presets can be defined by adding `.preset.<name>` as an additional heading like:
 
 ```toml
 [tool.crosswind.preset.foo]
-output_dir = "foo/specific/path
+output_dir = "foo/specific/path"
 ```
 
 If a preset is specified it will exclusively use that preset's configuration and _will not_ merge it with the default

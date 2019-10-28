@@ -1,0 +1,32 @@
+name: py2verify
+
+on: [push, pull_request]
+
+jobs:
+  verify:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: install apt dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install python-virtualenv
+
+      - name: Install Poetry
+        run: |
+          sudo pip2 install --system setuptools
+          sudo pip2 install --system poetry
+
+      - uses: actions/checkout@v1
+
+      - name: Create venv
+        working-directory: py2verify
+        run: make venv install
+
+      - name: Test
+        working-directory: py2verify
+        run: make tests
+
+      - name: Validate
+        working-directory: py2verify
+        run: make check

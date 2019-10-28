@@ -12,7 +12,6 @@ from crosswind.fixer_util import Name
 from crosswind.pgen2 import token
 
 
-_mapping = {"chr": "unichr", "str": "unicode"}
 _literal_re = re.compile(r"[rR]?[\'\"]")
 
 
@@ -21,7 +20,7 @@ class FixStr(fixer_base.BaseFix):
     order = "pre"
     run_order = 4  # Run this before bytes objects are converted to str objects
 
-    PATTERN = "STRING | 'str' | 'chr'"
+    PATTERN = "STRING | 'str'"
 
     def transform(self, node, results):
         new = node.clone()
@@ -30,7 +29,6 @@ class FixStr(fixer_base.BaseFix):
             if _literal_re.match(new.value):
                 new.value = "u" + new.value
                 return new
-        elif node.type == token.NAME:
-            assert new.value in _mapping
-            new.value = _mapping[new.value]
+        elif node.type == token.NAME and new.value == "str":
+            new.value = "unicode"
             return new

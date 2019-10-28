@@ -9,10 +9,9 @@ class Test_str(crosswindFixerTestCase):
         a = """unicode(x, y, z)"""
         self.check(b, a)
 
-    def test_chr_call(self):
-        b = """chr(a, t, m)"""
-        a = """unichr(a, t, m)"""
-        self.check(b, a)
+    def test_chr_call_unchanged(self):
+        u = """chr(a, t, m)"""
+        self.unchanged(u)
 
     def test_str_literal_1(self):
         b = '''"x"'''

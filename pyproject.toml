@@ -5,22 +5,22 @@ homepage = "https://github.com/ryanwersal/crosswind"
 description = "Convert between Python 2 and 3 in both directions"
 license = "Apache-2.0"
 authors = [
-	"Ryan Wersal <ryan@ryanwersal.com>",
+    "Ryan Wersal <ryan@ryanwersal.com>",
 ]
 classifiers = [
-	"Development Status :: 3 - Alpha",
-	"Environment :: Console",
-	"Intended Audience :: Developers",
-	"License :: OSI Approved :: Apache Software License",
-	"Operating System :: OS Independent",
-	"Programming Language :: Python :: 3 :: Only",
-	"Programming Language :: Python :: 3.6",
-	"Programming Language :: Python :: 3.7",
-	"Topic :: Software Development :: Code Generators",
-	"Topic :: Software Development :: Libraries :: Python Modules",
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 packages = [
-	{ include = "crosswind" },
+    { include = "crosswind" },
 ]
 
 [tool.poetry.dependencies]
@@ -40,7 +40,7 @@ crosswind = "crosswind.main:main"
 
 [tool.black]
 line-length = 120
-target-version = ['py36']
+target-version = ["py36"]
 exclude = '''
 (
 \.eggs
@@ -55,6 +55,7 @@ exclude = '''
 | dist
 | data
 | acceptance
+| py2verify
 )
 '''
 
@@ -66,21 +67,22 @@ force_grid_wrap = 0
 combine_as_imports = true
 include_trailing_comma = true
 skip_glob = [
-	'build',
-	'dist',
-	'data',
-	'acceptance'
+    "build",
+    "dist",
+    "data",
+    "acceptance",
+    "py2verify",
 ]
 atomic = true
 
 [tool.crosswind.preset.2to3]
 fixer_suites = [
-	"fixer_suites.two_to_three",
+    "fixer_suites.two_to_three",
 ]
 
 [tool.crosswind.preset.3to2]
 fixer_suites = [
-	"fixer_suites.three_to_two",
+    "fixer_suites.three_to_two",
 ]
 print_function = true
 
