@@ -1,5 +1,13 @@
 """
 Fixer for "class Foo: ..." -> "class Foo(object): ..."
+
+Python 3 only supports new-style classes but Python 2.7 still supports
+both old and new styles. The inheritance of `object`, a new style class,
+causes the class to also be new style.
+
+The lack of `(object)` on the Python 3 side is strictly due to the removal
+of old-style classes in 3 - you no longer need to be explicit if only inheriting
+from `object`.
 """
 
 from crosswind import fixer_base
