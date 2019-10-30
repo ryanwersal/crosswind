@@ -46,7 +46,8 @@ class Test_print(crosswindFixerTestCase):
         a = 'print >>sys.stderr, "You must specify an input file or an input string"'
         self.check(b, a)
 
-    # FIXME: This test fails in latest lib3to2 as well. It appears this was likely how it was desired to behave rather than how it does behave?
-    # def test_argument_unpacking(self):
-    #     s = "print(*args)"
-    #     self.warns_unchanged(s, "-fprint does not support argument unpacking.  fix using -xprint and then again with  -fprintfunction.")
+    def test_argument_unpacking(self):
+        s = "print(*args)"
+        self.warns_unchanged(
+            s, "-fprint does not support argument unpacking.  fix using -xprint and then again with  -fprintfunction."
+        )

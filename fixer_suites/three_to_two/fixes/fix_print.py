@@ -178,7 +178,7 @@ def map_printargs(args):
             assert str(kids[0].value) in ("sep", "end", "file")
             assert str(kids[0].value) not in mapping, mapping
             mapping[str(kids[0].value)] = kids[2]
-        elif arg.type == token.STAR:
+        elif arg.type in (syms.star_expr, token.STAR):
             return (None, None)
         else:
             pos.append(arg)
