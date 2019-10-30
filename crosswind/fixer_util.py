@@ -72,6 +72,48 @@ def Call(func_name, args=None, prefix=None):
     return node
 
 
+def Comparison(left, operator, right, prefix=None):
+    """A comparison"""
+    node = Node(syms.comparison, [left, operator, right])
+    if prefix is not None:
+        node.prefix = prefix
+    return node
+
+
+def Operator(operator, prefix=None):
+    """An operator"""
+    return Leaf(token.OP, operator, prefix=prefix)
+
+
+def CompositeOperator(operator_one, operator_two, prefix=None):
+    """Composite operator"""
+    node = Node(syms.comp_op, [operator_one, operator_two])
+    if prefix is not None:
+        node.prefix = prefix
+    return node
+
+
+def NoneValue(prefix=None):
+    """A None"""
+    return Leaf(token.NAME, "None", prefix=prefix)
+
+
+def OrTest(left, right, prefix=None):
+    """Logical or test"""
+    node = Node(syms.or_test, [left, Name("or", prefix=" "), right])
+    if prefix is not None:
+        node.prefix = prefix
+    return node
+
+
+def AndTest(left, right, prefix=None):
+    """logical and test"""
+    node = Node(syms.and_test, [left, Name("and", prefix=" "), right])
+    if prefix is not None:
+        node.prefix = prefix
+    return node
+
+
 def Newline():
     """A newline literal"""
     return Leaf(token.NEWLINE, "\n")
