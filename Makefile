@@ -24,13 +24,13 @@ check:
 	poetry run black --check crosswind fixer_suites
 
 	# Can we invoke crosswind at all?
-	poetry run crosswind/crosswind --help
+	poetry run python crosswind/crosswind --help
 
 	# Can we invoke crosswind for 2to3?
-	poetry run crosswind/crosswind --use-preset 2to3 crosswind/tests/acceptance/two.py
+	poetry run python crosswind/crosswind --use-preset 2to3 crosswind/tests/acceptance/two.py
 
 	# Can we invoke crosswind for 3to2?
-	poetry run crosswind/crosswind --use-preset 3to2 crosswind/tests/acceptance/three.py
+	poetry run python crosswind/crosswind --use-preset 3to2 crosswind/tests/acceptance/three.py
 
 # Invoke Python repl in venv
 repl:
@@ -41,7 +41,7 @@ tests:
 	poetry run pytest
 
 # Run code through formatters
-format: 
+format:
 	poetry run isort --recursive .
 	poetry run black crosswind fixer_suites
 
