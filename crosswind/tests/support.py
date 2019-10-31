@@ -3,9 +3,10 @@
 
 import os
 import os.path
-import unittest
 from itertools import chain
 from textwrap import dedent
+
+import pytest
 
 from crosswind import pygram, pytree, refactor
 from crosswind.pgen2 import driver as pgen2_driver
@@ -23,12 +24,6 @@ driver_no_print_statement = pgen2_driver.Driver(grammar_no_print_statement, conv
 
 def parse_string(string):
     return driver.parse_string(reformat(string), debug=True)
-
-
-def run_all_tests(test_mod=None, tests=None):
-    if tests is None:
-        tests = unittest.TestLoader().loadTestsFromModule(test_mod)
-    unittest.TextTestRunner(verbosity=2).run(tests)
 
 
 def reformat(string):
@@ -58,10 +53,7 @@ def all_project_files():
                 yield os.path.join(dirpath, filename)
 
 
-TestCase = unittest.TestCase
-
-
-class FixerTestCase(TestCase):
+class FixerTestCase:
     fixer = None
 
     # Other test cases can subclass this class and replace "fixer_pkg" with
@@ -83,20 +75,20 @@ class FixerTestCase(TestCase):
         before = reformat(before)
         after = reformat(after)
         tree = self.refactor.refactor_string(before, self.filename)
-        self.assertEqual(after, str(tree))
+        assert after == str(tree)
         return tree
 
     def check(self, before, after, ignore_warnings=False):
         tree = self._check(before, after)
-        self.assertTrue(tree.was_changed)
+        assert tree.was_changed
         if not ignore_warnings:
-            self.assertEqual(self.fixer_log, [])
+            assert self.fixer_log == []
 
     def warns(self, before, after, message, unchanged=False):
         tree = self._check(before, after)
-        self.assertIn(message, "".join(self.fixer_log))
+        assert message in "".join(self.fixer_log)
         if not unchanged:
-            self.assertTrue(tree.was_changed)
+            assert tree.was_changed
 
     def warns_unchanged(self, before, message):
         self.warns(before, before, message, unchanged=True)
@@ -104,7 +96,7 @@ class FixerTestCase(TestCase):
     def unchanged(self, before, ignore_warnings=False):
         self._check(before, before)
         if not ignore_warnings:
-            self.assertEqual(self.fixer_log, [])
+            assert self.fixer_log == []
 
     def assert_runs_after(self, *names):
         fixes = [self.fixer]
@@ -118,7 +110,7 @@ class FixerTestCase(TestCase):
         if pre and pre[-1].__class__.__module__.endswith(n) and not post:
             # We're the last in pre and post is empty
             return
-        self.fail(
+        pytest.fail(
             "Fixer run order (%s) is incorrect; %s should be last."
-            % (", ".join([x.__class__.__module__ for x in (pre + post)]), n)
+            % (", ".join([x.__class__.__module__ for x in pre + post]), n)
         )

@@ -28,7 +28,7 @@ from . import support
 from .support import driver, driver_no_print_statement
 
 
-class TestDriver(support.TestCase):
+class TestDriver(unittest.TestCase):
     def test_formfeed(self):
         s = """print 1\n\x0Cprint 2\n"""
         t = driver.parse_string(s)
@@ -36,7 +36,7 @@ class TestDriver(support.TestCase):
         self.assertEqual(t.children[1].children[0].type, syms.print_stmt)
 
 
-class TestPgen2Caching(support.TestCase):
+class TestPgen2Caching(unittest.TestCase):
     def test_load_grammar_from_txt_file(self):
         pgen2_driver.load_grammar(support.grammar_path, save=False, force=True)
 
@@ -120,7 +120,7 @@ pgen2_driver.load_grammar(%r, save=True, force=True)
         self.assertEqual(g.elephant, 19)
 
 
-class GrammarTest(support.TestCase):
+class GrammarTest(unittest.TestCase):
     def validate(self, code):
         support.parse_string(code)
 
@@ -619,7 +619,7 @@ class TestClassDef(GrammarTest):
         self.validate("class B(t, y=9, *args, **kwargs,): pass")
 
 
-class TestParserIdempotency(support.TestCase):
+class TestParserIdempotency(unittest.TestCase):
 
     """A cut-down version of pytree_idempotency.py."""
 

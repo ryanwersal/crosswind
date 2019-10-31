@@ -1,5 +1,7 @@
 """ Test suite for the code in fixer_util """
 
+import unittest
+
 from crosswind import fixer_util
 from crosswind.fixer_util import Attr, Call, Comma, Name
 from crosswind.pgen2 import token
@@ -18,14 +20,14 @@ def parse(code, strip_levels=0):
     return tree
 
 
-class MacroTestCase(support.TestCase):
+class MacroTestCase(unittest.TestCase):
     def assertStr(self, node, string):
         if isinstance(node, (tuple, list)):
             node = Node(fixer_util.syms.simple_stmt, node)
         self.assertEqual(str(node), string)
 
 
-class Test_is_tuple(support.TestCase):
+class Test_is_tuple(unittest.TestCase):
     def is_tuple(self, string):
         return fixer_util.is_tuple(parse(string, strip_levels=2))
 
@@ -41,7 +43,7 @@ class Test_is_tuple(support.TestCase):
         self.assertFalse(self.is_tuple("('foo') % (b, c)"))
 
 
-class Test_is_list(support.TestCase):
+class Test_is_list(unittest.TestCase):
     def is_list(self, string):
         return fixer_util.is_list(parse(string, strip_levels=2))
 
@@ -99,7 +101,7 @@ class Test_Call(MacroTestCase):
         self.assertStr(self._Call("d", kids[3], prefix=" "), " d(b, j)")
 
 
-class Test_does_tree_import(support.TestCase):
+class Test_does_tree_import(unittest.TestCase):
     def _find_bind_rec(self, name, node):
         # Search a tree for a binding -- used to find the starting
         # point for these tests.
@@ -150,7 +152,7 @@ class Test_does_tree_import(support.TestCase):
         self.try_with("def foo():\n\tbar.baz()\n\tstart=3")
 
 
-class Test_find_binding(support.TestCase):
+class Test_find_binding(unittest.TestCase):
     def find_binding(self, name, string, package=None):
         return fixer_util.find_binding(name, parse(string), package)
 
@@ -553,7 +555,7 @@ class Test_find_binding(support.TestCase):
         self.assertFalse(self.find_binding("a", s))
 
 
-class Test_touch_import(support.TestCase):
+class Test_touch_import(unittest.TestCase):
     def test_after_docstring(self):
         node = parse('"""foo"""\nbar()')
         fixer_util.touch_import(None, "foo", node)
@@ -580,7 +582,7 @@ class Test_touch_import(support.TestCase):
         self.assertEqual(str(node), "import cgi\nbar()\n\n")
 
 
-class Test_find_indentation(support.TestCase):
+class Test_find_indentation(unittest.TestCase):
     def test_nothing(self):
         fi = fixer_util.find_indentation
         node = parse("node()")

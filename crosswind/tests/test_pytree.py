@@ -8,6 +8,7 @@ In verbose mode, printing of the module, class and method name is much
 more helpful than printing of (the first line of) the docstring,
 especially when debugging a test.
 """
+import unittest
 
 from crosswind import pytree
 
@@ -25,7 +26,7 @@ except NameError:
         return l
 
 
-class TestNodes(support.TestCase):
+class TestNodes(unittest.TestCase):
 
     """Unit tests for nodes (Base, Leaf, Node)."""
 
@@ -359,7 +360,7 @@ class TestNodes(support.TestCase):
         self.assertEqual(p1.prev_sibling, None)
 
 
-class TestPatterns(support.TestCase):
+class TestPatterns(unittest.TestCase):
 
     """Unit tests for tree matching patterns."""
 

@@ -8,7 +8,7 @@ def fixer_fixture(two_to_three_test_case):
 
 def check(fixer, b, a):
     fixer.unchanged("from future_builtins import map; " + b, a)
-    super(Test_map, fixer).check(b, a)
+    fixer.check(b, a)
 
 
 def test_prefix_preservation(fixer):
