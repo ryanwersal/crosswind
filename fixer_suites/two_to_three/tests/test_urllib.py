@@ -1,6 +1,6 @@
 from operator import itemgetter
 
-from .util import FixerTestCase
+from crosswind.tests.support import FixerTestCase
 
 
 class Test_urllib(FixerTestCase):

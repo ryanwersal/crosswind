@@ -1,6 +1,5 @@
 from crosswind import pygram
-
-from .util import FixerTestCase
+from crosswind.tests.support import FixerTestCase
 
 
 class Test_print(FixerTestCase):

@@ -1,5 +1,6 @@
 import pytest
 
+from crosswind.tests.support import FixerTestCase
 from fixer_suites.two_to_three.tests import util
 
 
@@ -37,7 +38,7 @@ def test_none_is_does_not_throw():
 
 @pytest.fixture(name="pessimist")
 def pessimist_fixture():
-    test_case = util.FixerTestCase()
+    test_case = FixerTestCase()
     test_case.fixer = "nonetype_inequality"
     test_case.setUp(fixer_pkg="fixer_suites.pessimist")
     yield test_case

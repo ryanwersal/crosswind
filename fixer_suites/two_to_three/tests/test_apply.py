@@ -1,4 +1,4 @@
-from .util import FixerTestCase
+from crosswind.tests.support import FixerTestCase
 
 
 class Test_apply(FixerTestCase):

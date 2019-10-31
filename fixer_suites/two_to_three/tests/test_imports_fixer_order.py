@@ -1,4 +1,6 @@
-from .util import FixerTestCase, ImportsFixerTests
+from crosswind.tests.support import FixerTestCase
+
+from .util import ImportsFixerTests
 
 
 class Test_imports_fixer_order(FixerTestCase, ImportsFixerTests):
