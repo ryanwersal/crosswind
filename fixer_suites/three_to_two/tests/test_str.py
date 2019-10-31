@@ -1,29 +1,35 @@
-from .support import crosswindFixerTestCase
+import pytest
 
 
-class Test_str(crosswindFixerTestCase):
-    fixer = "str"
+@pytest.fixture(name="fixer")
+def fixer_fixture(three_to_two_test_case):
+    return three_to_two_test_case("str")
 
-    def test_str_call(self):
-        b = """str(x, y, z)"""
-        a = """unicode(x, y, z)"""
-        self.check(b, a)
 
-    def test_chr_call_unchanged(self):
-        u = """chr(a, t, m)"""
-        self.unchanged(u)
+def test_str_call(fixer):
+    b = """str(x, y, z)"""
+    a = """unicode(x, y, z)"""
+    fixer.check(b, a)
 
-    def test_str_literal_1(self):
-        b = '''"x"'''
-        a = '''u"x"'''
-        self.check(b, a)
 
-    def test_str_literal_2(self):
-        b = """r'x'"""
-        a = """ur'x'"""
-        self.check(b, a)
+def test_chr_call_unchanged(fixer):
+    u = """chr(a, t, m)"""
+    fixer.unchanged(u)
 
-    def test_str_literal_3(self):
-        b = """R'''x'''"""
-        a = """uR'''x'''"""
-        self.check(b, a)
+
+def test_str_literal_1(fixer):
+    b = '''"x"'''
+    a = '''u"x"'''
+    fixer.check(b, a)
+
+
+def test_str_literal_2(fixer):
+    b = """r'x'"""
+    a = """ur'x'"""
+    fixer.check(b, a)
+
+
+def test_str_literal_3(fixer):
+    b = """R'''x'''"""
+    a = """uR'''x'''"""
+    fixer.check(b, a)

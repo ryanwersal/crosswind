@@ -1,21 +1,24 @@
-from .support import crosswindFixerTestCase
+import pytest
 
 
-class Test_newstyle(crosswindFixerTestCase):
-    fixer = "newstyle"
+@pytest.fixture(name="fixer")
+def fixer_fixture(three_to_two_test_case):
+    return three_to_two_test_case("newstyle")
 
-    def test_oneline(self):
 
-        b = """class Foo: pass"""
-        a = """class Foo(object): pass"""
-        self.check(b, a)
+def test_oneline(fixer):
 
-    def test_suite(self):
+    b = """class Foo: pass"""
+    a = """class Foo(object): pass"""
+    fixer.check(b, a)
 
-        b = """
-        class Foo():
-            do_stuff()"""
-        a = """
-        class Foo(object):
-            do_stuff()"""
-        self.check(b, a)
+
+def test_suite(fixer):
+
+    b = """
+    class Foo():
+        do_stuff()"""
+    a = """
+    class Foo(object):
+        do_stuff()"""
+    fixer.check(b, a)

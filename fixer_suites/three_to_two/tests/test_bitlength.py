@@ -1,17 +1,20 @@
-from .support import crosswindFixerTestCase
+import pytest
 
 
-class Test_bitlength(crosswindFixerTestCase):
-    fixer = "bitlength"
+@pytest.fixture(name="fixer")
+def fixer_fixture(three_to_two_test_case):
+    return three_to_two_test_case("bitlength")
 
-    def test_fixed(self):
-        b = """a = something.bit_length()"""
-        a = """a = (len(bin(something)) - 2)"""
-        self.check(b, a, ignore_warnings=True)
 
-    def test_unfixed(self):
-        s = """a = bit_length(fire)"""
-        self.unchanged(s)
+def test_fixed(fixer):
+    b = """a = something.bit_length()"""
+    a = """a = (len(bin(something)) - 2)"""
+    fixer.check(b, a, ignore_warnings=True)
 
-        s = """a = s.bit_length('some_arg')"""
-        self.unchanged(s)
+
+def test_unfixed(fixer):
+    s = """a = bit_length(fire)"""
+    fixer.unchanged(s)
+
+    s = """a = s.bit_length('some_arg')"""
+    fixer.unchanged(s)

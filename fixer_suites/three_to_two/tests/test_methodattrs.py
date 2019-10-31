@@ -1,26 +1,30 @@
-from .support import crosswindFixerTestCase
+import pytest
 
 
-class Test_methodattrs(crosswindFixerTestCase):
-    fixer = "methodattrs"
+@pytest.fixture(name="fixer")
+def fixer_fixture(three_to_two_test_case):
+    return three_to_two_test_case("methodattrs")
 
-    attrs = ["func", "self"]
 
-    def test_methodattrs(self):
-        for attr in self.attrs:
-            b = "a.__%s__" % attr
-            a = "a.im_%s" % attr
-            self.check(b, a)
+attrs = ["func", "self"]
 
-            b = "self.foo.__%s__.foo_bar" % attr
-            a = "self.foo.im_%s.foo_bar" % attr
-            self.check(b, a)
+
+def test_methodattrs(fixer):
+    for attr in attrs:
+        b = "a.__%s__" % attr
+        a = "a.im_%s" % attr
+        fixer.check(b, a)
+
+        b = "self.foo.__%s__.foo_bar" % attr
+        a = "self.foo.im_%s.foo_bar" % attr
+        fixer.check(b, a)
 
         b = "dir(self.foo.__self__.__class__)"
         a = "dir(self.foo.im_self.__class__)"
-        self.check(b, a)
+        fixer.check(b, a)
 
-    def test_unchanged(self):
-        for attr in self.attrs:
-            s = "foo(__%s__ + 5)" % attr
-            self.unchanged(s)
+
+def test_unchanged(fixer):
+    for attr in attrs:
+        s = "foo(__%s__ + 5)" % attr
+        fixer.unchanged(s)

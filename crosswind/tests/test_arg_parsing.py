@@ -7,6 +7,9 @@ from crosswind import main
 
 @pytest.fixture
 def toml_config(tmpdir):
+    """
+    Writes TOML configuration for use in configuration tests.
+    """
     toml_path = os.path.join(tmpdir, "pyproject.toml")
     with open(toml_path, "w") as toml:
         toml.write(

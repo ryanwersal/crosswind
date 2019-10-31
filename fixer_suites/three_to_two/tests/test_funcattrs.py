@@ -1,32 +1,39 @@
-from .support import crosswindFixerTestCase
+import pytest
 
 
-class Test_funcattrs(crosswindFixerTestCase):
-    fixer = "funcattrs"
+@pytest.fixture(name="fixer")
+def fixer_fixture(three_to_two_test_case):
+    return three_to_two_test_case("funcattrs")
 
-    def test_doc_unchanged(self):
-        b = """whats.up.__doc__"""
-        self.unchanged(b)
 
-    def test_defaults(self):
-        b = """myFunc.__defaults__"""
-        a = """myFunc.func_defaults"""
-        self.check(b, a)
+def test_doc_unchanged(fixer):
+    b = """whats.up.__doc__"""
+    fixer.unchanged(b)
 
-    def test_closure(self):
-        b = """fore.__closure__"""
-        a = """fore.func_closure"""
-        self.check(b, a)
 
-    def test_globals(self):
-        b = """funkFunc.__globals__"""
-        a = """funkFunc.func_globals"""
-        self.check(b, a)
+def test_defaults(fixer):
+    b = """myFunc.__defaults__"""
+    a = """myFunc.func_defaults"""
+    fixer.check(b, a)
 
-    def test_dict_unchanged(self):
-        b = """tricky.__dict__"""
-        self.unchanged(b)
 
-    def test_name_unchanged(self):
-        b = """sayMy.__name__"""
-        self.unchanged(b)
+def test_closure(fixer):
+    b = """fore.__closure__"""
+    a = """fore.func_closure"""
+    fixer.check(b, a)
+
+
+def test_globals(fixer):
+    b = """funkFunc.__globals__"""
+    a = """funkFunc.func_globals"""
+    fixer.check(b, a)
+
+
+def test_dict_unchanged(fixer):
+    b = """tricky.__dict__"""
+    fixer.unchanged(b)
+
+
+def test_name_unchanged(fixer):
+    b = """sayMy.__name__"""
+    fixer.unchanged(b)

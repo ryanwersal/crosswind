@@ -1,49 +1,58 @@
-from .support import crosswindFixerTestCase
+import pytest
 
 
-class Test_super(crosswindFixerTestCase):
-    fixer = "super"
+@pytest.fixture(name="fixer")
+def fixer_fixture(three_to_two_test_case):
+    return three_to_two_test_case("super")
 
-    def test_noargs(self):
 
-        b = "def m(self):\n    super()"
-        a = "def m(self):\n    super(self.__class__, self)"
-        self.check(b, a)
+def test_noargs(fixer):
 
-    def test_other_params(self):
+    b = "def m(self):\n    super()"
+    a = "def m(self):\n    super(self.__class__, self)"
+    fixer.check(b, a)
 
-        b = "def m(a, self=None):\n    super()"
-        a = "def m(a, self=None):\n    super(a.__class__, a)"
-        self.check(b, a)
 
-    def test_no_with_stars(self):
+def test_other_params(fixer):
 
-        s = "def m(*args, **kwargs):\n    super()"
-        self.unchanged(s, ignore_warnings=True)
+    b = "def m(a, self=None):\n    super()"
+    a = "def m(a, self=None):\n    super(a.__class__, a)"
+    fixer.check(b, a)
 
-    def test_no_with_noargs(self):
 
-        s = "def m():\n    super()"
-        self.unchanged(s, ignore_warnings=True)
+def test_no_with_stars(fixer):
 
-    def test_class_noargs(self):
+    s = "def m(*args, **kwargs):\n    super()"
+    fixer.unchanged(s, ignore_warnings=True)
 
-        b = "class c:\n    def m(self):\n        super()"
-        a = "class c:\n    def m(self):\n        super(c, self)"
-        self.check(b, a)
 
-    def test_class_other_params(self):
+def test_no_with_noargs(fixer):
 
-        b = "class c:\n    def m(a, self=None):\n        super()"
-        a = "class c:\n    def m(a, self=None):\n        super(c, a)"
-        self.check(b, a)
+    s = "def m():\n    super()"
+    fixer.unchanged(s, ignore_warnings=True)
 
-    def test_class_no_with_stars(self):
 
-        s = "class c:\n    def m(*args, **kwargs):\n        super()"
-        self.unchanged(s, ignore_warnings=True)
+def test_class_noargs(fixer):
 
-    def test_class_no_with_noargs(self):
+    b = "class c:\n    def m(self):\n        super()"
+    a = "class c:\n    def m(self):\n        super(c, self)"
+    fixer.check(b, a)
 
-        s = "class c:\n    def m():\n        super()"
-        self.unchanged(s, ignore_warnings=True)
+
+def test_class_other_params(fixer):
+
+    b = "class c:\n    def m(a, self=None):\n        super()"
+    a = "class c:\n    def m(a, self=None):\n        super(c, a)"
+    fixer.check(b, a)
+
+
+def test_class_no_with_stars(fixer):
+
+    s = "class c:\n    def m(*args, **kwargs):\n        super()"
+    fixer.unchanged(s, ignore_warnings=True)
+
+
+def test_class_no_with_noargs(fixer):
+
+    s = "class c:\n    def m():\n        super()"
+    fixer.unchanged(s, ignore_warnings=True)

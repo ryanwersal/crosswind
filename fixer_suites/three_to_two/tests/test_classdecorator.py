@@ -1,90 +1,99 @@
-from .support import crosswindFixerTestCase
+import pytest
 
 
-class Test_classdecorator(crosswindFixerTestCase):
-    fixer = "classdecorator"
+@pytest.fixture(name="fixer")
+def fixer_fixture(three_to_two_test_case):
+    return three_to_two_test_case("classdecorator")
 
-    def test_basic_functionality(self):
 
-        b = """
-        @decor
-        class decorated(object):
-            pass"""
+def test_basic_functionality(fixer):
 
-        a = """
-        class decorated(object):
-            pass
-        decorated = decor(decorated)"""
+    b = """
+    @decor
+    class decorated(object):
+        pass"""
 
-        self.check(b, a)
+    a = """
+    class decorated(object):
+        pass
+    decorated = decor(decorated)"""
 
-    def test_whitespace(self):
+    fixer.check(b, a)
 
-        b = """
-        @decor
-        class decorated(object):
-            pass
-        print("hello, there!")"""
 
-        a = """
-        class decorated(object):
-            pass
-        decorated = decor(decorated)
+def test_whitespace(fixer):
 
-        print("hello, there!")"""
+    b = """
+    @decor
+    class decorated(object):
+        pass
+    print("hello, there!")"""
 
-        self.check(b, a)
+    a = """
+    class decorated(object):
+        pass
+    decorated = decor(decorated)
 
-    def test_chained(self):
+    print("hello, there!")"""
 
-        b = """
-        @f1
-        @f2
-        @f3
-        class wow(object):
-           do_cool_stuff_here()"""
+    fixer.check(b, a)
 
-        a = """
-        class wow(object):
-           do_cool_stuff_here()
-        wow = f1(f2(f3(wow)))"""
 
-        self.check(b, a)
+def test_chained(fixer):
 
-    def test_dots_and_parens(self):
+    b = """
+    @f1
+    @f2
+    @f3
+    class wow(object):
+        do_cool_stuff_here()"""
 
-        b = """
-        @should_work.with_dots(and_parens)
-        @dotted.name
-        @with_args(in_parens)
-        class awesome(object):
-            inconsequential_stuff()"""
+    a = """
+    class wow(object):
+        do_cool_stuff_here()
+    wow = f1(f2(f3(wow)))"""
 
-        a = """
-        class awesome(object):
-            inconsequential_stuff()
-        awesome = should_work.with_dots(and_parens)(dotted.name(with_args(in_parens)(awesome)))"""
+    fixer.check(b, a)
 
-        self.check(b, a)
 
-    def test_indentation(self):
+def test_dots_and_parens(fixer):
 
-        b = """
-        if 1:
-            if 2:
-                if 3:
-                    @something
-                    @something_else
-                    class foo(bar):
-                        do_stuff()
-                elif 4:
-                    pass"""
-        a = """
-        if 1:
-            if 2:
-                if 3:
-                    class foo(bar):
-                        do_stuff()
-                    foo = something(something_else(foo))
-                elif 4:
-                    pass"""
+    b = """
+    @should_work.with_dots(and_parens)
+    @dotted.name
+    @with_args(in_parens)
+    class awesome(object):
+        inconsequential_stuff()"""
+
+    a = """
+    class awesome(object):
+        inconsequential_stuff()
+    awesome = should_work.with_dots(and_parens)(dotted.name(with_args(in_parens)(awesome)))"""
+
+    fixer.check(b, a)
+
+
+def test_indentation(fixer):
+
+    b = """
+    if 1:
+        if 2:
+            if 3:
+                @something
+                @something_else
+                class foo(bar):
+                    do_stuff()
+            elif 4:
+                pass"""
+    a = """
+    if 1:
+        if 2:
+            if 3:
+                class foo(bar):
+                    do_stuff()
+                foo = something(something_else(foo))
+            elif 4:
+                pass"""
+
+    # FIXME: This was lacking an assert and it doesn't appear to work so need to figure that out.
+    # fixer.check(b, a)
