@@ -1,54 +1,60 @@
-from crosswind.tests.support import FixerTestCase
+import pytest
 
 
-class Test_nonzero(FixerTestCase):
-    fixer = "nonzero"
+@pytest.fixture(name="fixer")
+def fixer_fixture(two_to_three_test_case):
+    return two_to_three_test_case("nonzero")
 
-    def test_1(self):
-        b = """
-            class A:
-                def __nonzero__(self):
-                    pass
-            """
-        a = """
-            class A:
-                def __bool__(self):
-                    pass
-            """
-        self.check(b, a)
 
-    def test_2(self):
-        b = """
-            class A(object):
-                def __nonzero__(self):
-                    pass
-            """
-        a = """
-            class A(object):
-                def __bool__(self):
-                    pass
-            """
-        self.check(b, a)
-
-    def test_unchanged_1(self):
-        s = """
-            class A(object):
-                def __bool__(self):
-                    pass
-            """
-        self.unchanged(s)
-
-    def test_unchanged_2(self):
-        s = """
-            class A(object):
-                def __nonzero__(self, a):
-                    pass
-            """
-        self.unchanged(s)
-
-    def test_unchanged_func(self):
-        s = """
+def test_1(fixer):
+    b = """
+        class A:
             def __nonzero__(self):
                 pass
-            """
-        self.unchanged(s)
+        """
+    a = """
+        class A:
+            def __bool__(self):
+                pass
+        """
+    fixer.check(b, a)
+
+
+def test_2(fixer):
+    b = """
+        class A(object):
+            def __nonzero__(self):
+                pass
+        """
+    a = """
+        class A(object):
+            def __bool__(self):
+                pass
+        """
+    fixer.check(b, a)
+
+
+def test_unchanged_1(fixer):
+    s = """
+        class A(object):
+            def __bool__(self):
+                pass
+        """
+    fixer.unchanged(s)
+
+
+def test_unchanged_2(fixer):
+    s = """
+        class A(object):
+            def __nonzero__(self, a):
+                pass
+        """
+    fixer.unchanged(s)
+
+
+def test_unchanged_func(fixer):
+    s = """
+        def __nonzero__(self):
+            pass
+        """
+    fixer.unchanged(s)

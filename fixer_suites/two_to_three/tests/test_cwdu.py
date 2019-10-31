@@ -1,62 +1,67 @@
-from crosswind.tests.support import FixerTestCase
+import pytest
 
 
-class Test_getcwdu(FixerTestCase):
+@pytest.fixture(name="fixer")
+def fixer_fixture(two_to_three_test_case):
+    return two_to_three_test_case("getcwdu")
 
-    fixer = "getcwdu"
 
-    def test_basic(self):
-        b = """os.getcwdu"""
-        a = """os.getcwd"""
-        self.check(b, a)
+def test_basic(fixer):
+    b = """os.getcwdu"""
+    a = """os.getcwd"""
+    fixer.check(b, a)
 
-        b = """os.getcwdu()"""
-        a = """os.getcwd()"""
-        self.check(b, a)
+    b = """os.getcwdu()"""
+    a = """os.getcwd()"""
+    fixer.check(b, a)
 
-        b = """meth = os.getcwdu"""
-        a = """meth = os.getcwd"""
-        self.check(b, a)
+    b = """meth = os.getcwdu"""
+    a = """meth = os.getcwd"""
+    fixer.check(b, a)
 
-        b = """os.getcwdu(args)"""
-        a = """os.getcwd(args)"""
-        self.check(b, a)
+    b = """os.getcwdu(args)"""
+    a = """os.getcwd(args)"""
+    fixer.check(b, a)
 
-    def test_comment(self):
-        b = """os.getcwdu() # Foo"""
-        a = """os.getcwd() # Foo"""
-        self.check(b, a)
 
-    def test_unchanged(self):
-        s = """os.getcwd()"""
-        self.unchanged(s)
+def test_comment(fixer):
+    b = """os.getcwdu() # Foo"""
+    a = """os.getcwd() # Foo"""
+    fixer.check(b, a)
 
-        s = """getcwdu()"""
-        self.unchanged(s)
 
-        s = """os.getcwdb()"""
-        self.unchanged(s)
+def test_unchanged(fixer):
+    s = """os.getcwd()"""
+    fixer.unchanged(s)
 
-    def test_indentation(self):
-        b = """
-            if 1:
-                os.getcwdu()
-            """
-        a = """
-            if 1:
-                os.getcwd()
-            """
-        self.check(b, a)
+    s = """getcwdu()"""
+    fixer.unchanged(s)
 
-    def test_multilation(self):
-        b = """os .getcwdu()"""
-        a = """os .getcwd()"""
-        self.check(b, a)
+    s = """os.getcwdb()"""
+    fixer.unchanged(s)
 
-        b = """os.  getcwdu"""
-        a = """os.  getcwd"""
-        self.check(b, a)
 
-        b = """os.getcwdu (  )"""
-        a = """os.getcwd (  )"""
-        self.check(b, a)
+def test_indentation(fixer):
+    b = """
+        if 1:
+            os.getcwdu()
+        """
+    a = """
+        if 1:
+            os.getcwd()
+        """
+    fixer.check(b, a)
+
+
+def test_multilation(fixer):
+    b = """os .getcwdu()"""
+    a = """os .getcwd()"""
+    fixer.check(b, a)
+
+    b = """os.  getcwdu"""
+    a = """os.  getcwd"""
+    fixer.check(b, a)
+
+    b = """os.getcwdu (  )"""
+    a = """os.getcwd (  )"""
+    fixer.check(b, a)

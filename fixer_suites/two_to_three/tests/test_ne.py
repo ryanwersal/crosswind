@@ -1,29 +1,33 @@
-from crosswind.tests.support import FixerTestCase
+import pytest
 
 
-class Test_ne(FixerTestCase):
-    fixer = "ne"
+@pytest.fixture(name="fixer")
+def fixer_fixture(two_to_three_test_case):
+    return two_to_three_test_case("ne")
 
-    def test_basic(self):
-        b = """if x <> y:
-            pass"""
 
-        a = """if x != y:
-            pass"""
-        self.check(b, a)
+def test_basic(fixer):
+    b = """if x <> y:
+        pass"""
 
-    def test_no_spaces(self):
-        b = """if x<>y:
-            pass"""
+    a = """if x != y:
+        pass"""
+    fixer.check(b, a)
 
-        a = """if x!=y:
-            pass"""
-        self.check(b, a)
 
-    def test_chained(self):
-        b = """if x<>y<>z:
-            pass"""
+def test_no_spaces(fixer):
+    b = """if x<>y:
+        pass"""
 
-        a = """if x!=y!=z:
-            pass"""
-        self.check(b, a)
+    a = """if x!=y:
+        pass"""
+    fixer.check(b, a)
+
+
+def test_chained(fixer):
+    b = """if x<>y<>z:
+        pass"""
+
+    a = """if x!=y!=z:
+        pass"""
+    fixer.check(b, a)

@@ -1,12 +1,13 @@
-from crosswind.tests.support import FixerTestCase
+import pytest
 
 
-class Test_xrange_with_reduce(FixerTestCase):
-    def setUp(self):
-        super(Test_xrange_with_reduce, self).setUp(["xrange", "reduce"])
+@pytest.fixture(name="fixer")
+def fixer_fixture(two_to_three_test_case):
+    return two_to_three_test_case("", fix_list=["xrange", "reduce"])
 
-    def test_double_transform(self):
-        b = """reduce(x, xrange(5))"""
-        a = """from functools import reduce
+
+def test_double_transform(fixer):
+    b = """reduce(x, xrange(5))"""
+    a = """from functools import reduce
 reduce(x, range(5))"""
-        self.check(b, a)
+    fixer.check(b, a)
