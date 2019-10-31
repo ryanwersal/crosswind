@@ -15,6 +15,7 @@ from operator import itemgetter
 from crosswind import fixer_base
 from crosswind.fixer_util import AndTest, Comparison, CompositeOperator, NoneValue, Operator, OrTest
 from crosswind.pgen2 import token
+from crosswind.pygram import python_symbols as syms
 
 
 class FixNonetypeInequality(fixer_base.BaseFix):
@@ -28,6 +29,10 @@ class FixNonetypeInequality(fixer_base.BaseFix):
         assert "right" in results
 
         comparison, left, operator, right = itemgetter("comparison", "left", "operator", "right")(results)
+
+        # If operator is a composite operator we don't need to proceed as we only care about inequality cases.
+        if operator.type == syms.comp_op:
+            return
 
         if left.type == token.NAME:
             if operator.value in ("<", "<="):

@@ -44,9 +44,21 @@ def test_adds_none_check_for_greater_than_on_left(fixer):
     fixer.check(b, a)
 
 
+def test_adds_none_check_for_greater_than_equal_to_on_left(fixer):
+    b = """if foo >= 5: pass"""
+    a = """if foo is not None and foo >= 5: pass"""
+    fixer.check(b, a)
+
+
 def test_adds_none_check_for_greater_than_on_right(fixer):
     b = """if 5 < foo: pass"""
     a = """if foo is not None and 5 < foo: pass"""
+    fixer.check(b, a)
+
+
+def test_adds_none_check_for_greater_than_equal_on_right(fixer):
+    b = """if 5 <= foo: pass"""
+    a = """if foo is not None and 5 <= foo: pass"""
     fixer.check(b, a)
 
 
@@ -56,7 +68,29 @@ def test_adds_none_check_for_less_than_on_left(fixer):
     fixer.check(b, a)
 
 
+def test_adds_none_check_for_less_than_equal_on_left(fixer):
+    b = """if foo <= 5: pass"""
+    a = """if foo is None or foo <= 5: pass"""
+    fixer.check(b, a)
+
+
 def test_adds_none_check_for_less_than_on_right(fixer):
     b = """if 5 > foo: pass"""
     a = """if foo is None or 5 > foo: pass"""
     fixer.check(b, a)
+
+
+def test_adds_none_check_for_less_than_equal_on_right(fixer):
+    b = """if 5 >= foo: pass"""
+    a = """if foo is None or 5 >= foo: pass"""
+    fixer.check(b, a)
+
+
+def test_unchanged_if_is_not_operator(fixer):
+    u = """if foo is not None: pass"""
+    fixer.unchanged(u)
+
+
+def test_unchanged_if_pattern_not_found(fixer):
+    u = """print('foo')"""
+    fixer.unchanged(u)
