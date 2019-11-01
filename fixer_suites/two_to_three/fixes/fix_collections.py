@@ -18,7 +18,7 @@ class FixCollections(BaseFix):
 
     def transform(self, node, results):
         mod = results["mod"][0]
-        mod.replace(Name('collections', prefix=mod.prefix))
+        mod.replace(Name("collections", prefix=mod.prefix))
 
         if node.type == syms.power:
-            touch_import(None, 'collections', node)
+            touch_import(None, "collections", node)
