@@ -101,3 +101,6 @@ wouldn't be possible without it!
 
 Also a huge thank you to everyone who has contribued to Python, pgen, and lib2to3. Having such a foundation to start
 from has made things immeasurably easier and far more productive!
+
+And finally a shoutout to contributors of both [futurize](https://github.com/PythonCharmers/python-future/) and
+[drop2](https://github.com/purplediane/drop2) which together served as the basis of the defuturize fixer suite.
