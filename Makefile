@@ -21,7 +21,7 @@ check:
 	poetry run isort --recursive --check-only .
 
 	# Confirm no formatting changes are required
-	poetry run black --check crosswind fixer_suites
+	poetry run black --check .
 
 	# Can we invoke crosswind at all?
 	poetry run python crosswind/crosswind --help
@@ -43,7 +43,7 @@ tests:
 # Run code through formatters
 format:
 	poetry run isort --recursive .
-	poetry run black crosswind fixer_suites
+	poetry run black .
 
 # Lint all source code
 lint:
