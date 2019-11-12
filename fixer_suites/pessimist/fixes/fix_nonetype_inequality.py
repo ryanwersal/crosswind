@@ -34,6 +34,11 @@ class FixNonetypeInequality(fixer_base.BaseFix):
         if operator.type == syms.comp_op:
             return
 
+        # It is really obtuse to handle cases with names on both sides so punt on it for now.
+        if left.type == token.NAME and right.type == token.NAME:
+            self.warning(node, "Inequality between two names is unhandled and can only be manually inspected.")
+            return
+
         if left.type == token.NAME:
             if operator.value in ("<", "<="):
                 none_comparison = Comparison(left.clone(), Operator("is", prefix=" "), NoneValue(prefix=" "))

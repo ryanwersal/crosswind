@@ -94,3 +94,9 @@ def test_unchanged_if_is_not_operator(fixer):
 def test_unchanged_if_pattern_not_found(fixer):
     u = """print('foo')"""
     fixer.unchanged(u)
+
+
+@pytest.mark.parametrize("symbol", ["<", ">", "<=", ">="])
+def test_unchanged_if_inequality_involves_names_on_both_sides(fixer, symbol):
+    u = f"if foo {symbol} bar: pass"
+    fixer.warns_unchanged(u, "Inequality between two names is unhandled and can only be manually inspected.")
