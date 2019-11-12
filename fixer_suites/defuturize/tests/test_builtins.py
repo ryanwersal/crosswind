@@ -34,3 +34,15 @@ def test_removes_builtin_import_but_leaves_trailing_lines(fixer):
     b = "from builtins import foo\n# comment"
     a = "\n# comment"
     fixer.check(b, a)
+
+
+def test_removes_future_builtin_import(fixer):
+    b = "from future.builtins import foo"
+    a = ""
+    fixer.check(b, a)
+
+
+def test_removes_past_builtin_import(fixer):
+    b = "from past.builtins import foo"
+    a = ""
+    fixer.check(b, a)

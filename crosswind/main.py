@@ -186,9 +186,9 @@ def parse_args(args=None):
     # Load pyproject.toml if it exists
     config_path = "pyproject.toml"
     if opts.config_file:
-        config_path = os.path.abspath(opts.config_file)
+        config_path = os.path.abspath(os.path.expanduser(os.path.expandvars(opts.config_file)))
         if not os.path.exists(config_path):
-            parser.error(f"Failed to find specified configuration file at {config_path:!r}")
+            parser.error(f"Failed to find specified configuration file at {config_path!r}")
 
     pyproject_toml = toml.load(config_path)
     toml_config = pyproject_toml.get("tool", {}).get("crosswind", {})

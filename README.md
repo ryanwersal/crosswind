@@ -80,7 +80,7 @@ configure crosswind by defining such configuration in `pyproject.toml` under a `
 as:
 
 ```toml
-[tool.croswind]
+[tool.crosswind]
 output_dir = "path/to/output"
 ```
 

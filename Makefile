@@ -32,6 +32,12 @@ check:
 	# Can we invoke crosswind for 3to2?
 	poetry run python crosswind/crosswind --use-preset 3to2 crosswind/tests/acceptance/three.py
 
+	# Can we invoke crosswind for defuturize?
+	poetry run python crosswind/crosswind --use-preset defuturize crosswind/tests/acceptance/future.py
+
+	# Can we invoke crosswind with a combination of fixer suites?
+	poetry run python crosswind/crosswind --use-preset combo crosswind/tests/acceptance/future.py
+
 # Invoke Python repl in venv
 repl:
 	poetry run python
