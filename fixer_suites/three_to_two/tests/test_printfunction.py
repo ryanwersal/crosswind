@@ -26,7 +26,7 @@ def test_not_builtin_unchanged(fixer):
 # XXX: Quoting this differently than triple-quotes, because with newline
 # XXX: setting, I can't quite get the triple-quoted versions to line up.
 def test_arbitrary_printing(fixer):
-    b = "import dinosaur.skull\nimport sys\nprint" "(skull.jaw, skull.jaw.biteforce, file=sys.stderr)"
+    b = "import dinosaur.skull\nimport sys\nprint(skull.jaw, skull.jaw.biteforce, file=sys.stderr)"
     a = (
         "from __future__ import print_function\n"
         "import dinosaur.skull\nimport sys\nprint"

@@ -142,7 +142,10 @@ def parse_args(args=None):
     parser.add_option(
         "-f", "--fix", action="append", default=[], help="Each FIX specifies a transformation; default: all"
     )
-    parser.add_option("-j", "--processes", action="store", default=1, type="int", help="Run 2to3 concurrently")
+    parser.add_option(
+        "-e", "--exclude", action="append", default=[], help="Glob paths to exclude from the refactoring process"
+    )
+    parser.add_option("-j", "--processes", action="store", default=1, type="int", help="Run refactoring concurrently")
     parser.add_option("-x", "--nofix", action="append", default=[], help="Prevent a transformation from being run")
     parser.add_option("-L", "--list-fixer-suites", action="store_true", help="List available fixer suites")
     parser.add_option("-s", "--fixer-suites", action="append", default=[], help="Enabled fixer suites")
@@ -162,7 +165,7 @@ def parse_args(args=None):
         action="store",
         type="str",
         default="",
-        help="Put output files in this directory " "instead of overwriting the input files.  Requires -n.",
+        help="Put output files in this directory instead of overwriting the input files.  Requires -n.",
     )
     parser.add_option(
         "-W",
@@ -236,6 +239,8 @@ def main(args=None):
     if not options.fixer_suites:
         options.fixer_suites = all_fixer_suites
     options.fixer_suites = [s + ".fixes" for s in options.fixer_suites]
+
+    flags["exclude_patterns"] = [f"*{e}*" for e in options.exclude]
 
     if options.write_unchanged_files:
         flags["write_unchanged_files"] = True

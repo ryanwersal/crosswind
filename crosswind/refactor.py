@@ -12,6 +12,7 @@ __author__ = "Guido van Rossum <guido@python.org>"
 
 
 import collections
+import fnmatch
 import io
 import logging
 import operator
@@ -285,14 +286,27 @@ class RefactoringTool(object):
         refactored file."""
         pass
 
+    def is_path_excluded(self, path):
+        """Called for each directory and file to determine if it has been excluded
+        from the refactor operation."""
+        for pattern in self.options.get("exclude_patterns", []):
+            if fnmatch.fnmatch(path, pattern):
+                return True
+        return False
+
     def refactor(self, items, write=False, doctests_only=False):
         """Refactor a list of files and directories."""
 
         for dir_or_file in items:
+            if self.is_path_excluded(dir_or_file):
+                continue
+
             if os.path.isdir(dir_or_file):
                 self.refactor_dir(dir_or_file, write, doctests_only)
-            else:
+            elif os.path.isfile(dir_or_file):
                 self.refactor_file(dir_or_file, write, doctests_only)
+            else:
+                self.log_message("Path is neither a dir or file '%s'", dir_or_file)
 
     def refactor_dir(self, dir_name, write=False, doctests_only=False):
         """Descends down a directory and refactor every Python file found.
@@ -307,11 +321,17 @@ class RefactoringTool(object):
             dirnames.sort()
             filenames.sort()
             for name in filenames:
-                if not name.startswith(".") and os.path.splitext(name)[1] == py_ext:
-                    fullname = os.path.join(dirpath, name)
+                fullname = os.path.join(dirpath, name)
+                if (
+                    not name.startswith(".")
+                    and os.path.splitext(name)[1] == py_ext
+                    and not self.is_path_excluded(fullname)
+                ):
                     self.refactor_file(fullname, write, doctests_only)
             # Modify dirnames in-place to remove subdirs with leading dots
-            dirnames[:] = [dn for dn in dirnames if not dn.startswith(".")]
+            dirnames[:] = [
+                dn for dn in dirnames if not dn.startswith(".") and not self.is_path_excluded(os.path.join(dirpath, dn))
+            ]
 
     def _read_python_source(self, filename):
         """

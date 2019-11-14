@@ -126,7 +126,7 @@ def test_spaces_before_file(fixer):
 
 
 def test_with_future_print_function(fixer):
-    s = "from __future__ import print_function\n" "print('Hai!', end=' ')"
+    s = "from __future__ import print_function\nprint('Hai!', end=' ')"
     fixer.unchanged(s)
 
     b = "print 'Hello, world!'"

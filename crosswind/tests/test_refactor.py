@@ -302,3 +302,10 @@ from __future__ import print_function"""
                 break
         else:
             self.fail("explicit fixer not loaded")
+
+    def test_path_excluded(self):
+        options = {"exclude_patterns": ["*foo/bar*"]}
+        rt = self.rt(options=options)
+        self.assertTrue(rt.is_path_excluded("foo/bar/baz"))
+        self.assertTrue(rt.is_path_excluded("baz/foo/bar/"))
+        self.assertFalse(rt.is_path_excluded("some/other/path"))

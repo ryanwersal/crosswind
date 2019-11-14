@@ -163,8 +163,8 @@ def test_from_single(fixer):
     a = "from urllib2 import urlopen"
     fixer.check(b, a)
 
-    b = "from urllib.request import urlopen\n" "from urllib.parse import urlencode"
-    a = "from urllib2 import urlopen\n" "from urllib import urlencode"
+    b = "from urllib.request import urlopen\nfrom urllib.parse import urlencode"
+    a = "from urllib2 import urlopen\nfrom urllib import urlencode"
     fixer.check(b, a)
 
     b = "from tkinter.simpledialog import SimpleDialog"

@@ -43,7 +43,7 @@ def test_trailing_comment(fixer):
 
 def test_None_with_multiple_arguments(fixer):
     s = """x = map(None, a, b, c)"""
-    fixer.warns_unchanged(s, "cannot convert map(None, ...) with " "multiple arguments")
+    fixer.warns_unchanged(s, "cannot convert map(None, ...) with multiple arguments")
 
 
 def test_map_basic(fixer):
