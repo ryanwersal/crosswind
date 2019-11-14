@@ -28,12 +28,13 @@ python = ">=3.6"
 toml = "^0.10.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
-pylint = "^2.4"
-rope = "^0.14.0"
-vulture = "^1.1"
-black = {version = "^18.3-alpha.0", allows-prereleases = true}
-isort = "^4.3"
+pytest = "*"
+pylint = "*"
+rope = "*"
+vulture = "*"
+black = {version = "*", allows-prereleases = true}
+isort = "*"
+ptpython = "*"
 
 [tool.poetry.scripts]
 crosswind = "crosswind.main:main"

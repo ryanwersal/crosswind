@@ -40,7 +40,7 @@ check:
 
 # Invoke Python repl in venv
 repl:
-	poetry run python
+	poetry run python -m ptpython
 
 # Run all automated tests (unit, integration, etc)
 tests:
