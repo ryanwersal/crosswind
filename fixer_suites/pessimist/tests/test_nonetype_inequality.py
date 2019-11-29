@@ -96,7 +96,29 @@ def test_unchanged_if_pattern_not_found(fixer):
     fixer.unchanged(u)
 
 
-@pytest.mark.parametrize("symbol", ["<", ">", "<=", ">="])
+SYMBOLS = ["<", ">", "<=", ">="]
+LOGICAL_OP = ["and", "or"]
+
+
+@pytest.mark.parametrize("symbol", SYMBOLS)
 def test_unchanged_if_inequality_involves_names_on_both_sides(fixer, symbol):
     u = f"if foo {symbol} bar: pass"
     fixer.warns_unchanged(u, "Inequality between two names is unhandled and can only be manually inspected.")
+
+
+@pytest.mark.parametrize("symbol", SYMBOLS)
+def test_unchanged_if_parenthized(fixer, symbol):
+    u = f"if (foo {symbol} 5): pass"
+    fixer.unchanged(u)
+
+
+@pytest.mark.parametrize("symbol,logic", [(x, y) for x in SYMBOLS for y in LOGICAL_OP])
+def test_unchanged_if_inequality_already_part_of_complex_logical(fixer, symbol, logic):
+    u = f"if foo {symbol} 5 {logic} something is None: pass"
+    fixer.unchanged(u)
+
+    u = f"if something is None {logic} foo {symbol} 5: pass"
+    fixer.unchanged(u)
+
+    u = f"if bar >= 10 {logic} foo {symbol} 5: pass"
+    fixer.unchanged(u)
