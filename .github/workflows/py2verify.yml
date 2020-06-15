@@ -18,9 +18,9 @@ jobs:
         run: python -m pip install virtualenv setuptools
 
       - name: Install Poetry
-        uses: ryanwersal/install-poetry-action@v0.4.0
+        uses: ryanwersal/install-poetry-action@v0.5.1
         with:
-          poetry-version: latest
+          poetry-version: 1.0.9
           create-virtualenv: true
           virtualenv-in-project: true
 
